@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+
+  <extension point="org.knime.workbench.repository.categories">
+	<category description="MMI Agency" icon="icons/mmi.png" level-id="mmi" name="MMI Agency" path="/"/>
+	<category description="Google" icon="icons/google.png" level-id="mmi_google" name="Google" path="/mmi/"/>
+  </extension>
+   
+  <extension point="org.knime.workbench.repository.nodes">
+    <node category-path="/mmi/mmi_google/" icon="icons/pagespeed.png" factory-class="com.mmiagency.knime.google.pagespeed.GooglePageSpeedNodeFactory" id="com.mmiagency.knime.nodes.GooglePageSpeedNodeFactory"/>
+  </extension>
+   
+</plugin>
