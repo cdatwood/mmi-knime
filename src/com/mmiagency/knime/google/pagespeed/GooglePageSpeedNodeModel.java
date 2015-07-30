@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +26,7 @@ import org.knime.core.data.def.StringCell;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
@@ -59,17 +62,38 @@ public class GooglePageSpeedNodeModel extends NodeModel {
         
     static final String REST_URL = "https://www.googleapis.com/pagespeedonline/v2/runPagespeed?url=";
     
-	static final String URL_COLUMN = "URL Column Name";
+	static final String FIELD_LABEL_URL_COLUMN = "URL Column Name";
+	static final String FIELD_LABEL_API_KEY = "Google API Key";
+	static final String FIELD_LABEL_FILTER_THIRD_PARTY_RESOURCES = "Filter Third Party Resources";
+	static final String FIELD_LABEL_LOCALE = "Locale";
+	static final String FIELD_LABEL_STRATEGY = "Strategy";
+	
+	static final String FIELD_KEY_URL_COLUMN = "urlColumn";
+	static final String FIELD_KEY_API_KEY = "apiKey";
+	static final String FIELD_KEY_FILTER_THIRD_PARTY_RESOURCES = "filterThirdPartyResources";
+	static final String FIELD_KEY_LOCALE = "locale";
+	static final String FIELD_KEY_STRATEGY = "strategy";
+	
+	static final String FIELD_DEFAULT_URL_COLUMN = "url";
+	static final String FIELD_DEFAULT_LOCALE = "en_US";
+	static final String FIELD_DEFAULT_STRATEGY = "desktop";
+	static final String[] FIELD_OPTIONS_STRATEGY = (String[])Arrays.asList("desktop", "mobile").toArray();
 
 	private final SettingsModelString m_url = 
-			GooglePageSpeedNodeModel.getUrlColumnSettingsModel();
-	
-	static final String API_KEY = "Google API Key";
-	public final SettingsModelString m_apikey =
+			GooglePageSpeedNodeModel.getUrlColumnSettingsModel();	
+	private final SettingsModelString m_apikey =
 			GooglePageSpeedNodeModel.getApiKeySettingsModel();
+	private final SettingsModelBoolean m_filterThirdPartyResources =
+			GooglePageSpeedNodeModel.getFilterThirdPartyResourcesSettingsModel();
+	private final SettingsModelString m_locale =
+			GooglePageSpeedNodeModel.getLocaleSettingsModel();
+	private final SettingsModelString m_strategy =
+			GooglePageSpeedNodeModel.getStrategySettingsModel();
 	
 	static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
 	static final JsonFactory JSON_FACTORY = new JacksonFactory();
+	
+	private final List<String> hasRules = new ArrayList();
 
     /**
      * Constructor for the node model.
@@ -81,16 +105,36 @@ public class GooglePageSpeedNodeModel extends NodeModel {
     }
     
     public static SettingsModelString getUrlColumnSettingsModel() {
-    	return new SettingsModelString(URL_COLUMN,"url");   
+    	return new SettingsModelString(FIELD_KEY_URL_COLUMN, FIELD_DEFAULT_URL_COLUMN);   
     }
     
     public static SettingsModelString getApiKeySettingsModel() {
-    	return new SettingsModelString(API_KEY,"");   
+    	return new SettingsModelString(FIELD_KEY_API_KEY,"");   
+    }
+    
+    public static SettingsModelBoolean getFilterThirdPartyResourcesSettingsModel() {
+    	return new SettingsModelBoolean(FIELD_KEY_FILTER_THIRD_PARTY_RESOURCES, false);
+    }
+    
+    public static SettingsModelString getLocaleSettingsModel() {
+    	return new SettingsModelString(FIELD_KEY_LOCALE, FIELD_DEFAULT_LOCALE);
+    }
+    
+    public static SettingsModelString getStrategySettingsModel() {
+    	return new SettingsModelString(FIELD_KEY_STRATEGY, FIELD_DEFAULT_STRATEGY);
     }
     
     protected PageSpeedResult retrievePageSpeedResult(String url) throws IOException {
     	// pad URL with API key
-    	String theUrl = REST_URL + URLEncoder.encode(url, "UTF-8") + "&key=" + m_apikey.getStringValue();
+    	StringBuilder theUrl = new StringBuilder();
+    	theUrl.append(REST_URL);
+    	theUrl.append(URLEncoder.encode(url.trim(), "UTF-8"));
+    	theUrl.append("&filter_third_party_resources="+(m_filterThirdPartyResources.getBooleanValue()?"true":"false"));
+    	if (m_locale.getStringValue() != null && !m_locale.getStringValue().trim().isEmpty()) {
+    		theUrl.append("&locale="+m_locale.getStringValue().trim());
+    	}
+    	theUrl.append("&strategy="+m_strategy.getStringValue());
+    	theUrl.append("&key=" + m_apikey.getStringValue().trim());
     	
         HttpRequestFactory requestFactory =
         		HTTP_TRANSPORT.createRequestFactory(new HttpRequestInitializer() {
@@ -98,7 +142,7 @@ public class GooglePageSpeedNodeModel extends NodeModel {
                     	request.setParser(new JsonObjectParser(JSON_FACTORY));
                     }
                 });    	
-        HttpRequest request = requestFactory.buildGetRequest(new GenericUrl(theUrl));
+        HttpRequest request = requestFactory.buildGetRequest(new GenericUrl(theUrl.toString()));
         PageSpeedResult result = request.execute().parseAs(PageSpeedResult.class);
         return result;
     }
@@ -117,23 +161,10 @@ public class GooglePageSpeedNodeModel extends NodeModel {
     	
     	DataColumnSpec urlColumnSpec = inSpec.getColumnSpec(urlColumnName);
     	
-    	// check if column exists
-    	if (urlColumnSpec == null) {
-    		// TODO do something
-    	}
-    	
-    	// check if column data type is compatible to string
-    	if (!urlColumnSpec.getType().isCompatible(StringValue.class)) {
-    		// TODO do something
-    	}
-    	
     	int urlColumnIndex = inSpec.findColumnIndex(urlColumnName);
     	
     	// prepare output data container
-        DataColumnSpec[] allColSpecs = getDataColumnSpec();
-    	
-        DataTableSpec outputSpec = new DataTableSpec(allColSpecs);
-        BufferedDataContainer container = exec.createDataContainer(outputSpec);
+        BufferedDataContainer container = null;
         
         int i = 0;
         
@@ -143,6 +174,23 @@ public class GooglePageSpeedNodeModel extends NodeModel {
     	
     		// call pagespeed function
     		PageSpeedResult pageSpeedResult = retrievePageSpeedResult(url);
+    		
+    		if (pageSpeedResult == null 
+    				|| pageSpeedResult.pageStats == null
+    				|| pageSpeedResult.ruleGroups == null
+    				|| (pageSpeedResult.ruleGroups.SPEED == null && pageSpeedResult.ruleGroups.USABILITY == null)
+    				) {
+    			logger.error("Unable to retrieve PageSpeed results for url: " + url);
+    			continue;
+    		}
+    		
+    		// initialize container after first page speed result 
+    		if (container == null) {
+    	        DataColumnSpec[] allColSpecs = getDataColumnSpec(pageSpeedResult);
+    	    	
+    	        DataTableSpec outputSpec = new DataTableSpec(allColSpecs);
+    	        container = exec.createDataContainer(outputSpec);
+    		}
     		
     		// put results in outgoing table
     		RowKey key = new RowKey("Row " + i);
@@ -159,7 +207,6 @@ public class GooglePageSpeedNodeModel extends NodeModel {
             
             i++;
     	}
-        
 
         // once we are done, we close the container and return its table
         container.close();
@@ -167,169 +214,302 @@ public class GooglePageSpeedNodeModel extends NodeModel {
         return new BufferedDataTable[]{out};
     }
     
-    private DataColumnSpec[] getDataColumnSpec() {
-        DataColumnSpec[] allColSpecs = new DataColumnSpec[43];
-        allColSpecs[0] = 
-        		new DataColumnSpecCreator("url", StringCell.TYPE).createSpec();
-        allColSpecs[1] = 
-        		new DataColumnSpecCreator("responseCode", IntCell.TYPE).createSpec();
-        allColSpecs[2] = 
-        		new DataColumnSpecCreator("title", StringCell.TYPE).createSpec();
-        allColSpecs[3] = 
-                new DataColumnSpecCreator("score", IntCell.TYPE).createSpec();
-        allColSpecs[4] = 
-                new DataColumnSpecCreator("pageStats - numberResources", IntCell.TYPE).createSpec();
-        allColSpecs[5] = 
-                new DataColumnSpecCreator("pageStats - numberHosts", IntCell.TYPE).createSpec();
-        allColSpecs[6] = 
-                new DataColumnSpecCreator("pageStats - totalRequestBytes", StringCell.TYPE).createSpec();
-        allColSpecs[7] = 
-                new DataColumnSpecCreator("pageStats - numberStaticResources", IntCell.TYPE).createSpec();
-        allColSpecs[8] = 
-                new DataColumnSpecCreator("pageStats - htmlResponseBytes", StringCell.TYPE).createSpec();
-        allColSpecs[9] = 
-                new DataColumnSpecCreator("pageStats - cssResponseBytes", StringCell.TYPE).createSpec();
-        allColSpecs[10] = 
-                new DataColumnSpecCreator("pageStats - imageResponseBytes", StringCell.TYPE).createSpec();
-        allColSpecs[11] = 
-                new DataColumnSpecCreator("pageStats - javascriptResponseBytes", StringCell.TYPE).createSpec();
-        allColSpecs[12] = 
-                new DataColumnSpecCreator("pageStats - otherResponseBytes", StringCell.TYPE).createSpec();
-        allColSpecs[13] = 
-                new DataColumnSpecCreator("pageStats - numberJsResources", IntCell.TYPE).createSpec();
-        allColSpecs[14] = 
-                new DataColumnSpecCreator("pageStats - numberCssResources", IntCell.TYPE).createSpec();
-        
-        allColSpecs[15] = 
-                new DataColumnSpecCreator("locale", StringCell.TYPE).createSpec();
+    private DataColumnSpec[] getDataColumnSpec(PageSpeedResult pageSpeedResult) {
+    	List<DataColumnSpec> allColSpecs = new ArrayList();
     	
-        allColSpecs[16] = 
-                new DataColumnSpecCreator("AvoidLandingPageRedirects - ruleImpact", DoubleCell.TYPE).createSpec();
-        allColSpecs[17] = 
-                new DataColumnSpecCreator("AvoidLandingPageRedirects - summary", StringCell.TYPE).createSpec();
-
-        allColSpecs[18] = 
-                new DataColumnSpecCreator("EnableGzipCompression - ruleImpact", DoubleCell.TYPE).createSpec();
-        allColSpecs[19] = 
-                new DataColumnSpecCreator("EnableGzipCompression - summary", StringCell.TYPE).createSpec();
-        allColSpecs[20] = 
-                new DataColumnSpecCreator("EnableGzipCompression - urlBlocks", StringCell.TYPE).createSpec();
-
-        allColSpecs[21] = 
-                new DataColumnSpecCreator("LeverageBrowserCaching - ruleImpact", DoubleCell.TYPE).createSpec();
-        allColSpecs[22] = 
-                new DataColumnSpecCreator("LeverageBrowserCaching - summary", StringCell.TYPE).createSpec();
-        allColSpecs[23] = 
-                new DataColumnSpecCreator("LeverageBrowserCaching - urlBlocks", StringCell.TYPE).createSpec();
-
-        allColSpecs[24] = 
-                new DataColumnSpecCreator("MainResourceServerResponseTime - ruleImpact", DoubleCell.TYPE).createSpec();
-        allColSpecs[25] = 
-                new DataColumnSpecCreator("MainResourceServerResponseTime - urlBlocks", StringCell.TYPE).createSpec();
-
-        allColSpecs[26] = 
-                new DataColumnSpecCreator("MinifyCss - ruleImpact", DoubleCell.TYPE).createSpec();
-        allColSpecs[27] = 
-                new DataColumnSpecCreator("MinifyCss - summary", StringCell.TYPE).createSpec();
-        allColSpecs[28] = 
-                new DataColumnSpecCreator("MinifyCss - urlBlocks", StringCell.TYPE).createSpec();
-
-        allColSpecs[29] = 
-                new DataColumnSpecCreator("MinifyHTML - ruleImpact", DoubleCell.TYPE).createSpec();
-        allColSpecs[30] = 
-                new DataColumnSpecCreator("MinifyHTML - summary", StringCell.TYPE).createSpec();
-        allColSpecs[31] = 
-                new DataColumnSpecCreator("MinifyHTML - urlBlocks", StringCell.TYPE).createSpec();
-
-        allColSpecs[32] = 
-                new DataColumnSpecCreator("MinifyJavaScript - ruleImpact", DoubleCell.TYPE).createSpec();
-        allColSpecs[33] = 
-                new DataColumnSpecCreator("MinifyJavaScript - summary", StringCell.TYPE).createSpec();
-        allColSpecs[34] = 
-                new DataColumnSpecCreator("MinifyJavaScript - urlBlocks", StringCell.TYPE).createSpec();
-
-        allColSpecs[35] = 
-                new DataColumnSpecCreator("MinimizeRenderBlockingResources - ruleImpact", DoubleCell.TYPE).createSpec();
-        allColSpecs[36] = 
-                new DataColumnSpecCreator("MinimizeRenderBlockingResources - summary", StringCell.TYPE).createSpec();
-        allColSpecs[37] = 
-                new DataColumnSpecCreator("MinimizeRenderBlockingResources - urlBlocks", StringCell.TYPE).createSpec();
-
-        allColSpecs[38] = 
-                new DataColumnSpecCreator("OptimizeImages - ruleImpact", DoubleCell.TYPE).createSpec();
-        allColSpecs[39] = 
-                new DataColumnSpecCreator("OptimizeImages - summary", StringCell.TYPE).createSpec();
-        allColSpecs[40] = 
-                new DataColumnSpecCreator("OptimizeImages - urlBlocks", StringCell.TYPE).createSpec();
-
-        allColSpecs[41] = 
-                new DataColumnSpecCreator("PrioritizeVisibleContent - ruleImpact", DoubleCell.TYPE).createSpec();
-        allColSpecs[42] = 
-                new DataColumnSpecCreator("PrioritizeVisibleContent - summary", StringCell.TYPE).createSpec();
-
-        return allColSpecs;
+    	allColSpecs.add(new DataColumnSpecCreator("url", StringCell.TYPE).createSpec());
+    	allColSpecs.add(new DataColumnSpecCreator("strategy", StringCell.TYPE).createSpec());
+    	allColSpecs.add(new DataColumnSpecCreator("responseCode", IntCell.TYPE).createSpec());
+    	allColSpecs.add(new DataColumnSpecCreator("title", StringCell.TYPE).createSpec());
+    	if (pageSpeedResult.ruleGroups.SPEED != null) {
+    		allColSpecs.add(new DataColumnSpecCreator("speed score", IntCell.TYPE).createSpec());
+    	}
+    	if (pageSpeedResult.ruleGroups.USABILITY != null) {
+    		allColSpecs.add(new DataColumnSpecCreator("usability score", IntCell.TYPE).createSpec());
+    	}
+		allColSpecs.add(new DataColumnSpecCreator("pageStats - numberResources", IntCell.TYPE).createSpec());
+		allColSpecs.add(new DataColumnSpecCreator("pageStats - numberHosts", IntCell.TYPE).createSpec());
+		allColSpecs.add(new DataColumnSpecCreator("pageStats - totalRequestBytes", StringCell.TYPE).createSpec());
+		allColSpecs.add(new DataColumnSpecCreator("pageStats - numberStaticResources", IntCell.TYPE).createSpec());
+		allColSpecs.add(new DataColumnSpecCreator("pageStats - htmlResponseBytes", StringCell.TYPE).createSpec());
+		allColSpecs.add(new DataColumnSpecCreator("pageStats - cssResponseBytes", StringCell.TYPE).createSpec());
+		allColSpecs.add(new DataColumnSpecCreator("pageStats - imageResponseBytes", StringCell.TYPE).createSpec());
+		allColSpecs.add(new DataColumnSpecCreator("pageStats - javascriptResponseBytes", StringCell.TYPE).createSpec());
+		allColSpecs.add(new DataColumnSpecCreator("pageStats - otherResponseBytes", StringCell.TYPE).createSpec());
+		allColSpecs.add(new DataColumnSpecCreator("pageStats - numberJsResources", IntCell.TYPE).createSpec());
+		allColSpecs.add(new DataColumnSpecCreator("pageStats - numberCssResources", IntCell.TYPE).createSpec());
+		allColSpecs.add(new DataColumnSpecCreator("locale", StringCell.TYPE).createSpec());
+		
+		if (pageSpeedResult.formattedResults.ruleResults.AvoidLandingPageRedirects != null) {
+			hasRules.add("AvoidLandingPageRedirects");
+			allColSpecs.add(new DataColumnSpecCreator("AvoidLandingPageRedirects - ruleImpact", DoubleCell.TYPE).createSpec());
+			allColSpecs.add(new DataColumnSpecCreator("AvoidLandingPageRedirects - summary", StringCell.TYPE).createSpec());
+		}
+		if (pageSpeedResult.formattedResults.ruleResults.AvoidPlugins != null) {
+			hasRules.add("AvoidPlugins");
+			allColSpecs.add(new DataColumnSpecCreator("AvoidPlugins - ruleImpact", DoubleCell.TYPE).createSpec());
+			allColSpecs.add(new DataColumnSpecCreator("AvoidPlugins - summary", StringCell.TYPE).createSpec());
+		}
+		if (pageSpeedResult.formattedResults.ruleResults.ConfigureViewport != null) {
+			hasRules.add("ConfigureViewport");
+			allColSpecs.add(new DataColumnSpecCreator("ConfigureViewport - ruleImpact", DoubleCell.TYPE).createSpec());
+			allColSpecs.add(new DataColumnSpecCreator("ConfigureViewport - summary", StringCell.TYPE).createSpec());
+		}
+		if (pageSpeedResult.formattedResults.ruleResults.EnableGzipCompression != null) {
+			hasRules.add("EnableGzipCompression");
+			allColSpecs.add(new DataColumnSpecCreator("EnableGzipCompression - ruleImpact", DoubleCell.TYPE).createSpec());
+			allColSpecs.add(new DataColumnSpecCreator("EnableGzipCompression - summary", StringCell.TYPE).createSpec());
+			allColSpecs.add(new DataColumnSpecCreator("EnableGzipCompression - urlBlocks", StringCell.TYPE).createSpec());
+		}
+		if (pageSpeedResult.formattedResults.ruleResults.LeverageBrowserCaching != null) {
+			hasRules.add("LeverageBrowserCaching");
+			allColSpecs.add(new DataColumnSpecCreator("LeverageBrowserCaching - ruleImpact", DoubleCell.TYPE).createSpec());
+			allColSpecs.add(new DataColumnSpecCreator("LeverageBrowserCaching - summary", StringCell.TYPE).createSpec());
+			allColSpecs.add(new DataColumnSpecCreator("LeverageBrowserCaching - urlBlocks", StringCell.TYPE).createSpec());
+		}
+		if (pageSpeedResult.formattedResults.ruleResults.MainResourceServerResponseTime != null) {
+			hasRules.add("MainResourceServerResponseTime");
+			allColSpecs.add(new DataColumnSpecCreator("MainResourceServerResponseTime - ruleImpact", DoubleCell.TYPE).createSpec());
+			allColSpecs.add(new DataColumnSpecCreator("MainResourceServerResponseTime - summary", StringCell.TYPE).createSpec());
+			allColSpecs.add(new DataColumnSpecCreator("MainResourceServerResponseTime - urlBlocks", StringCell.TYPE).createSpec());
+		}
+		if (pageSpeedResult.formattedResults.ruleResults.MinifyCss != null) {
+			hasRules.add("MinifyCss");
+			allColSpecs.add(new DataColumnSpecCreator("MinifyCss - ruleImpact", DoubleCell.TYPE).createSpec());
+			allColSpecs.add(new DataColumnSpecCreator("MinifyCss - summary", StringCell.TYPE).createSpec());
+			allColSpecs.add(new DataColumnSpecCreator("MinifyCss - urlBlocks", StringCell.TYPE).createSpec());
+		}
+		if (pageSpeedResult.formattedResults.ruleResults.MinifyHTML != null) {
+			hasRules.add("MinifyHTML");
+			allColSpecs.add(new DataColumnSpecCreator("MinifyHTML - ruleImpact", DoubleCell.TYPE).createSpec());
+			allColSpecs.add(new DataColumnSpecCreator("MinifyHTML - summary", StringCell.TYPE).createSpec());
+			allColSpecs.add(new DataColumnSpecCreator("MinifyHTML - urlBlocks", StringCell.TYPE).createSpec());
+		}
+		if (pageSpeedResult.formattedResults.ruleResults.MinifyJavaScript != null) {
+			hasRules.add("MinifyJavaScript");
+			allColSpecs.add(new DataColumnSpecCreator("MinifyJavaScript - ruleImpact", DoubleCell.TYPE).createSpec());
+			allColSpecs.add(new DataColumnSpecCreator("MinifyJavaScript - summary", StringCell.TYPE).createSpec());
+			allColSpecs.add(new DataColumnSpecCreator("MinifyJavaScript - urlBlocks", StringCell.TYPE).createSpec());
+		}
+		if (pageSpeedResult.formattedResults.ruleResults.MinimizeRenderBlockingResources != null) {
+			hasRules.add("MinimizeRenderBlockingResources");
+			allColSpecs.add(new DataColumnSpecCreator("MinimizeRenderBlockingResources - ruleImpact", DoubleCell.TYPE).createSpec());
+			allColSpecs.add(new DataColumnSpecCreator("MinimizeRenderBlockingResources - summary", StringCell.TYPE).createSpec());
+			allColSpecs.add(new DataColumnSpecCreator("MinimizeRenderBlockingResources - urlBlocks", StringCell.TYPE).createSpec());
+		}
+		if (pageSpeedResult.formattedResults.ruleResults.OptimizeImages != null) {
+			hasRules.add("OptimizeImages");
+			allColSpecs.add(new DataColumnSpecCreator("OptimizeImages - ruleImpact", DoubleCell.TYPE).createSpec());
+			allColSpecs.add(new DataColumnSpecCreator("OptimizeImages - summary", StringCell.TYPE).createSpec());
+			allColSpecs.add(new DataColumnSpecCreator("OptimizeImages - urlBlocks", StringCell.TYPE).createSpec());
+		}
+		if (pageSpeedResult.formattedResults.ruleResults.PrioritizeVisibleContent != null) {
+			hasRules.add("PrioritizeVisibleContent");
+			allColSpecs.add(new DataColumnSpecCreator("PrioritizeVisibleContent - ruleImpact", DoubleCell.TYPE).createSpec());
+			allColSpecs.add(new DataColumnSpecCreator("PrioritizeVisibleContent - summary", StringCell.TYPE).createSpec());
+		}
+		if (pageSpeedResult.formattedResults.ruleResults.SizeContentToViewport != null) {
+			hasRules.add("SizeContentToViewport");
+			allColSpecs.add(new DataColumnSpecCreator("SizeContentToViewport - ruleImpact", DoubleCell.TYPE).createSpec());
+			allColSpecs.add(new DataColumnSpecCreator("SizeContentToViewport - summary", StringCell.TYPE).createSpec());
+		}
+		if (pageSpeedResult.formattedResults.ruleResults.SizeTapTargetAppropriately != null) {
+			hasRules.add("SizeTapTargetAppropriately");
+			allColSpecs.add(new DataColumnSpecCreator("SizeTapTargetAppropriately - ruleImpact", DoubleCell.TYPE).createSpec());
+			allColSpecs.add(new DataColumnSpecCreator("SizeTapTargetAppropriately - summary", StringCell.TYPE).createSpec());
+			allColSpecs.add(new DataColumnSpecCreator("SizeTapTargetAppropriately - urlBlocks", StringCell.TYPE).createSpec());
+		}
+		if (pageSpeedResult.formattedResults.ruleResults.UseLegibleFontSizes != null) {
+			hasRules.add("UseLegibleFontSizes");
+			allColSpecs.add(new DataColumnSpecCreator("UseLegibleFontSizes - ruleImpact", DoubleCell.TYPE).createSpec());
+			allColSpecs.add(new DataColumnSpecCreator("UseLegibleFontSizes - summary", StringCell.TYPE).createSpec());
+		}
+		
+		return allColSpecs.toArray(new DataColumnSpec[allColSpecs.size()]);
     }
     
     private DataCell[] mapDataCells(PageSpeedResult pageSpeedResult) {
-		DataCell[] cells = new DataCell[43];
+    	List<DataCell> cells = new ArrayList();
+    	
+		cells.add(new StringCell(pageSpeedResult.id));
+		cells.add(new StringCell(m_strategy.getStringValue()));
+		cells.add(new IntCell(pageSpeedResult.responseCode));
+		cells.add(new StringCell(pageSpeedResult.title));
+    	if (pageSpeedResult.ruleGroups.SPEED != null) {
+    		cells.add(new IntCell(pageSpeedResult.ruleGroups.SPEED.score));
+    	}
+    	if (pageSpeedResult.ruleGroups.USABILITY != null) {
+    		cells.add(new IntCell(pageSpeedResult.ruleGroups.USABILITY.score));
+    	}
+    	cells.add(new IntCell(pageSpeedResult.pageStats.numberResources));
+    	cells.add(new IntCell(pageSpeedResult.pageStats.numberHosts));
+    	cells.add(new StringCell(pageSpeedResult.pageStats.totalRequestBytes));
+    	cells.add(new IntCell(pageSpeedResult.pageStats.numberStaticResources));
+    	cells.add(new StringCell(pageSpeedResult.pageStats.htmlResponseBytes));
+    	cells.add(new StringCell(pageSpeedResult.pageStats.cssResponseBytes));
+    	cells.add(new StringCell(pageSpeedResult.pageStats.imageResponseBytes));
+    	cells.add(new StringCell(pageSpeedResult.pageStats.javascriptResponseBytes));
+    	cells.add(new StringCell(pageSpeedResult.pageStats.otherResponseBytes));
+    	cells.add(new IntCell(pageSpeedResult.pageStats.numberJsResources));
+    	cells.add(new IntCell(pageSpeedResult.pageStats.numberCssResources));
 		
-		cells[0] = new StringCell(pageSpeedResult.id);
-		cells[1] = new IntCell(pageSpeedResult.responseCode);
-		cells[2] = new StringCell(pageSpeedResult.title);
-		cells[3] = new IntCell(pageSpeedResult.ruleGroups.SPEED.score);
-		
-		cells[4] = new IntCell(pageSpeedResult.pageStats.numberResources);
-		cells[5] = new IntCell(pageSpeedResult.pageStats.numberHosts);
-		cells[6] = new StringCell(pageSpeedResult.pageStats.totalRequestBytes);
-		cells[7] = new IntCell(pageSpeedResult.pageStats.numberStaticResources);
-		cells[8] = new StringCell(pageSpeedResult.pageStats.htmlResponseBytes);
-		cells[9] = new StringCell(pageSpeedResult.pageStats.cssResponseBytes);
-		cells[10] = new StringCell(pageSpeedResult.pageStats.imageResponseBytes);
-		cells[11] = new StringCell(pageSpeedResult.pageStats.javascriptResponseBytes);
-		cells[12] = new StringCell(pageSpeedResult.pageStats.otherResponseBytes);
-		cells[13] = new IntCell(pageSpeedResult.pageStats.numberJsResources);
-		cells[14] = new IntCell(pageSpeedResult.pageStats.numberCssResources);
-		
-		cells[15] = new StringCell(pageSpeedResult.formattedResults.locale);
-		
-		cells[16] = new DoubleCell(pageSpeedResult.formattedResults.ruleResults.AvoidLandingPageRedirects.ruleImpact);
-		cells[17] = new StringCell(pageSpeedResult.formattedResults.ruleResults.AvoidLandingPageRedirects.getSummary());
-		
-		cells[18] = new DoubleCell(pageSpeedResult.formattedResults.ruleResults.EnableGzipCompression.ruleImpact);
-		cells[19] = new StringCell(pageSpeedResult.formattedResults.ruleResults.EnableGzipCompression.getSummary());
-		cells[20] = new StringCell(pageSpeedResult.formattedResults.ruleResults.EnableGzipCompression.getUrlBlocksSummary());
-		
-		cells[21] = new DoubleCell(pageSpeedResult.formattedResults.ruleResults.LeverageBrowserCaching.ruleImpact);
-		cells[22] = new StringCell(pageSpeedResult.formattedResults.ruleResults.LeverageBrowserCaching.getSummary());
-		cells[23] = new StringCell(pageSpeedResult.formattedResults.ruleResults.LeverageBrowserCaching.getUrlBlocksSummary());
-		
-		cells[24] = new DoubleCell(pageSpeedResult.formattedResults.ruleResults.MainResourceServerResponseTime.ruleImpact);
-		cells[25] = new StringCell(pageSpeedResult.formattedResults.ruleResults.MainResourceServerResponseTime.getUrlBlocksSummary());
-		
-		cells[26] = new DoubleCell(pageSpeedResult.formattedResults.ruleResults.MinifyCss.ruleImpact);
-		cells[27] = new StringCell(pageSpeedResult.formattedResults.ruleResults.MinifyCss.getSummary());
-		cells[28] = new StringCell(pageSpeedResult.formattedResults.ruleResults.MinifyCss.getUrlBlocksSummary());
-		
-		cells[29] = new DoubleCell(pageSpeedResult.formattedResults.ruleResults.MinifyHTML.ruleImpact);
-		cells[30] = new StringCell(pageSpeedResult.formattedResults.ruleResults.MinifyHTML.getSummary());
-		cells[31] = new StringCell(pageSpeedResult.formattedResults.ruleResults.MinifyHTML.getUrlBlocksSummary());
-		
-		cells[32] = new DoubleCell(pageSpeedResult.formattedResults.ruleResults.MinifyJavaScript.ruleImpact);
-		cells[33] = new StringCell(pageSpeedResult.formattedResults.ruleResults.MinifyJavaScript.getSummary());
-		cells[34] = new StringCell(pageSpeedResult.formattedResults.ruleResults.MinifyJavaScript.getUrlBlocksSummary());
-		
-		cells[35] = new DoubleCell(pageSpeedResult.formattedResults.ruleResults.MinimizeRenderBlockingResources.ruleImpact);
-		cells[36] = new StringCell(pageSpeedResult.formattedResults.ruleResults.MinimizeRenderBlockingResources.getSummary());
-		cells[37] = new StringCell(pageSpeedResult.formattedResults.ruleResults.MinimizeRenderBlockingResources.getUrlBlocksSummary());
-		
-		cells[38] = new DoubleCell(pageSpeedResult.formattedResults.ruleResults.OptimizeImages.ruleImpact);
-		cells[39] = new StringCell(pageSpeedResult.formattedResults.ruleResults.OptimizeImages.getSummary());
-		cells[40] = new StringCell(pageSpeedResult.formattedResults.ruleResults.OptimizeImages.getUrlBlocksSummary());
-		
-		cells[41] = new DoubleCell(pageSpeedResult.formattedResults.ruleResults.PrioritizeVisibleContent.ruleImpact);
-		cells[42] = new StringCell(pageSpeedResult.formattedResults.ruleResults.PrioritizeVisibleContent.getSummary());
-		
-		return cells;
+    	cells.add(new StringCell(pageSpeedResult.formattedResults.locale));
+
+    	if (hasRules.contains("AvoidLandingPageRedirects")) {
+			if (pageSpeedResult.formattedResults.ruleResults.AvoidLandingPageRedirects != null) {
+		    	cells.add(new DoubleCell(pageSpeedResult.formattedResults.ruleResults.AvoidLandingPageRedirects.ruleImpact));
+		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.AvoidLandingPageRedirects.getSummary()));
+			} else {
+				cells.add(new DoubleCell(-1));
+				cells.add(new StringCell(""));
+			}
+    	}
+    	if (hasRules.contains("AvoidPlugins")) {
+			if (pageSpeedResult.formattedResults.ruleResults.AvoidPlugins != null) {
+		    	cells.add(new DoubleCell(pageSpeedResult.formattedResults.ruleResults.AvoidPlugins.ruleImpact));
+		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.AvoidPlugins.getSummary()));
+			} else {
+				cells.add(new DoubleCell(-1));
+				cells.add(new StringCell(""));
+			}
+		}
+    	if (hasRules.contains("ConfigureViewport")) {
+			if (pageSpeedResult.formattedResults.ruleResults.ConfigureViewport != null) {
+		    	cells.add(new DoubleCell(pageSpeedResult.formattedResults.ruleResults.ConfigureViewport.ruleImpact));
+		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.ConfigureViewport.getSummary()));
+			} else {
+				cells.add(new DoubleCell(-1));
+				cells.add(new StringCell(""));
+			}
+		}
+    	if (hasRules.contains("EnableGzipCompression")) {
+			if (pageSpeedResult.formattedResults.ruleResults.EnableGzipCompression != null) {
+		    	cells.add(new DoubleCell(pageSpeedResult.formattedResults.ruleResults.EnableGzipCompression.ruleImpact));
+		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.EnableGzipCompression.getSummary()));
+		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.EnableGzipCompression.getUrlBlocksSummary()));
+			} else {
+				cells.add(new DoubleCell(-1));
+				cells.add(new StringCell(""));
+				cells.add(new StringCell(""));
+			}
+		}
+    	if (hasRules.contains("LeverageBrowserCaching")) {
+			if (pageSpeedResult.formattedResults.ruleResults.LeverageBrowserCaching != null) {
+		    	cells.add(new DoubleCell(pageSpeedResult.formattedResults.ruleResults.LeverageBrowserCaching.ruleImpact));
+		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.LeverageBrowserCaching.getSummary()));
+		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.LeverageBrowserCaching.getUrlBlocksSummary()));
+			} else {
+				cells.add(new DoubleCell(-1));
+				cells.add(new StringCell(""));
+				cells.add(new StringCell(""));
+			}
+		}
+    	if (hasRules.contains("MainResourceServerResponseTime")) {
+			if (pageSpeedResult.formattedResults.ruleResults.MainResourceServerResponseTime != null) {
+		    	cells.add(new DoubleCell(pageSpeedResult.formattedResults.ruleResults.MainResourceServerResponseTime.ruleImpact));
+		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.MainResourceServerResponseTime.getSummary()));
+		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.MainResourceServerResponseTime.getUrlBlocksSummary()));
+			} else {
+				cells.add(new DoubleCell(-1));
+				cells.add(new StringCell(""));
+				cells.add(new StringCell(""));
+			}
+		}
+    	if (hasRules.contains("MinifyCss")) {
+			if (pageSpeedResult.formattedResults.ruleResults.MinifyCss != null) {
+		    	cells.add(new DoubleCell(pageSpeedResult.formattedResults.ruleResults.MinifyCss.ruleImpact));
+		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.MinifyCss.getSummary()));
+		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.MinifyCss.getUrlBlocksSummary()));
+			} else {
+				cells.add(new DoubleCell(-1));
+				cells.add(new StringCell(""));
+				cells.add(new StringCell(""));
+			}
+		}
+    	if (hasRules.contains("MinifyHTML")) {
+			if (pageSpeedResult.formattedResults.ruleResults.MinifyHTML != null) {
+		    	cells.add(new DoubleCell(pageSpeedResult.formattedResults.ruleResults.MinifyHTML.ruleImpact));
+		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.MinifyHTML.getSummary()));
+		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.MinifyHTML.getUrlBlocksSummary()));
+			} else {
+				cells.add(new DoubleCell(-1));
+				cells.add(new StringCell(""));
+				cells.add(new StringCell(""));
+			}
+		}
+    	if (hasRules.contains("MinifyJavaScript")) {
+			if (pageSpeedResult.formattedResults.ruleResults.MinifyJavaScript != null) {
+		    	cells.add(new DoubleCell(pageSpeedResult.formattedResults.ruleResults.MinifyJavaScript.ruleImpact));
+		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.MinifyJavaScript.getSummary()));
+		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.MinifyJavaScript.getUrlBlocksSummary()));
+			} else {
+				cells.add(new DoubleCell(-1));
+				cells.add(new StringCell(""));
+				cells.add(new StringCell(""));
+			}
+		}
+    	if (hasRules.contains("MinimizeRenderBlockingResources")) {
+			if (pageSpeedResult.formattedResults.ruleResults.MinimizeRenderBlockingResources != null) {
+		    	cells.add(new DoubleCell(pageSpeedResult.formattedResults.ruleResults.MinimizeRenderBlockingResources.ruleImpact));
+		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.MinimizeRenderBlockingResources.getSummary()));
+		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.MinimizeRenderBlockingResources.getUrlBlocksSummary()));
+			} else {
+				cells.add(new DoubleCell(-1));
+				cells.add(new StringCell(""));
+				cells.add(new StringCell(""));
+			}
+		}
+    	if (hasRules.contains("OptimizeImages")) {
+			if (pageSpeedResult.formattedResults.ruleResults.OptimizeImages != null) {
+		    	cells.add(new DoubleCell(pageSpeedResult.formattedResults.ruleResults.OptimizeImages.ruleImpact));
+		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.OptimizeImages.getSummary()));
+		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.OptimizeImages.getUrlBlocksSummary()));
+			} else {
+				cells.add(new DoubleCell(-1));
+				cells.add(new StringCell(""));
+				cells.add(new StringCell(""));
+			}
+		}
+    	if (hasRules.contains("PrioritizeVisibleContent")) {
+			if (pageSpeedResult.formattedResults.ruleResults.PrioritizeVisibleContent != null) {
+		    	cells.add(new DoubleCell(pageSpeedResult.formattedResults.ruleResults.PrioritizeVisibleContent.ruleImpact));
+		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.PrioritizeVisibleContent.getSummary()));
+			} else {
+				cells.add(new DoubleCell(-1));
+				cells.add(new StringCell(""));
+			}
+		}
+    	if (hasRules.contains("SizeContentToViewport")) {
+			if (pageSpeedResult.formattedResults.ruleResults.SizeContentToViewport != null) {
+		    	cells.add(new DoubleCell(pageSpeedResult.formattedResults.ruleResults.SizeContentToViewport.ruleImpact));
+		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.SizeContentToViewport.getSummary()));
+			} else {
+				cells.add(new DoubleCell(-1));
+				cells.add(new StringCell(""));
+			}
+		}
+    	if (hasRules.contains("SizeTapTargetAppropriately")) {
+			if (pageSpeedResult.formattedResults.ruleResults.SizeTapTargetAppropriately != null) {
+		    	cells.add(new DoubleCell(pageSpeedResult.formattedResults.ruleResults.SizeTapTargetAppropriately.ruleImpact));
+		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.SizeTapTargetAppropriately.getSummary()));
+		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.SizeTapTargetAppropriately.getUrlBlocksSummary()));
+			} else {
+				cells.add(new DoubleCell(-1));
+				cells.add(new StringCell(""));
+				cells.add(new StringCell(""));
+			}
+		}
+    	if (hasRules.contains("UseLegibleFontSizes")) {
+			if (pageSpeedResult.formattedResults.ruleResults.UseLegibleFontSizes != null) {
+		    	cells.add(new DoubleCell(pageSpeedResult.formattedResults.ruleResults.UseLegibleFontSizes.ruleImpact));
+		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.UseLegibleFontSizes.getSummary()));
+			} else {
+				cells.add(new DoubleCell(-1));
+				cells.add(new StringCell(""));
+			}
+		}    	
+
+		return cells.toArray(new DataCell[cells.size()]);
     }
 
     /**
@@ -367,6 +547,9 @@ public class GooglePageSpeedNodeModel extends NodeModel {
         // save user settings to the config object.
         m_url.saveSettingsTo(settings);
         m_apikey.saveSettingsTo(settings);
+        m_filterThirdPartyResources.saveSettingsTo(settings);
+        m_locale.saveSettingsTo(settings);
+        m_strategy.saveSettingsTo(settings);
     }
 
     /**
@@ -378,10 +561,12 @@ public class GooglePageSpeedNodeModel extends NodeModel {
             
         // load (valid) settings from the config object.
         // It can be safely assumed that the settings are valided by the 
-        // method below.
-        
+        // method below.        
         m_url.loadSettingsFrom(settings);
         m_apikey.loadSettingsFrom(settings);
+        m_filterThirdPartyResources.loadSettingsFrom(settings);
+        m_locale.loadSettingsFrom(settings);
+        m_strategy.loadSettingsFrom(settings);
     }
 
     /**
@@ -398,6 +583,9 @@ public class GooglePageSpeedNodeModel extends NodeModel {
 
         m_url.validateSettings(settings);
         m_apikey.validateSettings(settings);
+        m_filterThirdPartyResources.validateSettings(settings);
+        m_locale.validateSettings(settings);
+        m_strategy.validateSettings(settings);
     }
     
     /**
@@ -452,9 +640,11 @@ public class GooglePageSpeedNodeModel extends NodeModel {
     }
     public static class PageSpeedRuleGroup {
     	@Key
-    	PageSpeedRuleGroupSpeed SPEED;
+    	PageSpeedRuleGroupGroup SPEED;
+    	@Key
+    	PageSpeedRuleGroupGroup USABILITY;
     }
-    public static class PageSpeedRuleGroupSpeed {
+    public static class PageSpeedRuleGroupGroup {
     	@Key
     	int score;
     }
@@ -492,6 +682,10 @@ public class GooglePageSpeedNodeModel extends NodeModel {
     	@Key
     	PageSpeedRuleResult AvoidLandingPageRedirects;
     	@Key
+    	PageSpeedRuleResult AvoidPlugins;
+    	@Key
+    	PageSpeedRuleResult ConfigureViewport;
+    	@Key
     	PageSpeedRuleResult EnableGzipCompression;
     	@Key
     	PageSpeedRuleResult LeverageBrowserCaching;
@@ -509,6 +703,12 @@ public class GooglePageSpeedNodeModel extends NodeModel {
     	PageSpeedRuleResult OptimizeImages;
     	@Key
     	PageSpeedRuleResult PrioritizeVisibleContent;
+    	@Key
+    	PageSpeedRuleResult SizeContentToViewport;
+    	@Key
+    	PageSpeedRuleResult SizeTapTargetAppropriately;
+    	@Key
+    	PageSpeedRuleResult UseLegibleFontSizes;
     }
     public static class PageSpeedRuleResult {
     	@Key
