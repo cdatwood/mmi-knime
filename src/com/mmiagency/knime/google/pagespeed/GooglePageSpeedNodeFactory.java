@@ -26,7 +26,7 @@ public class GooglePageSpeedNodeFactory
      */
     @Override
     public int getNrNodeViews() {
-        return 1;
+        return 0;
     }
 
     /**

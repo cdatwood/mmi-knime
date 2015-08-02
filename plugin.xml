@@ -1,14 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<?eclipse version="3.0"?>
-<plugin>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?eclipse version="3.0"?><plugin>
 
   <extension point="org.knime.workbench.repository.categories">
 	<category description="MMI Agency" icon="icons/mmi.png" level-id="mmi" name="MMI Agency" path="/"/>
 	<category description="Google" icon="icons/google.png" level-id="mmi_google" name="Google" path="/mmi/"/>
+	<category description="W3C" icon="icons/w3c.png" level-id="mmi_w3c" name="W3C" path="/mmi/"/>
   </extension>
    
   <extension point="org.knime.workbench.repository.nodes">
-    <node category-path="/community/mmi/mmi_google/" icon="icons/pagespeed.png" factory-class="com.mmiagency.knime.google.pagespeed.GooglePageSpeedNodeFactory" id="com.mmiagency.knime.nodes.GooglePageSpeedNodeFactory"/>
-  </extension>
+    <node category-path="/mmi/mmi_google/" factory-class="com.mmiagency.knime.google.pagespeed.GooglePageSpeedNodeFactory" id="com.mmiagency.knime.nodes.GooglePageSpeedNodeFactory"/>
+    <node category-path="/mmi/mmi_w3c/" factory-class="com.mmiagency.knime.w3c.htmlvalidator.W3cHtmlValidatorNodeNodeFactory" id="com.mmiagency.knime.w3c.html.W3cHtmlValidatorNodeNodeFactory"/>
+</extension>
    
 </plugin>

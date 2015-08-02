@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode icon="./default.png" type="Source" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10.xsd">
+    <name>W3C Html Validator</name>
+    
+    <shortDescription>
+        This node submits URL(s) to W3C' Nu HTML Validator service to evaluate quality of the HTML source.
+    </shortDescription>
+    
+    <fullDescription>
+        <intro>This node submits URL(s) to W3C' Nu HTML Validator service to evaluate quality of the HTML source.</intro>
+        
+        <option name="HTML Validator URL">HTML Validator URL, default to W3C's URL</option>
+        <option name="URL Column Name">A selection of String columns from the input table, the chosen column will be used in URL(s) submission.</option>
+        <option name="Show Outline">Show site outline in details results</option>
+
+    </fullDescription>
+    
+    <ports>
+        <inPort index="0" name="Input Table">An input table that contains a URL column</inPort>
+        <outPort index="0" name="Output Table">An output table with HTML Validator summary results with counts for info, warning and error types</outPort>
+        <outPort index="1" name="Output Table">An output table with HTML Validator details results with text for info, warning and error types</outPort>
+    </ports>    
+
+</knimeNode>

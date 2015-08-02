@@ -205,6 +205,13 @@ public class GooglePageSpeedNodeModel extends NodeModel {
             exec.setProgress(i / (double)inData[0].getRowCount(), 
                 "Adding row " + i);
             
+            // pause for 1 second to ensure we don't submit URL more frequent than 1 per second.
+            try {
+            	Thread.sleep(1000);
+            } catch (InterruptedException e) {
+            	// do nothing
+            }
+            
             i++;
     	}
 
@@ -534,6 +541,13 @@ public class GooglePageSpeedNodeModel extends NodeModel {
         // to execute. If the node can execute in its current state return
         // the spec of its output data table(s) (if you can, otherwise an array
         // with null elements), or throw an exception with a useful user message
+		if (inSpecs.length<1) {
+			throw new InvalidSettingsException("You must link a table with URL column to this node.");
+		}
+		
+		if (inSpecs[0].findColumnIndex(m_url.getStringValue()) < 0) {
+			throw new InvalidSettingsException("A URL column in the data input table must exist and must be specified.");
+		}
 
         return new DataTableSpec[]{null};
     }
