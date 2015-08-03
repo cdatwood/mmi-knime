@@ -10,6 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jsoup.Connection;
+import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -196,12 +197,13 @@ public class W3cCssValidatorNodeNodeModel extends NodeModel {
         		new DataTableSpec(detailsColSpecs));
         
         int summaryRowCount = 0;
-        
+		int detailsRowCount = 0;
+		        
     	for (Iterator<DataRow> it = inData.iterator(); it.hasNext();) {
     		DataRow row = it.next();
     		String url = ((StringValue)row.getCell(urlColumnIndex)).getStringValue();
     		// put results in outgoing table
-    		RowKey key = new RowKey("Row " + summaryRowCount);
+    		RowKey key = new RowKey("Row " + summaryRowCount++);
 
     		// retrieve validator results
     		String validatorUrl = m_validatorUrl.getStringValue() + 
@@ -222,14 +224,22 @@ public class W3cCssValidatorNodeNodeModel extends NodeModel {
     		summaryCells[4] = new StringCell(m_vendorExtensions.getStringValue());
     		summaryCells[5] = new IntCell(0);
     		summaryCells[6] = new IntCell(0);
-    		    		
-    		Connection con = Jsoup.connect(validatorUrl).userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.21 (KHTML, like Gecko) Chrome/19.0.1042.0 Safari/535.21").timeout(10000);
-    	    Connection.Response resp = con.execute();
-    	    Document doc = con.get();
+    		
+    		boolean goodRespond = true;
+    		String errorMessage = null;
+    		
+    		Connection con = Jsoup.connect(validatorUrl).userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.21 (KHTML, like Gecko) Chrome/19.0.1042.0 Safari/535.21").timeout(10000);    		
+    	    Connection.Response resp = null;
+    	    Document doc = null;
+    	    try {
+    	    	resp = con.execute();
+    	    	doc = con.get();
+    	    } catch (HttpStatusException hse) {
+    	    	goodRespond = false;
+    	    	errorMessage = hse.getMessage();
+    	    }
     	    
-    		int detailsRowCount = 0;
-    		    		
-    		if (resp.statusCode() == 200) {
+    		if (goodRespond && resp.statusCode() == 200) {
     			// errors
 	    		Elements errors = doc.select("#errors");
 	    		
@@ -259,7 +269,7 @@ public class W3cCssValidatorNodeNodeModel extends NodeModel {
 	    			
 	    			for (Element error : section.select(".error")) {
 		    			
-		        		RowKey detailsKey = new RowKey("Row " + detailsRowCount);
+		        		RowKey detailsKey = new RowKey("Row " + detailsRowCount++);
 		        		
 		    			DataCell[] detailsCells = new DataCell[7];
 		    			
@@ -296,7 +306,6 @@ public class W3cCssValidatorNodeNodeModel extends NodeModel {
 		    			DataRow detailsDataRow = new DefaultRow(detailsKey, detailsCells);
 		        		containerDetails.addRowToTable(detailsDataRow);
 		        		
-		        		detailsRowCount++;
 	    			}
 	    		}
 	    		
@@ -329,7 +338,7 @@ public class W3cCssValidatorNodeNodeModel extends NodeModel {
 	    			
 	    			for (Element warning : section.select(".warning")) {
 		    			
-		        		RowKey detailsKey = new RowKey("Row " + detailsRowCount);
+		        		RowKey detailsKey = new RowKey("Row " + detailsRowCount++);
 		        		
 		    			DataCell[] detailsCells = new DataCell[7];
 		    			
@@ -373,20 +382,25 @@ public class W3cCssValidatorNodeNodeModel extends NodeModel {
 		    			DataRow detailsDataRow = new DefaultRow(detailsKey, detailsCells);
 		        		containerDetails.addRowToTable(detailsDataRow);
 		        		
-		        		detailsRowCount++;
 	    			}
 	    		}
 
     		} else {    	    	
-        		RowKey detailsKey = new RowKey("Row 0");
+        		RowKey detailsKey = new RowKey("Row " + detailsRowCount++);
 
-        		DataCell[] detailsCells = new DataCell[4];
+        		DataCell[] detailsCells = new DataCell[7];
     			
     			detailsCells[0] = new StringCell(url);
     			detailsCells[1] = new StringCell("");
-    			detailsCells[2] = new IntCell(0);
-    			detailsCells[3] = new StringCell("");
-    			detailsCells[4] = new StringCell(doc.html().toString());
+    			detailsCells[2] = new StringCell("");
+    			detailsCells[3] = new IntCell(0);
+    			detailsCells[4] = new IntCell(0);
+    			detailsCells[5] = new StringCell("");
+    			if (goodRespond) {
+    				detailsCells[6] = new StringCell(doc.html().toString());
+    			} else {
+    				detailsCells[6] = new StringCell(errorMessage);
+    			}
 
     			DataRow detailsDataRow = new DefaultRow(detailsKey, detailsCells);
         		containerDetails.addRowToTable(detailsDataRow);    			
@@ -407,7 +421,6 @@ public class W3cCssValidatorNodeNodeModel extends NodeModel {
             	// do nothing
             }
             
-            summaryRowCount++;
     	}
     	
         // once we are done, we close the container and return its table

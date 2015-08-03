@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.jsoup.Connection;
+import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -120,12 +121,13 @@ public class W3cHtmlValidatorNodeNodeModel extends NodeModel {
         		new DataTableSpec(detailsColSpecs));
         
         int summaryRowCount = 0;
+		int detailsRowCount = 0;
         
     	for (Iterator<DataRow> it = inData.iterator(); it.hasNext();) {
     		DataRow row = it.next();
     		String url = ((StringValue)row.getCell(urlColumnIndex)).getStringValue();
     		// put results in outgoing table
-    		RowKey key = new RowKey("Row " + summaryRowCount);
+    		RowKey key = new RowKey("Row " + summaryRowCount++);
 
     		// retrieve validator results
     		String validatorUrl = m_validatorUrl.getStringValue() + "?doc=" + URLEncoder.encode(url, "UTF-8");
@@ -135,15 +137,23 @@ public class W3cHtmlValidatorNodeNodeModel extends NodeModel {
     		
     		logger.info("Validation URL: " + validatorUrl);
     		
-    		Connection con = Jsoup.connect(validatorUrl).userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.21 (KHTML, like Gecko) Chrome/19.0.1042.0 Safari/535.21").timeout(10000);
-    	    Connection.Response resp = con.execute();
-    	    Document doc = con.get();
+    		boolean goodRespond = true;
+    		String errorMessage = null;
+    		
+    		Connection con = Jsoup.connect(validatorUrl).userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.21 (KHTML, like Gecko) Chrome/19.0.1042.0 Safari/535.21").timeout(10000);    		
+    	    Connection.Response resp = null;
+    	    Document doc = null;
+    	    try {
+    	    	resp = con.execute();
+    	    	doc = con.get();
+    	    } catch (HttpStatusException hse) {
+    	    	goodRespond = false;
+    	    	errorMessage = hse.getMessage();
+    	    }
     	    
     		int infoCount = 0;
     		int warningCount = 0;
     		int errorCount = 0;
-
-    		int detailsRowCount = 0;
     		
     		int number = 1;
     		
@@ -152,7 +162,7 @@ public class W3cHtmlValidatorNodeNodeModel extends NodeModel {
 	    		
 	    		for (Element result : results) {
 	    			
-	        		RowKey detailsKey = new RowKey("Row " + detailsRowCount);
+	        		RowKey detailsKey = new RowKey("Row " + detailsRowCount++);
 	        		
 	    			DataCell[] detailsCells = new DataCell[4];
 	    			
@@ -178,14 +188,13 @@ public class W3cHtmlValidatorNodeNodeModel extends NodeModel {
 	    			DataRow detailsDataRow = new DefaultRow(detailsKey, detailsCells);
 	        		containerDetails.addRowToTable(detailsDataRow);
 	        		
-	        		detailsRowCount++;
 	    		}
 	    		
 	    		if (m_showOutline.getBooleanValue()) {
 		    		Elements outline = doc.select("#outline");	    	
 		    		
 		    		if (outline.size() > 0) {
-		        		RowKey detailsKey = new RowKey("Row " + detailsRowCount);
+		        		RowKey detailsKey = new RowKey("Row " + detailsRowCount++);
 			    		
 		    			DataCell[] detailsCells = new DataCell[4];
 		    			
@@ -199,15 +208,18 @@ public class W3cHtmlValidatorNodeNodeModel extends NodeModel {
 		    		}
 	    		}
     		} else {    	    	
-        		RowKey detailsKey = new RowKey("Row 0");
+        		RowKey detailsKey = new RowKey("Row " + detailsRowCount++);
 
         		DataCell[] detailsCells = new DataCell[4];
     			
     			detailsCells[0] = new StringCell(url);
     			detailsCells[1] = new IntCell(1);
     			detailsCells[2] = new StringCell("");
-    			detailsCells[3] = new StringCell(doc.html().toString());
-
+    			if (goodRespond) {
+    				detailsCells[3] = new StringCell(doc.html().toString());
+    			} else {
+    				detailsCells[3] = new StringCell(errorMessage);
+    			}
     			DataRow detailsDataRow = new DefaultRow(detailsKey, detailsCells);
         		containerDetails.addRowToTable(detailsDataRow);    			
     		}
@@ -234,7 +246,6 @@ public class W3cHtmlValidatorNodeNodeModel extends NodeModel {
             	// do nothing
             }
             
-            summaryRowCount++;
     	}
 
         // once we are done, we close the container and return its table
