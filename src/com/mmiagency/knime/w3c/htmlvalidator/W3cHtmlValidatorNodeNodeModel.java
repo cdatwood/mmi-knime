@@ -19,14 +19,12 @@ import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.RowKey;
 import org.knime.core.data.StringValue;
 import org.knime.core.data.def.DefaultRow;
-import org.knime.core.data.def.DoubleCell;
 import org.knime.core.data.def.IntCell;
 import org.knime.core.data.def.StringCell;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
-import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.ExecutionContext;
@@ -36,8 +34,6 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-
-import com.mmiagency.knime.google.pagespeed.GooglePageSpeedNodeModel;
 
 
 /**
@@ -103,9 +99,7 @@ public class W3cHtmlValidatorNodeNodeModel extends NodeModel {
 		
     	DataTableSpec inSpec = inData.getSpec();
     	String urlColumnName = m_url.getStringValue();
-    	
-    	DataColumnSpec urlColumnSpec = inSpec.getColumnSpec(urlColumnName);
-    	
+    	    	
     	int urlColumnIndex = inSpec.findColumnIndex(urlColumnName);
 		
     	// prepare output data container        

@@ -4,12 +4,9 @@ import org.knime.core.data.StringValue;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentColumnNameSelection;
-import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
-import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.util.DataValueColumnFilter;
 
-import com.mmiagency.knime.google.pagespeed.GooglePageSpeedNodeModel;
 
 /**
  * <code>NodeDialog</code> for the "W3cHtmlValidatorNode" Node.
@@ -29,7 +26,8 @@ public class W3cHtmlValidatorNodeNodeDialog extends DefaultNodeSettingsPane {
      * This is just a suggestion to demonstrate possible default dialog
      * components.
      */
-    protected W3cHtmlValidatorNodeNodeDialog() {
+    @SuppressWarnings("unchecked")
+	protected W3cHtmlValidatorNodeNodeDialog() {
         super();
         
         addDialogComponent(new DialogComponentString(

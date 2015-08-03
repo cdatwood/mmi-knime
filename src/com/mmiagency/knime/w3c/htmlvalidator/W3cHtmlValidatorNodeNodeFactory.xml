@@ -3,11 +3,11 @@
     <name>W3C Html Validator</name>
     
     <shortDescription>
-        This node submits URL(s) to W3C' Nu HTML Validator service to evaluate quality of the HTML source.
+        This node submits URL(s) to W3C Nu HTML Validator service to evaluate quality of the HTML source.
     </shortDescription>
     
     <fullDescription>
-        <intro>This node submits URL(s) to W3C' Nu HTML Validator service to evaluate quality of the HTML source.</intro>
+        <intro>This node submits URL(s) to W3C Nu HTML Validator service to evaluate quality of the HTML source.</intro>
         
         <option name="HTML Validator URL">HTML Validator URL, default to W3C's URL</option>
         <option name="URL Column Name">A selection of String columns from the input table, the chosen column will be used in URL(s) submission.</option>

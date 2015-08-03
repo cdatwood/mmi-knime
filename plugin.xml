@@ -9,7 +9,8 @@
    
   <extension point="org.knime.workbench.repository.nodes">
     <node category-path="/mmi/mmi_google/" factory-class="com.mmiagency.knime.google.pagespeed.GooglePageSpeedNodeFactory" id="com.mmiagency.knime.nodes.GooglePageSpeedNodeFactory"/>
-    <node category-path="/mmi/mmi_w3c/" factory-class="com.mmiagency.knime.w3c.htmlvalidator.W3cHtmlValidatorNodeNodeFactory" id="com.mmiagency.knime.w3c.html.W3cHtmlValidatorNodeNodeFactory"/>
+    <node category-path="/mmi/mmi_w3c/" factory-class="com.mmiagency.knime.w3c.htmlvalidator.W3cHtmlValidatorNodeNodeFactory" id="com.mmiagency.knime.w3c.htmlvalidator.W3cHtmlValidatorNodeNodeFactory"/>
+    <node category-path="/mmi/mmi_w3c/" factory-class="com.mmiagency.knime.w3c.cssvalidator.W3cCssValidatorNodeNodeFactory" id="com.mmiagency.knime.w3c.cssvalidator.W3cCssValidatorNodeNodeFactory"/>
 </extension>
    
 </plugin>

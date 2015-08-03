@@ -1,15 +1,11 @@
 package com.mmiagency.knime.google.pagespeed;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
@@ -21,7 +17,6 @@ import org.knime.core.data.StringValue;
 import org.knime.core.data.def.DefaultRow;
 import org.knime.core.data.def.DoubleCell;
 import org.knime.core.data.def.IntCell;
-import org.knime.core.data.def.LongCell;
 import org.knime.core.data.def.StringCell;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
@@ -77,7 +72,7 @@ public class GooglePageSpeedNodeModel extends NodeModel {
 	static final String FIELD_DEFAULT_URL_COLUMN = "url";
 	static final String FIELD_DEFAULT_LOCALE = "en_US";
 	static final String FIELD_DEFAULT_STRATEGY = "desktop";
-	static final String[] FIELD_OPTIONS_STRATEGY = (String[])Arrays.asList("desktop", "mobile").toArray();
+	static final String[] FIELD_OPTIONS_STRATEGY = new String[]{"desktop", "mobile"};
 
 	private final SettingsModelString m_url = 
 			GooglePageSpeedNodeModel.getUrlColumnSettingsModel();	
@@ -93,7 +88,7 @@ public class GooglePageSpeedNodeModel extends NodeModel {
 	static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
 	static final JsonFactory JSON_FACTORY = new JacksonFactory();
 	
-	private final List<String> hasRules = new ArrayList();
+	private final List<String> hasRules = new ArrayList<String>();
 
     /**
      * Constructor for the node model.
@@ -158,9 +153,7 @@ public class GooglePageSpeedNodeModel extends NodeModel {
 
     	DataTableSpec inSpec = inData[0].getSpec();
     	String urlColumnName = m_url.getStringValue();
-    	
-    	DataColumnSpec urlColumnSpec = inSpec.getColumnSpec(urlColumnName);
-    	
+    	    	
     	int urlColumnIndex = inSpec.findColumnIndex(urlColumnName);
     	
     	// prepare output data container
@@ -222,7 +215,7 @@ public class GooglePageSpeedNodeModel extends NodeModel {
     }
     
     private DataColumnSpec[] getDataColumnSpec(PageSpeedResult pageSpeedResult) {
-    	List<DataColumnSpec> allColSpecs = new ArrayList();
+    	List<DataColumnSpec> allColSpecs = new ArrayList<DataColumnSpec>();
     	
     	allColSpecs.add(new DataColumnSpecCreator("url", StringCell.TYPE).createSpec());
     	allColSpecs.add(new DataColumnSpecCreator("strategy", StringCell.TYPE).createSpec());
@@ -336,7 +329,7 @@ public class GooglePageSpeedNodeModel extends NodeModel {
     }
     
     private DataCell[] mapDataCells(PageSpeedResult pageSpeedResult) {
-    	List<DataCell> cells = new ArrayList();
+    	List<DataCell> cells = new ArrayList<DataCell>();
     	
 		cells.add(new StringCell(pageSpeedResult.id));
 		cells.add(new StringCell(m_strategy.getStringValue()));
