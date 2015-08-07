@@ -19,7 +19,7 @@ import org.knime.core.node.util.DataValueColumnFilter;
  * 
  * @author MMI Agency
  */
-public class W3cHtmlValidatorNodeNodeDialog extends DefaultNodeSettingsPane {
+public class W3cHtmlValidatorNodeDialog extends DefaultNodeSettingsPane {
 
     /**
      * New pane for configuring W3cHtmlValidatorNode node dialog.
@@ -27,22 +27,22 @@ public class W3cHtmlValidatorNodeNodeDialog extends DefaultNodeSettingsPane {
      * components.
      */
     @SuppressWarnings("unchecked")
-	protected W3cHtmlValidatorNodeNodeDialog() {
+	protected W3cHtmlValidatorNodeDialog() {
         super();
         
         addDialogComponent(new DialogComponentString(
-        		W3cHtmlValidatorNodeNodeModel.getValidatorUrlSettingsModel(),
-        		W3cHtmlValidatorNodeNodeModel.FIELD_LABEL_VALIDATOR_URL, true, 20));        
+        		W3cHtmlValidatorNodeModel.getValidatorUrlSettingsModel(),
+        		W3cHtmlValidatorNodeModel.FIELD_LABEL_VALIDATOR_URL, true, 20));        
 
         addDialogComponent(new DialogComponentColumnNameSelection(
-        		W3cHtmlValidatorNodeNodeModel.getUrlColumnSettingsModel(),
-        		W3cHtmlValidatorNodeNodeModel.FIELD_LABEL_URL_COLUMN, 
+        		W3cHtmlValidatorNodeModel.getUrlColumnSettingsModel(),
+        		W3cHtmlValidatorNodeModel.FIELD_LABEL_URL_COLUMN, 
         		0, true,
         		new DataValueColumnFilter(StringValue.class)));
 
         addDialogComponent(new DialogComponentBoolean(
-        		W3cHtmlValidatorNodeNodeModel.getShowOutlineSettingsModel(),
-        		W3cHtmlValidatorNodeNodeModel.FIELD_LABEL_SHOW_OUTLINE));        
+        		W3cHtmlValidatorNodeModel.getShowOutlineSettingsModel(),
+        		W3cHtmlValidatorNodeModel.FIELD_LABEL_SHOW_OUTLINE));        
 
     }
 }

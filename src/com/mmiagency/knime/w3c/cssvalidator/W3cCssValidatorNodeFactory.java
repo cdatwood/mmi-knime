@@ -1,24 +1,24 @@
-package com.mmiagency.knime.w3c.htmlvalidator;
+package com.mmiagency.knime.w3c.cssvalidator;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
 /**
- * <code>NodeFactory</code> for the "W3cHtmlValidatorNode" Node.
+ * <code>NodeFactory</code> for the "W3cCssValidatorNode" Node.
  * 
  *
  * @author MMI Agency
  */
-public class W3cHtmlValidatorNodeNodeFactory 
-        extends NodeFactory<W3cHtmlValidatorNodeNodeModel> {
+public class W3cCssValidatorNodeFactory 
+        extends NodeFactory<W3cCssValidatorNodeModel> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public W3cHtmlValidatorNodeNodeModel createNodeModel() {
-        return new W3cHtmlValidatorNodeNodeModel();
+    public W3cCssValidatorNodeModel createNodeModel() {
+        return new W3cCssValidatorNodeModel();
     }
 
     /**
@@ -33,9 +33,9 @@ public class W3cHtmlValidatorNodeNodeFactory
      * {@inheritDoc}
      */
     @Override
-    public NodeView<W3cHtmlValidatorNodeNodeModel> createNodeView(final int viewIndex,
-            final W3cHtmlValidatorNodeNodeModel nodeModel) {
-        return new W3cHtmlValidatorNodeNodeView(nodeModel);
+    public NodeView<W3cCssValidatorNodeModel> createNodeView(final int viewIndex,
+            final W3cCssValidatorNodeModel nodeModel) {
+        return new W3cCssValidatorNodeView(nodeModel);
     }
 
     /**
@@ -51,7 +51,7 @@ public class W3cHtmlValidatorNodeNodeFactory
      */
     @Override
     public NodeDialogPane createNodeDialogPane() {
-        return new W3cHtmlValidatorNodeNodeDialog();
+        return new W3cCssValidatorNodeDialog();
     }
 
 }

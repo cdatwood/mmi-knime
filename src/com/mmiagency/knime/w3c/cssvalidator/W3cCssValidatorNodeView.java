@@ -8,14 +8,14 @@ import org.knime.core.node.NodeView;
  *
  * @author MMI Agency
  */
-public class W3cCssValidatorNodeNodeView extends NodeView<W3cCssValidatorNodeNodeModel> {
+public class W3cCssValidatorNodeView extends NodeView<W3cCssValidatorNodeModel> {
 
     /**
      * Creates a new view.
      * 
-     * @param nodeModel The model (class: {@link W3cCssValidatorNodeNodeModel})
+     * @param nodeModel The model (class: {@link W3cCssValidatorNodeModel})
      */
-    protected W3cCssValidatorNodeNodeView(final W3cCssValidatorNodeNodeModel nodeModel) {
+    protected W3cCssValidatorNodeView(final W3cCssValidatorNodeModel nodeModel) {
         super(nodeModel);
 
         // TODO instantiate the components of the view here.
@@ -30,8 +30,8 @@ public class W3cCssValidatorNodeNodeView extends NodeView<W3cCssValidatorNodeNod
 
         // TODO retrieve the new model from your nodemodel and 
         // update the view.
-        W3cCssValidatorNodeNodeModel nodeModel = 
-            (W3cCssValidatorNodeNodeModel)getNodeModel();
+        W3cCssValidatorNodeModel nodeModel = 
+            (W3cCssValidatorNodeModel)getNodeModel();
         assert nodeModel != null;
         
         // be aware of a possibly not executed nodeModel! The data you retrieve

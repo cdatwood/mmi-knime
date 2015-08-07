@@ -43,11 +43,11 @@ import org.knime.core.node.NodeSettingsWO;
  *
  * @author MMI Agency
  */
-public class W3cHtmlValidatorNodeNodeModel extends NodeModel {
+public class W3cHtmlValidatorNodeModel extends NodeModel {
     
     // the logger instance
     private static final NodeLogger logger = NodeLogger
-            .getLogger(W3cHtmlValidatorNodeNodeModel.class);
+            .getLogger(W3cHtmlValidatorNodeModel.class);
 
 	static final String FIELD_LABEL_VALIDATOR_URL = "HTML Validator URL";
 	static final String FIELD_LABEL_URL_COLUMN = "URL Column Name";
@@ -61,16 +61,16 @@ public class W3cHtmlValidatorNodeNodeModel extends NodeModel {
 	static final String FIELD_DEFAULT_URL_COLUMN = "url";
 
 	private final SettingsModelString m_validatorUrl = 
-			W3cHtmlValidatorNodeNodeModel.getValidatorUrlSettingsModel();	
+			W3cHtmlValidatorNodeModel.getValidatorUrlSettingsModel();	
 	private final SettingsModelString m_url = 
-			W3cHtmlValidatorNodeNodeModel.getUrlColumnSettingsModel();	
+			W3cHtmlValidatorNodeModel.getUrlColumnSettingsModel();	
 	private final SettingsModelBoolean m_showOutline = 
-			W3cHtmlValidatorNodeNodeModel.getShowOutlineSettingsModel();	
+			W3cHtmlValidatorNodeModel.getShowOutlineSettingsModel();	
 
 	/**
      * Constructor for the node model.
      */
-    protected W3cHtmlValidatorNodeNodeModel() {
+    protected W3cHtmlValidatorNodeModel() {
     
         // one incoming port and two outgoing ports
         super(1, 2);

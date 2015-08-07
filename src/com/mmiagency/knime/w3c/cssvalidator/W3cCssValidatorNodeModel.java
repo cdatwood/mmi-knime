@@ -44,11 +44,11 @@ import org.knime.core.node.NodeSettingsWO;
  *
  * @author MMI Agency
  */
-public class W3cCssValidatorNodeNodeModel extends NodeModel {
+public class W3cCssValidatorNodeModel extends NodeModel {
     
     // the logger instance
     private static final NodeLogger logger = NodeLogger
-            .getLogger(W3cCssValidatorNodeNodeModel.class);
+            .getLogger(W3cCssValidatorNodeModel.class);
         
 	static final String FIELD_LABEL_VALIDATOR_URL = "CSS Validator URL";
 	static final String FIELD_LABEL_URL_COLUMN = "URL Column Name";
@@ -77,22 +77,22 @@ public class W3cCssValidatorNodeNodeModel extends NodeModel {
 	static final Map<String, String> FIELD_OPTIONS_VENDOR_EXTENSIONS = new HashMap<String, String>();
 	
 	private final SettingsModelString m_validatorUrl = 
-			W3cCssValidatorNodeNodeModel.getValidatorUrlSettingsModel();	
+			W3cCssValidatorNodeModel.getValidatorUrlSettingsModel();	
 	private final SettingsModelString m_url = 
-			W3cCssValidatorNodeNodeModel.getUrlColumnSettingsModel();	
+			W3cCssValidatorNodeModel.getUrlColumnSettingsModel();	
 	private final SettingsModelString m_profile = 
-			W3cCssValidatorNodeNodeModel.getProfileSettingsModel();	
+			W3cCssValidatorNodeModel.getProfileSettingsModel();	
 	private final SettingsModelString m_medium = 
-			W3cCssValidatorNodeNodeModel.getMediumSettingsModel();	
+			W3cCssValidatorNodeModel.getMediumSettingsModel();	
 	private final SettingsModelString m_warnings = 
-			W3cCssValidatorNodeNodeModel.getWarningsSettingsModel();	
+			W3cCssValidatorNodeModel.getWarningsSettingsModel();	
 	private final SettingsModelString m_vendorExtensions = 
-			W3cCssValidatorNodeNodeModel.getVendorExtensionsSettingsModel();	
+			W3cCssValidatorNodeModel.getVendorExtensionsSettingsModel();	
 
 	/**
      * Constructor for the node model.
      */
-    protected W3cCssValidatorNodeNodeModel() {
+    protected W3cCssValidatorNodeModel() {
     
         // one incoming port and two outgoing ports
         super(1, 2);
