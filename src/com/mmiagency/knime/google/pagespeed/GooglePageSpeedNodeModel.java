@@ -55,6 +55,7 @@ public class GooglePageSpeedNodeModel extends NodeModel {
     private static final NodeLogger logger = NodeLogger
             .getLogger(GooglePageSpeedNodeModel.class);
         
+    // static variables for setting dialog labels, internal key for settings and default values
     static final String REST_URL = "https://www.googleapis.com/pagespeedonline/v2/runPagespeed?url=";
     
 	static final String FIELD_LABEL_URL_COLUMN = "URL Column Name";
@@ -74,6 +75,7 @@ public class GooglePageSpeedNodeModel extends NodeModel {
 	static final String FIELD_DEFAULT_STRATEGY = "desktop";
 	static final String[] FIELD_OPTIONS_STRATEGY = new String[]{"desktop", "mobile"};
 
+	// settings for storing and values evaluation
 	private final SettingsModelString m_url = 
 			GooglePageSpeedNodeModel.getUrlColumnSettingsModel();	
 	private final SettingsModelString m_apikey =
@@ -99,6 +101,7 @@ public class GooglePageSpeedNodeModel extends NodeModel {
         super(1, 1);
     }
     
+    // static methods for creating settings models
     public static SettingsModelString getUrlColumnSettingsModel() {
     	return new SettingsModelString(FIELD_KEY_URL_COLUMN, FIELD_DEFAULT_URL_COLUMN);   
     }
@@ -119,6 +122,12 @@ public class GooglePageSpeedNodeModel extends NodeModel {
     	return new SettingsModelString(FIELD_KEY_STRATEGY, FIELD_DEFAULT_STRATEGY);
     }
     
+    /**
+     * Call Google PageSpeed API to retrieve PageSpeed results
+     * @param url URL to be sent to Google PageSpeed API
+     * @return PageSpeedResult
+     * @throws IOException
+     */
     protected PageSpeedResult retrievePageSpeedResult(String url) throws IOException {
     	// pad URL with API key
     	StringBuilder theUrl = new StringBuilder();
@@ -214,6 +223,11 @@ public class GooglePageSpeedNodeModel extends NodeModel {
         return new BufferedDataTable[]{out};
     }
     
+    /**
+     * Return column spec based on PageSpeed result
+     * @param pageSpeedResult
+     * @return
+     */
     private DataColumnSpec[] getDataColumnSpec(PageSpeedResult pageSpeedResult) {
     	List<DataColumnSpec> allColSpecs = new ArrayList<DataColumnSpec>();
     	
@@ -328,6 +342,11 @@ public class GooglePageSpeedNodeModel extends NodeModel {
 		return allColSpecs.toArray(new DataColumnSpec[allColSpecs.size()]);
     }
     
+    /**
+     * Maps PageSpeed Result to data cell
+     * @param pageSpeedResult
+     * @return
+     */
     private DataCell[] mapDataCells(PageSpeedResult pageSpeedResult) {
     	List<DataCell> cells = new ArrayList<DataCell>();
     	
