@@ -1,8 +1,10 @@
 package com.mmiagency.knime.google.pagespeed;
 
+import java.awt.Color;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.swing.JLabel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -11,6 +13,7 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentColumnNameSelection;
+import org.knime.core.node.defaultnodesettings.DialogComponentLabel;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
@@ -34,6 +37,8 @@ public class GooglePageSpeedNodeDialog extends DefaultNodeSettingsPane {
             .getLogger(GooglePageSpeedNodeDialog.class);
     
     protected SettingsModelString localeSetting;
+    
+    private DialogComponentLabel m_warning = new DialogComponentLabel("");
 	
     /**
      * New pane for configuring GooglePageSpeed node dialog.
@@ -43,26 +48,26 @@ public class GooglePageSpeedNodeDialog extends DefaultNodeSettingsPane {
     @SuppressWarnings("unchecked")
 	protected GooglePageSpeedNodeDialog() {
         super();
-        
+
         addDialogComponent(new DialogComponentString(
-        		GooglePageSpeedNodeModel.getApiKeySettingsModel(),
-        		GooglePageSpeedNodeModel.FIELD_LABEL_API_KEY, true, 20));        
+        		GooglePageSpeedNodeConfiguration.getApiKeySettingsModel(),
+        		GooglePageSpeedNodeConfiguration.FIELD_LABEL_API_KEY, true, 20));        
 
         addDialogComponent(new DialogComponentColumnNameSelection(
-        		GooglePageSpeedNodeModel.getUrlColumnSettingsModel(),
-        		GooglePageSpeedNodeModel.FIELD_LABEL_URL_COLUMN, 
+        		GooglePageSpeedNodeConfiguration.getUrlColumnSettingsModel(),
+        		GooglePageSpeedNodeConfiguration.FIELD_LABEL_URL_COLUMN, 
         		0, true,
         		new DataValueColumnFilter(StringValue.class)));
         
         addDialogComponent(new DialogComponentBoolean(
-        		GooglePageSpeedNodeModel.getFilterThirdPartyResourcesSettingsModel(),
-        		GooglePageSpeedNodeModel.FIELD_LABEL_FILTER_THIRD_PARTY_RESOURCES));        
+        		GooglePageSpeedNodeConfiguration.getFilterThirdPartyResourcesSettingsModel(),
+        		GooglePageSpeedNodeConfiguration.FIELD_LABEL_FILTER_THIRD_PARTY_RESOURCES));        
         
-        localeSetting = GooglePageSpeedNodeModel.getLocaleSettingsModel();
+        localeSetting = GooglePageSpeedNodeConfiguration.getLocaleSettingsModel();
         
         addDialogComponent(new DialogComponentString(
         		localeSetting,
-        		GooglePageSpeedNodeModel.FIELD_LABEL_LOCALE, 
+        		GooglePageSpeedNodeConfiguration.FIELD_LABEL_LOCALE, 
         		false, 20));
         
         localeSetting.addChangeListener(new ChangeListener() {
@@ -73,23 +78,31 @@ public class GooglePageSpeedNodeDialog extends DefaultNodeSettingsPane {
 				
 				if (locale == null || locale.trim().isEmpty()) {
 					logger.warn("Locale is empty");
+					m_warning.setText("WARNING: Locale is empty");
 					return;
+				} else {
+					m_warning.setText("");
 				}
 				
 				Matcher matcher = pattern.matcher(locale);
 				
-				if (matcher.matches()) {
+				if (!matcher.matches()) {
 					logger.warn("Locale is not in right format (e.g. en_US).");
+					m_warning.setText("WARNING: Locale is not in right format (e.g. en_US).");
 					return;
+				} else {
+					m_warning.setText("");
 				}
 			}
         });
                 
         addDialogComponent(new DialogComponentStringSelection(
-        		GooglePageSpeedNodeModel.getStrategySettingsModel(),
-        		GooglePageSpeedNodeModel.FIELD_LABEL_STRATEGY, 
-        		GooglePageSpeedNodeModel.FIELD_OPTIONS_STRATEGY));        
+        		GooglePageSpeedNodeConfiguration.getStrategySettingsModel(),
+        		GooglePageSpeedNodeConfiguration.FIELD_LABEL_STRATEGY, 
+        		GooglePageSpeedNodeConfiguration.FIELD_OPTIONS_STRATEGY));        
                     
+        addDialogComponent(m_warning);
+        
     }
 }
 

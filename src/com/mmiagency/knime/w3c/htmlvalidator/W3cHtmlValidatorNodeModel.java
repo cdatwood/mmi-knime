@@ -49,24 +49,8 @@ public class W3cHtmlValidatorNodeModel extends NodeModel {
     private static final NodeLogger logger = NodeLogger
             .getLogger(W3cHtmlValidatorNodeModel.class);
 
-	static final String FIELD_LABEL_VALIDATOR_URL = "HTML Validator URL";
-	static final String FIELD_LABEL_URL_COLUMN = "URL Column Name";
-	static final String FIELD_LABEL_SHOW_OUTLINE = "Show Outline";
-
-	static final String FIELD_KEY_VALIDATOR_URL = "htmlValidatorUrl";
-	static final String FIELD_KEY_URL_COLUMN = "urlColumn";
-	static final String FIELD_KEY_SHOW_OUTLINE = "showOutline";
-
-	static final String FIELD_DEFAULT_VALIDATOR_URL = "https://validator.w3.org/nu/";
-	static final String FIELD_DEFAULT_URL_COLUMN = "url";
-
-	private final SettingsModelString m_validatorUrl = 
-			W3cHtmlValidatorNodeModel.getValidatorUrlSettingsModel();	
-	private final SettingsModelString m_url = 
-			W3cHtmlValidatorNodeModel.getUrlColumnSettingsModel();	
-	private final SettingsModelBoolean m_showOutline = 
-			W3cHtmlValidatorNodeModel.getShowOutlineSettingsModel();	
-
+    private W3cHtmlValidatorNodeConfiguration configuration = new W3cHtmlValidatorNodeConfiguration();
+    
 	/**
      * Constructor for the node model.
      */
@@ -74,16 +58,6 @@ public class W3cHtmlValidatorNodeModel extends NodeModel {
     
         // one incoming port and two outgoing ports
         super(1, 2);
-    }
-    
-    public static SettingsModelString getValidatorUrlSettingsModel() {
-    	return new SettingsModelString(FIELD_KEY_VALIDATOR_URL, FIELD_DEFAULT_VALIDATOR_URL);   
-    }
-    public static SettingsModelString getUrlColumnSettingsModel() {
-    	return new SettingsModelString(FIELD_KEY_URL_COLUMN, FIELD_DEFAULT_URL_COLUMN);   
-    }
-    public static SettingsModelBoolean getShowOutlineSettingsModel() {
-    	return new SettingsModelBoolean(FIELD_KEY_SHOW_OUTLINE, false);
     }
     
     /**
@@ -99,7 +73,7 @@ public class W3cHtmlValidatorNodeModel extends NodeModel {
 		BufferedDataTable inData = (BufferedDataTable)inObjects[0];
 		
     	DataTableSpec inSpec = inData.getSpec();
-    	String urlColumnName = m_url.getStringValue();
+    	String urlColumnName = configuration.getUrl().getStringValue();
     	    	
     	int urlColumnIndex = inSpec.findColumnIndex(urlColumnName);
 		
@@ -130,8 +104,8 @@ public class W3cHtmlValidatorNodeModel extends NodeModel {
     		RowKey key = new RowKey("Row " + summaryRowCount++);
 
     		// retrieve validator results
-    		String validatorUrl = m_validatorUrl.getStringValue() + "?doc=" + URLEncoder.encode(url, "UTF-8");
-    		if (m_showOutline.getBooleanValue()) {
+    		String validatorUrl = configuration.getValidatorUrl().getStringValue() + "?doc=" + URLEncoder.encode(url, "UTF-8");
+    		if (configuration.getShowOutline().getBooleanValue()) {
     			validatorUrl += "&showoutline=yes";
     		}
     		
@@ -190,7 +164,7 @@ public class W3cHtmlValidatorNodeModel extends NodeModel {
 	        		
 	    		}
 	    		
-	    		if (m_showOutline.getBooleanValue()) {
+	    		if (configuration.getShowOutline().getBooleanValue()) {
 		    		Elements outline = doc.select("#outline");	    	
 		    		
 		    		if (outline.size() > 0) {
@@ -286,7 +260,7 @@ public class W3cHtmlValidatorNodeModel extends NodeModel {
 			throw new InvalidSettingsException("You must link a table with URL column to this node.");
 		}
 		
-		if (inSpecs[0].findColumnIndex(m_url.getStringValue()) < 0) {
+		if (inSpecs[0].findColumnIndex(configuration.getUrl().getStringValue()) < 0) {
 			throw new InvalidSettingsException("A URL column in the data input table must exist and must be specified.");
 		}
 
@@ -299,9 +273,7 @@ public class W3cHtmlValidatorNodeModel extends NodeModel {
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
 
-        m_validatorUrl.saveSettingsTo(settings);
-        m_url.saveSettingsTo(settings);
-        m_showOutline.saveSettingsTo(settings);
+    	configuration.saveSettingsTo(settings);
 
     }
 
@@ -312,9 +284,7 @@ public class W3cHtmlValidatorNodeModel extends NodeModel {
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
             
-        m_validatorUrl.loadSettingsFrom(settings);
-        m_url.loadSettingsFrom(settings);
-        m_showOutline.loadSettingsFrom(settings);
+    	configuration.loadValidatedSettingsFrom(settings);
 
     }
 
@@ -325,9 +295,7 @@ public class W3cHtmlValidatorNodeModel extends NodeModel {
     protected void validateSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
 
-        m_validatorUrl.validateSettings(settings);
-    	m_url.validateSettings(settings);
-        m_showOutline.validateSettings(settings);
+    	configuration.validateSettings(settings);
     	
     }
     

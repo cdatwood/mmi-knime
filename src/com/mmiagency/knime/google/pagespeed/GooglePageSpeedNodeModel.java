@@ -54,44 +54,14 @@ public class GooglePageSpeedNodeModel extends NodeModel {
     // the logger instance
     private static final NodeLogger logger = NodeLogger
             .getLogger(GooglePageSpeedNodeModel.class);
-        
-    // static variables for setting dialog labels, internal key for settings and default values
-    static final String REST_URL = "https://www.googleapis.com/pagespeedonline/v2/runPagespeed?url=";
-    
-	static final String FIELD_LABEL_URL_COLUMN = "URL Column Name";
-	static final String FIELD_LABEL_API_KEY = "Google API Key";
-	static final String FIELD_LABEL_FILTER_THIRD_PARTY_RESOURCES = "Filter Third Party Resources";
-	static final String FIELD_LABEL_LOCALE = "Locale";
-	static final String FIELD_LABEL_STRATEGY = "Strategy";
-	
-	static final String FIELD_KEY_URL_COLUMN = "urlColumn";
-	static final String FIELD_KEY_API_KEY = "apiKey";
-	static final String FIELD_KEY_FILTER_THIRD_PARTY_RESOURCES = "filterThirdPartyResources";
-	static final String FIELD_KEY_LOCALE = "locale";
-	static final String FIELD_KEY_STRATEGY = "strategy";
-	
-	static final String FIELD_DEFAULT_URL_COLUMN = "url";
-	static final String FIELD_DEFAULT_LOCALE = "en_US";
-	static final String FIELD_DEFAULT_STRATEGY = "desktop";
-	static final String[] FIELD_OPTIONS_STRATEGY = new String[]{"desktop", "mobile"};
-
-	// settings for storing and values evaluation
-	private final SettingsModelString m_url = 
-			GooglePageSpeedNodeModel.getUrlColumnSettingsModel();	
-	private final SettingsModelString m_apikey =
-			GooglePageSpeedNodeModel.getApiKeySettingsModel();
-	private final SettingsModelBoolean m_filterThirdPartyResources =
-			GooglePageSpeedNodeModel.getFilterThirdPartyResourcesSettingsModel();
-	private final SettingsModelString m_locale =
-			GooglePageSpeedNodeModel.getLocaleSettingsModel();
-	private final SettingsModelString m_strategy =
-			GooglePageSpeedNodeModel.getStrategySettingsModel();
 	
 	static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
 	static final JsonFactory JSON_FACTORY = new JacksonFactory();
 	
 	private final List<String> hasRules = new ArrayList<String>();
 
+	private GooglePageSpeedNodeConfiguration configuration = new GooglePageSpeedNodeConfiguration();
+	
     /**
      * Constructor for the node model.
      */
@@ -99,27 +69,6 @@ public class GooglePageSpeedNodeModel extends NodeModel {
     
         // one incoming port and one outgoing port
         super(1, 1);
-    }
-    
-    // static methods for creating settings models
-    public static SettingsModelString getUrlColumnSettingsModel() {
-    	return new SettingsModelString(FIELD_KEY_URL_COLUMN, FIELD_DEFAULT_URL_COLUMN);   
-    }
-    
-    public static SettingsModelString getApiKeySettingsModel() {
-    	return new SettingsModelString(FIELD_KEY_API_KEY,"");   
-    }
-    
-    public static SettingsModelBoolean getFilterThirdPartyResourcesSettingsModel() {
-    	return new SettingsModelBoolean(FIELD_KEY_FILTER_THIRD_PARTY_RESOURCES, false);
-    }
-    
-    public static SettingsModelString getLocaleSettingsModel() {
-    	return new SettingsModelString(FIELD_KEY_LOCALE, FIELD_DEFAULT_LOCALE);
-    }
-    
-    public static SettingsModelString getStrategySettingsModel() {
-    	return new SettingsModelString(FIELD_KEY_STRATEGY, FIELD_DEFAULT_STRATEGY);
     }
     
     /**
@@ -131,14 +80,14 @@ public class GooglePageSpeedNodeModel extends NodeModel {
     protected PageSpeedResult retrievePageSpeedResult(String url) throws IOException {
     	// pad URL with API key
     	StringBuilder theUrl = new StringBuilder();
-    	theUrl.append(REST_URL);
+    	theUrl.append(GooglePageSpeedNodeConfiguration.REST_URL);
     	theUrl.append(URLEncoder.encode(url.trim(), "UTF-8"));
-    	theUrl.append("&filter_third_party_resources="+(m_filterThirdPartyResources.getBooleanValue()?"true":"false"));
-    	if (m_locale.getStringValue() != null && !m_locale.getStringValue().trim().isEmpty()) {
-    		theUrl.append("&locale="+m_locale.getStringValue().trim());
+    	theUrl.append("&filter_third_party_resources="+(configuration.getFilterThirdPartyResources().getBooleanValue()?"true":"false"));
+    	if (configuration.getLocale().getStringValue() != null && !configuration.getLocale().getStringValue().trim().isEmpty()) {
+    		theUrl.append("&locale="+configuration.getLocale().getStringValue().trim());
     	}
-    	theUrl.append("&strategy="+m_strategy.getStringValue());
-    	theUrl.append("&key=" + m_apikey.getStringValue().trim());
+    	theUrl.append("&strategy="+configuration.getStrategy().getStringValue());
+    	theUrl.append("&key=" + configuration.getApiKey().getStringValue().trim());
     	
         HttpRequestFactory requestFactory =
         		HTTP_TRANSPORT.createRequestFactory(new HttpRequestInitializer() {
@@ -161,7 +110,7 @@ public class GooglePageSpeedNodeModel extends NodeModel {
         logger.info("Loading URLs from incoming tables");
 
     	DataTableSpec inSpec = inData[0].getSpec();
-    	String urlColumnName = m_url.getStringValue();
+    	String urlColumnName = configuration.getUrl().getStringValue();
     	    	
     	int urlColumnIndex = inSpec.findColumnIndex(urlColumnName);
     	
@@ -351,7 +300,7 @@ public class GooglePageSpeedNodeModel extends NodeModel {
     	List<DataCell> cells = new ArrayList<DataCell>();
     	
 		cells.add(new StringCell(pageSpeedResult.id));
-		cells.add(new StringCell(m_strategy.getStringValue()));
+		cells.add(new StringCell(configuration.getStrategy().getStringValue()));
 		cells.add(new IntCell(pageSpeedResult.responseCode));
 		cells.add(new StringCell(pageSpeedResult.title));
     	if (pageSpeedResult.ruleGroups.SPEED != null) {
@@ -557,7 +506,7 @@ public class GooglePageSpeedNodeModel extends NodeModel {
 			throw new InvalidSettingsException("You must link a table with URL column to this node.");
 		}
 		
-		if (inSpecs[0].findColumnIndex(m_url.getStringValue()) < 0) {
+		if (inSpecs[0].findColumnIndex(configuration.getUrl().getStringValue()) < 0) {
 			throw new InvalidSettingsException("A URL column in the data input table must exist and must be specified.");
 		}
 
@@ -570,12 +519,8 @@ public class GooglePageSpeedNodeModel extends NodeModel {
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
 
-        // save user settings to the config object.
-        m_url.saveSettingsTo(settings);
-        m_apikey.saveSettingsTo(settings);
-        m_filterThirdPartyResources.saveSettingsTo(settings);
-        m_locale.saveSettingsTo(settings);
-        m_strategy.saveSettingsTo(settings);
+    	configuration.saveSettingsTo(settings);
+    	
     }
 
     /**
@@ -585,14 +530,8 @@ public class GooglePageSpeedNodeModel extends NodeModel {
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
             
-        // load (valid) settings from the config object.
-        // It can be safely assumed that the settings are valided by the 
-        // method below.        
-        m_url.loadSettingsFrom(settings);
-        m_apikey.loadSettingsFrom(settings);
-        m_filterThirdPartyResources.loadSettingsFrom(settings);
-        m_locale.loadSettingsFrom(settings);
-        m_strategy.loadSettingsFrom(settings);
+    	configuration.loadValidatedSettingsFrom(settings);
+
     }
 
     /**
@@ -601,17 +540,9 @@ public class GooglePageSpeedNodeModel extends NodeModel {
     @Override
     protected void validateSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
-            
-        // check if the settings could be applied to our model
-        // e.g. if the count is in a certain range (which is ensured by the
-        // SettingsModel).
-        // Do not actually set any values of any member variables.
 
-        m_url.validateSettings(settings);
-        m_apikey.validateSettings(settings);
-        m_filterThirdPartyResources.validateSettings(settings);
-        m_locale.validateSettings(settings);
-        m_strategy.validateSettings(settings);
+    	configuration.validateSettings(settings);
+
     }
     
     /**
@@ -654,9 +585,9 @@ public class GooglePageSpeedNodeModel extends NodeModel {
     	@Key
     	String id;
     	@Key
-    	int responseCode;
+    	int responseCode = 0;
     	@Key
-    	String title;
+    	String title = "";
     	@Key
     	PageSpeedRuleGroup ruleGroups;
     	@Key
@@ -676,27 +607,27 @@ public class GooglePageSpeedNodeModel extends NodeModel {
     }
     public static class PageSpeedPageStats {
     	@Key
-    	int numberResources;
+    	int numberResources = 0;
     	@Key
-    	int numberHosts;
+    	int numberHosts = 0;
     	@Key
-    	String totalRequestBytes;
+    	String totalRequestBytes = "";
     	@Key
-    	int numberStaticResources;
+    	int numberStaticResources = 0;
     	@Key
-    	String htmlResponseBytes;
+    	String htmlResponseBytes = "";
     	@Key
-    	String cssResponseBytes;
+    	String cssResponseBytes = "";
     	@Key
-    	String imageResponseBytes;
+    	String imageResponseBytes = "";
     	@Key
-    	String javascriptResponseBytes;
+    	String javascriptResponseBytes = "";
     	@Key
-    	String otherResponseBytes;
+    	String otherResponseBytes = "";
     	@Key
-    	int numberJsResources;
+    	int numberJsResources = 0;
     	@Key
-    	int numberCssResources;
+    	int numberCssResources = 0;
     }
     public static class PageSpeedFormattedResults {
     	@Key

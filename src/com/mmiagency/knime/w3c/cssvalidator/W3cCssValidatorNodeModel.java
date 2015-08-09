@@ -3,9 +3,7 @@ package com.mmiagency.knime.w3c.cssvalidator;
 import java.io.File;
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,7 +26,6 @@ import org.knime.core.data.def.StringCell;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
-import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
@@ -49,45 +46,8 @@ public class W3cCssValidatorNodeModel extends NodeModel {
     // the logger instance
     private static final NodeLogger logger = NodeLogger
             .getLogger(W3cCssValidatorNodeModel.class);
-        
-	static final String FIELD_LABEL_VALIDATOR_URL = "CSS Validator URL";
-	static final String FIELD_LABEL_URL_COLUMN = "URL Column Name";
-	static final String FIELD_LABEL_PROFILE = "Profile";
-	static final String FIELD_LABEL_MEDIUM = "Medium";
-	static final String FIELD_LABEL_WARNINGS = "Warnings";
-	static final String FIELD_LABEL_VENDOR_EXTENSIONS = "Vendor Extensions";
 
-	static final String FIELD_KEY_VALIDATOR_URL = "validatorUrl";
-	static final String FIELD_KEY_URL_COLUMN = "urlColumn";
-	static final String FIELD_KEY_PROFILE = "profile";
-	static final String FIELD_KEY_MEDIUM = "usermedium";
-	static final String FIELD_KEY_WARNINGS = "warning";
-	static final String FIELD_KEY_VENDOR_EXTENSIONS = "vextwarning";
-
-	static final String FIELD_DEFAULT_VALIDATOR_URL = "http://jigsaw.w3.org/css-validator/validator";
-	static final String FIELD_DEFAULT_URL_COLUMN = "url";
-	static final String FIELD_DEFAULT_PROFILE = "CSS level 3";
-	static final String FIELD_DEFAULT_MEDIUM = "All";
-	static final String FIELD_DEFAULT_WARNINGS = "Normal report";
-	static final String FIELD_DEFAULT_VENDOR_EXTENSIONS = "Default";
-	
-	static final Map<String, String> FIELD_OPTIONS_PROFILE = new HashMap<String, String>();
-	static final Map<String, String> FIELD_OPTIONS_MEDIUM = new HashMap<String, String>();
-	static final Map<String, String> FIELD_OPTIONS_WARNINGS = new HashMap<String, String>();
-	static final Map<String, String> FIELD_OPTIONS_VENDOR_EXTENSIONS = new HashMap<String, String>();
-	
-	private final SettingsModelString m_validatorUrl = 
-			W3cCssValidatorNodeModel.getValidatorUrlSettingsModel();	
-	private final SettingsModelString m_url = 
-			W3cCssValidatorNodeModel.getUrlColumnSettingsModel();	
-	private final SettingsModelString m_profile = 
-			W3cCssValidatorNodeModel.getProfileSettingsModel();	
-	private final SettingsModelString m_medium = 
-			W3cCssValidatorNodeModel.getMediumSettingsModel();	
-	private final SettingsModelString m_warnings = 
-			W3cCssValidatorNodeModel.getWarningsSettingsModel();	
-	private final SettingsModelString m_vendorExtensions = 
-			W3cCssValidatorNodeModel.getVendorExtensionsSettingsModel();	
+    private W3cCssValidatorNodeConfiguration configuration = new W3cCssValidatorNodeConfiguration();
 
 	/**
      * Constructor for the node model.
@@ -97,61 +57,6 @@ public class W3cCssValidatorNodeModel extends NodeModel {
         // one incoming port and two outgoing ports
         super(1, 2);
         
-        initOptions();
-    }
-    
-    private void initOptions() {
-    	FIELD_OPTIONS_PROFILE.put("No special profile", "none");
-    	FIELD_OPTIONS_PROFILE.put("CSS level 1", "css1");
-    	FIELD_OPTIONS_PROFILE.put("CSS level 2", "css2");
-    	FIELD_OPTIONS_PROFILE.put("CSS level 2.1", "css21");
-    	FIELD_OPTIONS_PROFILE.put("CSS level 3", "css3");
-    	FIELD_OPTIONS_PROFILE.put("SVG", "svg");
-    	FIELD_OPTIONS_PROFILE.put("SVG Basic", "svgbasic");
-    	FIELD_OPTIONS_PROFILE.put("SVG tiny", "svgtiny");
-    	FIELD_OPTIONS_PROFILE.put("Mobile", "mobile");
-    	FIELD_OPTIONS_PROFILE.put("ATSC TV profile", "atsc-tv");
-    	FIELD_OPTIONS_PROFILE.put("TV profile", "tv");
-    	
-    	FIELD_OPTIONS_MEDIUM.put("All", "all");
-    	FIELD_OPTIONS_MEDIUM.put("aural", "aural");
-    	FIELD_OPTIONS_MEDIUM.put("braille", "braille");
-    	FIELD_OPTIONS_MEDIUM.put("embossed", "embossed");
-    	FIELD_OPTIONS_MEDIUM.put("handheld", "handheld");
-    	FIELD_OPTIONS_MEDIUM.put("print", "print");
-    	FIELD_OPTIONS_MEDIUM.put("projection", "projection");
-    	FIELD_OPTIONS_MEDIUM.put("screen", "screen");
-    	FIELD_OPTIONS_MEDIUM.put("TTY", "tty");
-    	FIELD_OPTIONS_MEDIUM.put("TV", "tv");
-    	FIELD_OPTIONS_MEDIUM.put("presentation", "presentation");
-    	
-    	FIELD_OPTIONS_WARNINGS.put("All", "2");
-    	FIELD_OPTIONS_WARNINGS.put("Normal report", "1");
-    	FIELD_OPTIONS_WARNINGS.put("Most important", "0");
-    	FIELD_OPTIONS_WARNINGS.put("No warnings", "no");
-
-    	FIELD_OPTIONS_VENDOR_EXTENSIONS.put("Default", "");
-    	FIELD_OPTIONS_VENDOR_EXTENSIONS.put("Warnings", "true");
-    	FIELD_OPTIONS_VENDOR_EXTENSIONS.put("Errors", "true");
-    }
-
-    public static SettingsModelString getValidatorUrlSettingsModel() {
-    	return new SettingsModelString(FIELD_KEY_VALIDATOR_URL, FIELD_DEFAULT_VALIDATOR_URL);   
-    }
-    public static SettingsModelString getUrlColumnSettingsModel() {
-    	return new SettingsModelString(FIELD_KEY_URL_COLUMN, FIELD_DEFAULT_URL_COLUMN);   
-    }
-    public static SettingsModelString getProfileSettingsModel() {
-    	return new SettingsModelString(FIELD_KEY_PROFILE, FIELD_DEFAULT_PROFILE);   
-    }
-    public static SettingsModelString getMediumSettingsModel() {
-    	return new SettingsModelString(FIELD_KEY_MEDIUM, FIELD_DEFAULT_MEDIUM);   
-    }
-    public static SettingsModelString getWarningsSettingsModel() {
-    	return new SettingsModelString(FIELD_KEY_WARNINGS, FIELD_DEFAULT_WARNINGS);   
-    }
-    public static SettingsModelString getVendorExtensionsSettingsModel() {
-    	return new SettingsModelString(FIELD_KEY_VENDOR_EXTENSIONS, FIELD_DEFAULT_VENDOR_EXTENSIONS);   
     }
     
     /**
@@ -169,7 +74,7 @@ public class W3cCssValidatorNodeModel extends NodeModel {
 		BufferedDataTable inData = (BufferedDataTable)inObjects[0];
 		
     	DataTableSpec inSpec = inData.getSpec();
-    	String urlColumnName = m_url.getStringValue();
+    	String urlColumnName = configuration.getUrl().getStringValue();
     	    	
     	int urlColumnIndex = inSpec.findColumnIndex(urlColumnName);
 
@@ -206,22 +111,22 @@ public class W3cCssValidatorNodeModel extends NodeModel {
     		RowKey key = new RowKey("Row " + summaryRowCount++);
 
     		// retrieve validator results
-    		String validatorUrl = m_validatorUrl.getStringValue() + 
+    		String validatorUrl = configuration.getValidatorUrl().getStringValue() + 
     				"?uri=" + URLEncoder.encode(url, "UTF-8") +
-    				"&profile=" + FIELD_OPTIONS_PROFILE.get(m_profile.getStringValue()) + 
-    				"&usermedium=" + FIELD_OPTIONS_MEDIUM.get(m_medium.getStringValue()) +
-    				"&warning=" + FIELD_OPTIONS_WARNINGS.get(m_warnings.getStringValue()) +
-    				"&vextwarning=" + FIELD_OPTIONS_VENDOR_EXTENSIONS.get(m_vendorExtensions.getStringValue());
+    				"&profile=" + W3cCssValidatorNodeConfiguration.FIELD_OPTIONS_PROFILE.get(configuration.getProfile().getStringValue()) + 
+    				"&usermedium=" + W3cCssValidatorNodeConfiguration.FIELD_OPTIONS_MEDIUM.get(configuration.getMedium().getStringValue()) +
+    				"&warning=" + W3cCssValidatorNodeConfiguration.FIELD_OPTIONS_WARNINGS.get(configuration.getWarnings().getStringValue()) +
+    				"&vextwarning=" + W3cCssValidatorNodeConfiguration.FIELD_OPTIONS_VENDOR_EXTENSIONS.get(configuration.getVendorExtensions().getStringValue());
     		
     		logger.info("Validation URL: " + validatorUrl);
     		
     		DataCell[] summaryCells = new DataCell[7];
     		
     		summaryCells[0] = new StringCell(url);
-    		summaryCells[1] = new StringCell(m_profile.getStringValue());
-    		summaryCells[2] = new StringCell(m_medium.getStringValue());
-    		summaryCells[3] = new StringCell(m_warnings.getStringValue());
-    		summaryCells[4] = new StringCell(m_vendorExtensions.getStringValue());
+    		summaryCells[1] = new StringCell(configuration.getProfile().getStringValue());
+    		summaryCells[2] = new StringCell(configuration.getMedium().getStringValue());
+    		summaryCells[3] = new StringCell(configuration.getWarnings().getStringValue());
+    		summaryCells[4] = new StringCell(configuration.getVendorExtensions().getStringValue());
     		summaryCells[5] = new IntCell(0);
     		summaryCells[6] = new IntCell(0);
     		
@@ -456,7 +361,7 @@ public class W3cCssValidatorNodeModel extends NodeModel {
 			throw new InvalidSettingsException("You must link a table with URL column to this node.");
 		}
 		
-		if (inSpecs[0].findColumnIndex(m_url.getStringValue()) < 0) {
+		if (inSpecs[0].findColumnIndex(configuration.getUrl().getStringValue()) < 0) {
 			throw new InvalidSettingsException("A URL column in the data input table must exist and must be specified.");
 		}
 
@@ -469,12 +374,7 @@ public class W3cCssValidatorNodeModel extends NodeModel {
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
 
-        m_validatorUrl.saveSettingsTo(settings);
-        m_url.saveSettingsTo(settings);
-        m_profile.saveSettingsTo(settings);
-        m_medium.saveSettingsTo(settings);
-        m_warnings.saveSettingsTo(settings);
-        m_vendorExtensions.saveSettingsTo(settings);
+    	configuration.saveSettingsTo(settings);
 
     }
 
@@ -485,12 +385,7 @@ public class W3cCssValidatorNodeModel extends NodeModel {
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
             
-        m_validatorUrl.loadSettingsFrom(settings);
-        m_url.loadSettingsFrom(settings);
-        m_profile.loadSettingsFrom(settings);
-        m_medium.loadSettingsFrom(settings);
-        m_warnings.loadSettingsFrom(settings);
-        m_vendorExtensions.loadSettingsFrom(settings);
+    	configuration.loadValidatedSettingsFrom(settings);
 
     }
 
@@ -501,12 +396,7 @@ public class W3cCssValidatorNodeModel extends NodeModel {
     protected void validateSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
             
-        m_validatorUrl.validateSettings(settings);
-        m_url.validateSettings(settings);
-        m_profile.validateSettings(settings);
-        m_medium.validateSettings(settings);
-        m_warnings.validateSettings(settings);
-        m_vendorExtensions.validateSettings(settings);
+    	configuration.validateSettings(settings);
 
     }
     

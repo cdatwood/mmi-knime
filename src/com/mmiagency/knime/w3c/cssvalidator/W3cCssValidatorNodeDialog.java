@@ -30,34 +30,34 @@ public class W3cCssValidatorNodeDialog extends DefaultNodeSettingsPane {
         super();
         
         addDialogComponent(new DialogComponentString(
-        		W3cCssValidatorNodeModel.getValidatorUrlSettingsModel(),
-        		W3cCssValidatorNodeModel.FIELD_LABEL_VALIDATOR_URL, true, 20));        
+        		W3cCssValidatorNodeConfiguration.getValidatorUrlSettingsModel(),
+        		W3cCssValidatorNodeConfiguration.FIELD_LABEL_VALIDATOR_URL, true, 20));        
 
         addDialogComponent(new DialogComponentColumnNameSelection(
-        		W3cCssValidatorNodeModel.getUrlColumnSettingsModel(),
-        		W3cCssValidatorNodeModel.FIELD_LABEL_URL_COLUMN, 
+        		W3cCssValidatorNodeConfiguration.getUrlColumnSettingsModel(),
+        		W3cCssValidatorNodeConfiguration.FIELD_LABEL_URL_COLUMN, 
         		0, true,
         		new DataValueColumnFilter(StringValue.class)));
         
         addDialogComponent(new DialogComponentStringSelection(
-        		W3cCssValidatorNodeModel.getProfileSettingsModel(),
-        		W3cCssValidatorNodeModel.FIELD_LABEL_PROFILE, 
-        		W3cCssValidatorNodeModel.FIELD_OPTIONS_PROFILE.keySet().toArray(new String[W3cCssValidatorNodeModel.FIELD_OPTIONS_PROFILE.keySet().size()])));        
+        		W3cCssValidatorNodeConfiguration.getProfileSettingsModel(),
+        		W3cCssValidatorNodeConfiguration.FIELD_LABEL_PROFILE, 
+        		W3cCssValidatorNodeConfiguration.FIELD_OPTIONS_PROFILE.keySet().toArray(new String[W3cCssValidatorNodeConfiguration.FIELD_OPTIONS_PROFILE.keySet().size()])));        
 
         addDialogComponent(new DialogComponentStringSelection(
-        		W3cCssValidatorNodeModel.getMediumSettingsModel(),
-        		W3cCssValidatorNodeModel.FIELD_LABEL_MEDIUM, 
-        		W3cCssValidatorNodeModel.FIELD_OPTIONS_MEDIUM.keySet().toArray(new String[W3cCssValidatorNodeModel.FIELD_OPTIONS_MEDIUM.keySet().size()])));        
+        		W3cCssValidatorNodeConfiguration.getMediumSettingsModel(),
+        		W3cCssValidatorNodeConfiguration.FIELD_LABEL_MEDIUM, 
+        		W3cCssValidatorNodeConfiguration.FIELD_OPTIONS_MEDIUM.keySet().toArray(new String[W3cCssValidatorNodeConfiguration.FIELD_OPTIONS_MEDIUM.keySet().size()])));        
         
         addDialogComponent(new DialogComponentStringSelection(
-        		W3cCssValidatorNodeModel.getWarningsSettingsModel(),
-        		W3cCssValidatorNodeModel.FIELD_LABEL_WARNINGS, 
-        		W3cCssValidatorNodeModel.FIELD_OPTIONS_WARNINGS.keySet().toArray(new String[W3cCssValidatorNodeModel.FIELD_OPTIONS_WARNINGS.keySet().size()])));        
+        		W3cCssValidatorNodeConfiguration.getWarningsSettingsModel(),
+        		W3cCssValidatorNodeConfiguration.FIELD_LABEL_WARNINGS, 
+        		W3cCssValidatorNodeConfiguration.FIELD_OPTIONS_WARNINGS.keySet().toArray(new String[W3cCssValidatorNodeConfiguration.FIELD_OPTIONS_WARNINGS.keySet().size()])));        
         
         addDialogComponent(new DialogComponentStringSelection(
-        		W3cCssValidatorNodeModel.getVendorExtensionsSettingsModel(),
-        		W3cCssValidatorNodeModel.FIELD_LABEL_VENDOR_EXTENSIONS, 
-        		W3cCssValidatorNodeModel.FIELD_OPTIONS_VENDOR_EXTENSIONS.keySet().toArray(new String[W3cCssValidatorNodeModel.FIELD_OPTIONS_VENDOR_EXTENSIONS.keySet().size()])));        
+        		W3cCssValidatorNodeConfiguration.getVendorExtensionsSettingsModel(),
+        		W3cCssValidatorNodeConfiguration.FIELD_LABEL_VENDOR_EXTENSIONS, 
+        		W3cCssValidatorNodeConfiguration.FIELD_OPTIONS_VENDOR_EXTENSIONS.keySet().toArray(new String[W3cCssValidatorNodeConfiguration.FIELD_OPTIONS_VENDOR_EXTENSIONS.keySet().size()])));        
     }
 }
 

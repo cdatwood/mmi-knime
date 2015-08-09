@@ -8,7 +8,7 @@ import org.knime.core.node.NodeView;
  * <code>NodeFactory</code> for the "W3cHtmlValidatorNode" Node.
  * 
  *
- * @author MMI Agency
+ * @author Ed Ng
  */
 public class W3cHtmlValidatorNodeFactory 
         extends NodeFactory<W3cHtmlValidatorNodeModel> {

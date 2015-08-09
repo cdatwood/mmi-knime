@@ -31,18 +31,18 @@ public class W3cHtmlValidatorNodeDialog extends DefaultNodeSettingsPane {
         super();
         
         addDialogComponent(new DialogComponentString(
-        		W3cHtmlValidatorNodeModel.getValidatorUrlSettingsModel(),
-        		W3cHtmlValidatorNodeModel.FIELD_LABEL_VALIDATOR_URL, true, 20));        
+        		W3cHtmlValidatorNodeConfiguration.getValidatorUrlSettingsModel(),
+        		W3cHtmlValidatorNodeConfiguration.FIELD_LABEL_VALIDATOR_URL, true, 20));        
 
         addDialogComponent(new DialogComponentColumnNameSelection(
-        		W3cHtmlValidatorNodeModel.getUrlColumnSettingsModel(),
-        		W3cHtmlValidatorNodeModel.FIELD_LABEL_URL_COLUMN, 
+        		W3cHtmlValidatorNodeConfiguration.getUrlColumnSettingsModel(),
+        		W3cHtmlValidatorNodeConfiguration.FIELD_LABEL_URL_COLUMN, 
         		0, true,
         		new DataValueColumnFilter(StringValue.class)));
 
         addDialogComponent(new DialogComponentBoolean(
-        		W3cHtmlValidatorNodeModel.getShowOutlineSettingsModel(),
-        		W3cHtmlValidatorNodeModel.FIELD_LABEL_SHOW_OUTLINE));        
+        		W3cHtmlValidatorNodeConfiguration.getShowOutlineSettingsModel(),
+        		W3cHtmlValidatorNodeConfiguration.FIELD_LABEL_SHOW_OUTLINE));        
 
     }
 }
