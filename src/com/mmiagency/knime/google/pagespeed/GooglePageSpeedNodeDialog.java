@@ -1,10 +1,8 @@
 package com.mmiagency.knime.google.pagespeed;
 
-import java.awt.Color;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.swing.JLabel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
