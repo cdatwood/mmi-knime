@@ -47,7 +47,7 @@ public class W3cCssValidatorNodeModel extends NodeModel {
     private static final NodeLogger logger = NodeLogger
             .getLogger(W3cCssValidatorNodeModel.class);
 
-    private W3cCssValidatorNodeConfiguration configuration = new W3cCssValidatorNodeConfiguration();
+    private W3cCssValidatorNodeConfiguration m_configuration = new W3cCssValidatorNodeConfiguration();
 
 	/**
      * Constructor for the node model.
@@ -74,7 +74,7 @@ public class W3cCssValidatorNodeModel extends NodeModel {
 		BufferedDataTable inData = (BufferedDataTable)inObjects[0];
 		
     	DataTableSpec inSpec = inData.getSpec();
-    	String urlColumnName = configuration.getUrl().getStringValue();
+    	String urlColumnName = m_configuration.getUrl().getStringValue();
     	    	
     	int urlColumnIndex = inSpec.findColumnIndex(urlColumnName);
 
@@ -111,22 +111,22 @@ public class W3cCssValidatorNodeModel extends NodeModel {
     		RowKey key = new RowKey("Row " + summaryRowCount++);
 
     		// retrieve validator results
-    		String validatorUrl = configuration.getValidatorUrl().getStringValue() + 
+    		String validatorUrl = m_configuration.getValidatorUrl().getStringValue() + 
     				"?uri=" + URLEncoder.encode(url, "UTF-8") +
-    				"&profile=" + W3cCssValidatorNodeConfiguration.FIELD_OPTIONS_PROFILE.get(configuration.getProfile().getStringValue()) + 
-    				"&usermedium=" + W3cCssValidatorNodeConfiguration.FIELD_OPTIONS_MEDIUM.get(configuration.getMedium().getStringValue()) +
-    				"&warning=" + W3cCssValidatorNodeConfiguration.FIELD_OPTIONS_WARNINGS.get(configuration.getWarnings().getStringValue()) +
-    				"&vextwarning=" + W3cCssValidatorNodeConfiguration.FIELD_OPTIONS_VENDOR_EXTENSIONS.get(configuration.getVendorExtensions().getStringValue());
+    				"&profile=" + W3cCssValidatorNodeConfiguration.FIELD_OPTIONS_PROFILE.get(m_configuration.getProfile().getStringValue()) + 
+    				"&usermedium=" + W3cCssValidatorNodeConfiguration.FIELD_OPTIONS_MEDIUM.get(m_configuration.getMedium().getStringValue()) +
+    				"&warning=" + W3cCssValidatorNodeConfiguration.FIELD_OPTIONS_WARNINGS.get(m_configuration.getWarnings().getStringValue()) +
+    				"&vextwarning=" + W3cCssValidatorNodeConfiguration.FIELD_OPTIONS_VENDOR_EXTENSIONS.get(m_configuration.getVendorExtensions().getStringValue());
     		
     		logger.info("Validation URL: " + validatorUrl);
     		
     		DataCell[] summaryCells = new DataCell[7];
     		
     		summaryCells[0] = new StringCell(url);
-    		summaryCells[1] = new StringCell(configuration.getProfile().getStringValue());
-    		summaryCells[2] = new StringCell(configuration.getMedium().getStringValue());
-    		summaryCells[3] = new StringCell(configuration.getWarnings().getStringValue());
-    		summaryCells[4] = new StringCell(configuration.getVendorExtensions().getStringValue());
+    		summaryCells[1] = new StringCell(m_configuration.getProfile().getStringValue());
+    		summaryCells[2] = new StringCell(m_configuration.getMedium().getStringValue());
+    		summaryCells[3] = new StringCell(m_configuration.getWarnings().getStringValue());
+    		summaryCells[4] = new StringCell(m_configuration.getVendorExtensions().getStringValue());
     		summaryCells[5] = new IntCell(0);
     		summaryCells[6] = new IntCell(0);
     		
@@ -361,7 +361,7 @@ public class W3cCssValidatorNodeModel extends NodeModel {
 			throw new InvalidSettingsException("You must link a table with URL column to this node.");
 		}
 		
-		if (inSpecs[0].findColumnIndex(configuration.getUrl().getStringValue()) < 0) {
+		if (inSpecs[0].findColumnIndex(m_configuration.getUrl().getStringValue()) < 0) {
 			throw new InvalidSettingsException("A URL column in the data input table must exist and must be specified.");
 		}
 
@@ -374,7 +374,7 @@ public class W3cCssValidatorNodeModel extends NodeModel {
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
 
-    	configuration.saveSettingsTo(settings);
+    	m_configuration.saveSettingsTo(settings);
 
     }
 
@@ -385,7 +385,7 @@ public class W3cCssValidatorNodeModel extends NodeModel {
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
             
-    	configuration.loadValidatedSettingsFrom(settings);
+    	m_configuration.loadValidatedSettingsFrom(settings);
 
     }
 
@@ -396,7 +396,7 @@ public class W3cCssValidatorNodeModel extends NodeModel {
     protected void validateSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
             
-    	configuration.validateSettings(settings);
+    	m_configuration.validateSettings(settings);
 
     }
     

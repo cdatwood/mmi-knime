@@ -25,8 +25,6 @@ import org.knime.core.data.def.StringCell;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
-import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
-import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
@@ -49,7 +47,7 @@ public class W3cHtmlValidatorNodeModel extends NodeModel {
     private static final NodeLogger logger = NodeLogger
             .getLogger(W3cHtmlValidatorNodeModel.class);
 
-    private W3cHtmlValidatorNodeConfiguration configuration = new W3cHtmlValidatorNodeConfiguration();
+    private W3cHtmlValidatorNodeConfiguration m_configuration = new W3cHtmlValidatorNodeConfiguration();
     
 	/**
      * Constructor for the node model.
@@ -73,7 +71,7 @@ public class W3cHtmlValidatorNodeModel extends NodeModel {
 		BufferedDataTable inData = (BufferedDataTable)inObjects[0];
 		
     	DataTableSpec inSpec = inData.getSpec();
-    	String urlColumnName = configuration.getUrl().getStringValue();
+    	String urlColumnName = m_configuration.getUrl().getStringValue();
     	    	
     	int urlColumnIndex = inSpec.findColumnIndex(urlColumnName);
 		
@@ -104,8 +102,8 @@ public class W3cHtmlValidatorNodeModel extends NodeModel {
     		RowKey key = new RowKey("Row " + summaryRowCount++);
 
     		// retrieve validator results
-    		String validatorUrl = configuration.getValidatorUrl().getStringValue() + "?doc=" + URLEncoder.encode(url, "UTF-8");
-    		if (configuration.getShowOutline().getBooleanValue()) {
+    		String validatorUrl = m_configuration.getValidatorUrl().getStringValue() + "?doc=" + URLEncoder.encode(url, "UTF-8");
+    		if (m_configuration.getShowOutline().getBooleanValue()) {
     			validatorUrl += "&showoutline=yes";
     		}
     		
@@ -164,7 +162,7 @@ public class W3cHtmlValidatorNodeModel extends NodeModel {
 	        		
 	    		}
 	    		
-	    		if (configuration.getShowOutline().getBooleanValue()) {
+	    		if (m_configuration.getShowOutline().getBooleanValue()) {
 		    		Elements outline = doc.select("#outline");	    	
 		    		
 		    		if (outline.size() > 0) {
@@ -260,7 +258,7 @@ public class W3cHtmlValidatorNodeModel extends NodeModel {
 			throw new InvalidSettingsException("You must link a table with URL column to this node.");
 		}
 		
-		if (inSpecs[0].findColumnIndex(configuration.getUrl().getStringValue()) < 0) {
+		if (inSpecs[0].findColumnIndex(m_configuration.getUrl().getStringValue()) < 0) {
 			throw new InvalidSettingsException("A URL column in the data input table must exist and must be specified.");
 		}
 
@@ -273,7 +271,7 @@ public class W3cHtmlValidatorNodeModel extends NodeModel {
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
 
-    	configuration.saveSettingsTo(settings);
+    	m_configuration.saveSettingsTo(settings);
 
     }
 
@@ -284,7 +282,7 @@ public class W3cHtmlValidatorNodeModel extends NodeModel {
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
             
-    	configuration.loadValidatedSettingsFrom(settings);
+    	m_configuration.loadValidatedSettingsFrom(settings);
 
     }
 
@@ -295,7 +293,7 @@ public class W3cHtmlValidatorNodeModel extends NodeModel {
     protected void validateSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
 
-    	configuration.validateSettings(settings);
+    	m_configuration.validateSettings(settings);
     	
     }
     
