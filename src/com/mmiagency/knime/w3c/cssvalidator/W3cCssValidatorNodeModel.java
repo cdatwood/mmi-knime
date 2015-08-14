@@ -79,7 +79,7 @@ public class W3cCssValidatorNodeModel extends NodeModel {
     	int urlColumnIndex = inSpec.findColumnIndex(urlColumnName);
 
     	// prepare output data container        
-        DataColumnSpec[] summaryColSpecs = new DataColumnSpec[7];
+        DataColumnSpec[] summaryColSpecs = new DataColumnSpec[8];
         summaryColSpecs[0] = new DataColumnSpecCreator("url", StringCell.TYPE).createSpec();
         summaryColSpecs[1] = new DataColumnSpecCreator("profile", StringCell.TYPE).createSpec();
         summaryColSpecs[2] = new DataColumnSpecCreator("medium", StringCell.TYPE).createSpec();
@@ -87,6 +87,7 @@ public class W3cCssValidatorNodeModel extends NodeModel {
         summaryColSpecs[4] = new DataColumnSpecCreator("vendor extensions", StringCell.TYPE).createSpec();
         summaryColSpecs[5] = new DataColumnSpecCreator("error count", IntCell.TYPE).createSpec();
         summaryColSpecs[6] = new DataColumnSpecCreator("warning count", IntCell.TYPE).createSpec();
+        summaryColSpecs[7] = new DataColumnSpecCreator("status", StringCell.TYPE).createSpec();
         BufferedDataContainer containerSummary = exec.createDataContainer(
         		new DataTableSpec(summaryColSpecs));
         
@@ -120,7 +121,7 @@ public class W3cCssValidatorNodeModel extends NodeModel {
     		
     		logger.info("Validation URL: " + validatorUrl);
     		
-    		DataCell[] summaryCells = new DataCell[7];
+    		DataCell[] summaryCells = new DataCell[8];
     		
     		summaryCells[0] = new StringCell(url);
     		summaryCells[1] = new StringCell(m_configuration.getProfile().getStringValue());
@@ -129,6 +130,7 @@ public class W3cCssValidatorNodeModel extends NodeModel {
     		summaryCells[4] = new StringCell(m_configuration.getVendorExtensions().getStringValue());
     		summaryCells[5] = new IntCell(0);
     		summaryCells[6] = new IntCell(0);
+    		summaryCells[7] = new StringCell("");
     		
     		boolean goodRespond = true;
     		String errorMessage = null;
@@ -142,10 +144,17 @@ public class W3cCssValidatorNodeModel extends NodeModel {
     	    } catch (HttpStatusException hse) {
     	    	goodRespond = false;
     	    	errorMessage = hse.getMessage();
+        		summaryCells[7] = new StringCell(errorMessage);
+    	    } catch (Throwable t) {
+    	    	goodRespond = false;
+    	    	errorMessage = t.getMessage();
+        		summaryCells[7] = new StringCell(errorMessage);
     	    }
     	    
     		if (goodRespond && resp.statusCode() == 200) {
-    			// errors
+        		summaryCells[7] = new StringCell("success");
+        		
+        		// errors
 	    		Elements errors = doc.select("#errors");
 	    		
 	    		Elements h3 = errors.select("h3");

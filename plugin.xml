@@ -2,15 +2,13 @@
 <?eclipse version="3.0"?><plugin>
 
   <extension point="org.knime.workbench.repository.categories">
-	<category description="MMI Agency" icon="icons/mmi.png" level-id="mmi" name="MMI Agency" path="/"/>
-	<category description="Google" icon="icons/google.png" level-id="mmi_google" name="Google" path="/mmi/"/>
-	<category description="W3C" icon="icons/w3c.png" level-id="mmi_w3c" name="W3C" path="/mmi/"/>
+	<category description="MMI Agency" icon="icons/MMI_Knime_MMILogo_16x16.png" level-id="mmi" name="MMI Agency" path="/"/>
   </extension>
    
   <extension point="org.knime.workbench.repository.nodes">
-    <node category-path="/mmi/mmi_google/" factory-class="com.mmiagency.knime.google.pagespeed.GooglePageSpeedNodeFactory" id="com.mmiagency.knime.google.pagespeed.GooglePageSpeedNodeFactory"/>
-    <node category-path="/mmi/mmi_w3c/" factory-class="com.mmiagency.knime.w3c.htmlvalidator.W3cHtmlValidatorNodeFactory" id="com.mmiagency.knime.w3c.htmlvalidator.W3cHtmlValidatorNodeFactory"/>
-    <node category-path="/mmi/mmi_w3c/" factory-class="com.mmiagency.knime.w3c.cssvalidator.W3cCssValidatorNodeFactory" id="com.mmiagency.knime.w3c.cssvalidator.W3cCssValidatorNodeFactory"/>
+    <node category-path="/mmi/" factory-class="com.mmiagency.knime.google.pagespeed.GooglePageSpeedNodeFactory" id="com.mmiagency.knime.google.pagespeed.GooglePageSpeedNodeFactory"/>
+    <node category-path="/mmi/" factory-class="com.mmiagency.knime.w3c.htmlvalidator.W3cHtmlValidatorNodeFactory" id="com.mmiagency.knime.w3c.htmlvalidator.W3cHtmlValidatorNodeFactory"/>
+    <node category-path="/mmi/" factory-class="com.mmiagency.knime.w3c.cssvalidator.W3cCssValidatorNodeFactory" id="com.mmiagency.knime.w3c.cssvalidator.W3cCssValidatorNodeFactory"/>
   </extension>
    
 </plugin>

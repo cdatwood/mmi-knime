@@ -16,9 +16,9 @@
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="Input Table">An input table that contains a URL column</inPort>
-        <outPort index="0" name="Output Table">An output table with HTML Validator summary results with counts for info, warning and error types</outPort>
-        <outPort index="1" name="Output Table">An output table with HTML Validator details results with text for info, warning and error types</outPort>
+        <inPort index="0" name="Incoming table with URL column">An input table that contains a URL column</inPort>
+        <outPort index="0" name="Table output of summary result">An output table with HTML Validator summary results with counts for info, warning and error types</outPort>
+        <outPort index="1" name="Table output of details result">An output table with HTML Validator details results with text for info, warning and error types</outPort>
     </ports>    
 
 </knimeNode>

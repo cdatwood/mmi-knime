@@ -76,11 +76,12 @@ public class W3cHtmlValidatorNodeModel extends NodeModel {
     	int urlColumnIndex = inSpec.findColumnIndex(urlColumnName);
 		
     	// prepare output data container        
-        DataColumnSpec[] summaryColSpecs = new DataColumnSpec[4];
+        DataColumnSpec[] summaryColSpecs = new DataColumnSpec[5];
         summaryColSpecs[0] = new DataColumnSpecCreator("url", StringCell.TYPE).createSpec();
         summaryColSpecs[1] = new DataColumnSpecCreator("info count", IntCell.TYPE).createSpec();
         summaryColSpecs[2] = new DataColumnSpecCreator("warning count", IntCell.TYPE).createSpec();
         summaryColSpecs[3] = new DataColumnSpecCreator("error count", IntCell.TYPE).createSpec();
+        summaryColSpecs[4] = new DataColumnSpecCreator("status", StringCell.TYPE).createSpec();
         BufferedDataContainer containerSummary = exec.createDataContainer(
         		new DataTableSpec(summaryColSpecs));
         
@@ -109,6 +110,14 @@ public class W3cHtmlValidatorNodeModel extends NodeModel {
     		
     		logger.info("Validation URL: " + validatorUrl);
     		
+    		DataCell[] summaryCells = new DataCell[5];
+    		
+    		summaryCells[0] = new StringCell(url);
+    		summaryCells[1] = new IntCell(0);
+    		summaryCells[2] = new IntCell(0);
+    		summaryCells[3] = new IntCell(0);
+    		summaryCells[4] = new StringCell("");
+
     		boolean goodRespond = true;
     		String errorMessage = null;
     		
@@ -121,6 +130,11 @@ public class W3cHtmlValidatorNodeModel extends NodeModel {
     	    } catch (HttpStatusException hse) {
     	    	goodRespond = false;
     	    	errorMessage = hse.getMessage();
+        		summaryCells[4] = new StringCell(errorMessage);
+    	    } catch (Throwable t) {
+    	    	goodRespond = false;
+    	    	errorMessage = t.getMessage();
+        		summaryCells[4] = new StringCell(errorMessage);
     	    }
     	    
     		int infoCount = 0;
@@ -130,7 +144,15 @@ public class W3cHtmlValidatorNodeModel extends NodeModel {
     		int number = 1;
     		
     		if (resp.statusCode() == 200) {
+        		summaryCells[4] = new StringCell("success");
 	    		Elements results = doc.select("#results ol li");
+	    		
+	    		if (results.size() == 1) {
+	    			Element result = results.get(0);
+	    			if (result.text().indexOf("Error") >= 0) {
+	            		summaryCells[4] = new StringCell("failed");
+	    			}
+	    		}
 	    		
 	    		for (Element result : results) {
 	    			
@@ -155,7 +177,7 @@ public class W3cHtmlValidatorNodeModel extends NodeModel {
 	        			detailsCells[2] = new StringCell("");
 	    			}
 	    			
-	    			detailsCells[3] = new StringCell(result.html());
+	    			detailsCells[3] = new StringCell(result.text());
 	
 	    			DataRow detailsDataRow = new DefaultRow(detailsKey, detailsCells);
 	        		containerDetails.addRowToTable(detailsDataRow);
@@ -173,7 +195,7 @@ public class W3cHtmlValidatorNodeModel extends NodeModel {
 		    			detailsCells[0] = new StringCell(url);
 		    			detailsCells[1] = new IntCell(0);
 	        			detailsCells[2] = new StringCell("outline");
-	        			detailsCells[3] = new StringCell(outline.get(0).html());
+	        			detailsCells[3] = new StringCell(outline.get(0).text());
 	
 		    			DataRow detailsDataRow = new DefaultRow(detailsKey, detailsCells);
 		        		containerDetails.addRowToTable(detailsDataRow);
@@ -191,14 +213,12 @@ public class W3cHtmlValidatorNodeModel extends NodeModel {
     				detailsCells[3] = new StringCell(doc.html().toString());
     			} else {
     				detailsCells[3] = new StringCell(errorMessage);
+    				summaryCells[4] = new StringCell(errorMessage);
     			}
     			DataRow detailsDataRow = new DefaultRow(detailsKey, detailsCells);
         		containerDetails.addRowToTable(detailsDataRow);    			
     		}
     		
-    		DataCell[] summaryCells = new DataCell[4];
-    		
-    		summaryCells[0] = new StringCell(url);
     		summaryCells[1] = new IntCell(infoCount);
     		summaryCells[2] = new IntCell(warningCount);
     		summaryCells[3] = new IntCell(errorCount);    		
@@ -237,9 +257,6 @@ public class W3cHtmlValidatorNodeModel extends NodeModel {
      */
     @Override
     protected void reset() {
-        // TODO Code executed on reset.
-        // Models build during execute are cleared here.
-        // Also data handled in load/saveInternals will be erased here.
     }
 
     /**
@@ -249,11 +266,6 @@ public class W3cHtmlValidatorNodeModel extends NodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
         
-        // TODO: check if user settings are available, fit to the incoming
-        // table structure, and the incoming types are feasible for the node
-        // to execute. If the node can execute in its current state return
-        // the spec of its output data table(s) (if you can, otherwise an array
-        // with null elements), or throw an exception with a useful user message
 		if (inSpecs.length<1) {
 			throw new InvalidSettingsException("You must link a table with URL column to this node.");
 		}
@@ -261,6 +273,8 @@ public class W3cHtmlValidatorNodeModel extends NodeModel {
 		if (inSpecs[0].findColumnIndex(m_configuration.getUrl().getStringValue()) < 0) {
 			throw new InvalidSettingsException("A URL column in the data input table must exist and must be specified.");
 		}
+		
+		// TODO flow variables
 
         return new DataTableSpec[]{null, null};
     }

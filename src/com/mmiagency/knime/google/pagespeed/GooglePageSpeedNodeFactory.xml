@@ -18,8 +18,8 @@
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="Input Table">An input table that contains a URL column</inPort>
-        <outPort index="0" name="Output Table">An output table with Google PageSpeed results</outPort>
+        <inPort index="0" name="Incoming table with URL column">An input table that contains a URL column</inPort>
+        <outPort index="0" name="Table output of details result">An output table with Google PageSpeed results</outPort>
     </ports>    
 
 </knimeNode>

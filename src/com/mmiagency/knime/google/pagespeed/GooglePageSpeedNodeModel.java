@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
@@ -116,30 +118,78 @@ public class GooglePageSpeedNodeModel extends NodeModel {
         BufferedDataContainer container = null;
         
         int i = 0;
+        Queue<PageSpeedResult> pageSpeedErrors = new LinkedList<PageSpeedResult>();
         
     	for (Iterator<DataRow> it = inData[0].iterator(); it.hasNext();) {
     		DataRow row = it.next();
     		String url = ((StringValue)row.getCell(urlColumnIndex)).getStringValue();
     	
-    		// call pagespeed function
-    		PageSpeedResult pageSpeedResult = retrievePageSpeedResult(url);
+    		// call pagespeed function    		
+    		PageSpeedResult pageSpeedResult = null;
+    		boolean hasError = false;
     		
-    		if (pageSpeedResult == null 
-    				|| pageSpeedResult.pageStats == null
-    				|| pageSpeedResult.ruleGroups == null
-    				|| (pageSpeedResult.ruleGroups.SPEED == null && pageSpeedResult.ruleGroups.USABILITY == null)
-    				) {
-    			logger.error("Unable to retrieve PageSpeed results for url: " + url);
-    			continue;
+    		try {
+	    		pageSpeedResult = retrievePageSpeedResult(url);
+	    		
+	    		if (pageSpeedResult == null 
+	    				|| pageSpeedResult.pageStats == null
+	    				|| pageSpeedResult.ruleGroups == null
+	    				|| (pageSpeedResult.ruleGroups.SPEED == null && pageSpeedResult.ruleGroups.USABILITY == null)
+	    				) {
+	    			logger.error("Unable to retrieve PageSpeed results for url: " + url);
+	    			pageSpeedResult = new PageSpeedResult();
+	    			pageSpeedResult.id = url;
+	    			pageSpeedResult.status = "Unable to retrieve PageSpeed results";
+	    			pageSpeedErrors.add(pageSpeedResult);
+	    			hasError = true;
+	    		}
+    		} catch (Throwable t) {
+    			logger.error("Unable to retrieve PageSpeed results for url: " + url + ", error: " + t.getMessage());
+    			pageSpeedResult = new PageSpeedResult();
+    			pageSpeedResult.id = url;
+    			pageSpeedResult.status = t.getMessage();
+    			pageSpeedErrors.add(pageSpeedResult);
+    			hasError = true;
     		}
     		
     		// initialize container after first page speed result 
     		if (container == null) {
+    			// skip data column spec if first URL has error because there is no result to determine columns
+    			if (hasError) {
+    				continue;
+    			}
     	        DataColumnSpec[] allColSpecs = getDataColumnSpec(pageSpeedResult);
     	    	
     	        DataTableSpec outputSpec = new DataTableSpec(allColSpecs);
     	        container = exec.createDataContainer(outputSpec);
     		}
+    		
+    		// output all outstanding errors
+    		while (!pageSpeedErrors.isEmpty()) {
+    			PageSpeedResult r = pageSpeedErrors.poll();
+    			
+        		RowKey key = new RowKey("Row " + i);
+
+        		DataCell[] cells = mapDataCells(r);
+
+        		DataRow dataRow = new DefaultRow(key, cells);
+        		container.addRowToTable(dataRow);
+        		
+                // check if the execution monitor was canceled
+                exec.checkCanceled();
+                exec.setProgress(i / (double)inData[0].getRowCount(), 
+                    "Adding row " + i);
+                
+                i++;
+    		}
+    		
+    		// if current record has error, stop here
+    		if (hasError) {
+    			continue;
+    		}
+    		
+    		// this is a successful run, set status to success
+    		pageSpeedResult.status = "success";
     		
     		// put results in outgoing table
     		RowKey key = new RowKey("Row " + i);
@@ -163,6 +213,32 @@ public class GooglePageSpeedNodeModel extends NodeModel {
             
             i++;
     	}
+    	
+		// output all outstanding errors
+		while (!pageSpeedErrors.isEmpty()) {
+			PageSpeedResult r = pageSpeedErrors.poll();
+			
+    		RowKey key = new RowKey("Row " + i);
+
+    		DataCell[] cells = mapDataCells(r);
+
+    		DataRow dataRow = new DefaultRow(key, cells);
+    		
+    		if (container == null) {
+    	        DataColumnSpec[] allColSpecs = getDataColumnSpec(r);    	    	
+    	        DataTableSpec outputSpec = new DataTableSpec(allColSpecs);
+    	        container = exec.createDataContainer(outputSpec);
+    		}
+
+    		container.addRowToTable(dataRow);
+    		
+            // check if the execution monitor was canceled
+            exec.checkCanceled();
+            exec.setProgress(i / (double)inData[0].getRowCount(), 
+                "Adding row " + i);
+            
+            i++;
+		}
 
         // once we are done, we close the container and return its table
         container.close();
@@ -179,13 +255,16 @@ public class GooglePageSpeedNodeModel extends NodeModel {
     	List<DataColumnSpec> allColSpecs = new ArrayList<DataColumnSpec>();
     	
     	allColSpecs.add(new DataColumnSpecCreator("url", StringCell.TYPE).createSpec());
+    	allColSpecs.add(new DataColumnSpecCreator("status", StringCell.TYPE).createSpec());
     	allColSpecs.add(new DataColumnSpecCreator("strategy", StringCell.TYPE).createSpec());
     	allColSpecs.add(new DataColumnSpecCreator("responseCode", IntCell.TYPE).createSpec());
     	allColSpecs.add(new DataColumnSpecCreator("title", StringCell.TYPE).createSpec());
-    	if (pageSpeedResult.ruleGroups.SPEED != null) {
+    	if (pageSpeedResult.ruleGroups != null && pageSpeedResult.ruleGroups.SPEED != null) {
+    		hasRules.add("SPEED");
     		allColSpecs.add(new DataColumnSpecCreator("speed score", IntCell.TYPE).createSpec());
     	}
-    	if (pageSpeedResult.ruleGroups.USABILITY != null) {
+    	if (pageSpeedResult.ruleGroups != null && pageSpeedResult.ruleGroups.USABILITY != null) {
+    		hasRules.add("USABILITY");
     		allColSpecs.add(new DataColumnSpecCreator("usability score", IntCell.TYPE).createSpec());
     	}
 		allColSpecs.add(new DataColumnSpecCreator("pageStats - numberResources", IntCell.TYPE).createSpec());
@@ -201,86 +280,86 @@ public class GooglePageSpeedNodeModel extends NodeModel {
 		allColSpecs.add(new DataColumnSpecCreator("pageStats - numberCssResources", IntCell.TYPE).createSpec());
 		allColSpecs.add(new DataColumnSpecCreator("locale", StringCell.TYPE).createSpec());
 		
-		if (pageSpeedResult.formattedResults.ruleResults.AvoidLandingPageRedirects != null) {
+		if (pageSpeedResult.formattedResults != null && pageSpeedResult.formattedResults.ruleResults.AvoidLandingPageRedirects != null) {
 			hasRules.add("AvoidLandingPageRedirects");
 			allColSpecs.add(new DataColumnSpecCreator("AvoidLandingPageRedirects - ruleImpact", DoubleCell.TYPE).createSpec());
 			allColSpecs.add(new DataColumnSpecCreator("AvoidLandingPageRedirects - summary", StringCell.TYPE).createSpec());
 		}
-		if (pageSpeedResult.formattedResults.ruleResults.AvoidPlugins != null) {
+		if (pageSpeedResult.formattedResults != null && pageSpeedResult.formattedResults.ruleResults.AvoidPlugins != null) {
 			hasRules.add("AvoidPlugins");
 			allColSpecs.add(new DataColumnSpecCreator("AvoidPlugins - ruleImpact", DoubleCell.TYPE).createSpec());
 			allColSpecs.add(new DataColumnSpecCreator("AvoidPlugins - summary", StringCell.TYPE).createSpec());
 		}
-		if (pageSpeedResult.formattedResults.ruleResults.ConfigureViewport != null) {
+		if (pageSpeedResult.formattedResults != null && pageSpeedResult.formattedResults.ruleResults.ConfigureViewport != null) {
 			hasRules.add("ConfigureViewport");
 			allColSpecs.add(new DataColumnSpecCreator("ConfigureViewport - ruleImpact", DoubleCell.TYPE).createSpec());
 			allColSpecs.add(new DataColumnSpecCreator("ConfigureViewport - summary", StringCell.TYPE).createSpec());
 		}
-		if (pageSpeedResult.formattedResults.ruleResults.EnableGzipCompression != null) {
+		if (pageSpeedResult.formattedResults != null && pageSpeedResult.formattedResults.ruleResults.EnableGzipCompression != null) {
 			hasRules.add("EnableGzipCompression");
 			allColSpecs.add(new DataColumnSpecCreator("EnableGzipCompression - ruleImpact", DoubleCell.TYPE).createSpec());
 			allColSpecs.add(new DataColumnSpecCreator("EnableGzipCompression - summary", StringCell.TYPE).createSpec());
 			allColSpecs.add(new DataColumnSpecCreator("EnableGzipCompression - urlBlocks", StringCell.TYPE).createSpec());
 		}
-		if (pageSpeedResult.formattedResults.ruleResults.LeverageBrowserCaching != null) {
+		if (pageSpeedResult.formattedResults != null && pageSpeedResult.formattedResults.ruleResults.LeverageBrowserCaching != null) {
 			hasRules.add("LeverageBrowserCaching");
 			allColSpecs.add(new DataColumnSpecCreator("LeverageBrowserCaching - ruleImpact", DoubleCell.TYPE).createSpec());
 			allColSpecs.add(new DataColumnSpecCreator("LeverageBrowserCaching - summary", StringCell.TYPE).createSpec());
 			allColSpecs.add(new DataColumnSpecCreator("LeverageBrowserCaching - urlBlocks", StringCell.TYPE).createSpec());
 		}
-		if (pageSpeedResult.formattedResults.ruleResults.MainResourceServerResponseTime != null) {
+		if (pageSpeedResult.formattedResults != null && pageSpeedResult.formattedResults.ruleResults.MainResourceServerResponseTime != null) {
 			hasRules.add("MainResourceServerResponseTime");
 			allColSpecs.add(new DataColumnSpecCreator("MainResourceServerResponseTime - ruleImpact", DoubleCell.TYPE).createSpec());
 			allColSpecs.add(new DataColumnSpecCreator("MainResourceServerResponseTime - summary", StringCell.TYPE).createSpec());
 			allColSpecs.add(new DataColumnSpecCreator("MainResourceServerResponseTime - urlBlocks", StringCell.TYPE).createSpec());
 		}
-		if (pageSpeedResult.formattedResults.ruleResults.MinifyCss != null) {
+		if (pageSpeedResult.formattedResults != null && pageSpeedResult.formattedResults.ruleResults.MinifyCss != null) {
 			hasRules.add("MinifyCss");
 			allColSpecs.add(new DataColumnSpecCreator("MinifyCss - ruleImpact", DoubleCell.TYPE).createSpec());
 			allColSpecs.add(new DataColumnSpecCreator("MinifyCss - summary", StringCell.TYPE).createSpec());
 			allColSpecs.add(new DataColumnSpecCreator("MinifyCss - urlBlocks", StringCell.TYPE).createSpec());
 		}
-		if (pageSpeedResult.formattedResults.ruleResults.MinifyHTML != null) {
+		if (pageSpeedResult.formattedResults != null && pageSpeedResult.formattedResults.ruleResults.MinifyHTML != null) {
 			hasRules.add("MinifyHTML");
 			allColSpecs.add(new DataColumnSpecCreator("MinifyHTML - ruleImpact", DoubleCell.TYPE).createSpec());
 			allColSpecs.add(new DataColumnSpecCreator("MinifyHTML - summary", StringCell.TYPE).createSpec());
 			allColSpecs.add(new DataColumnSpecCreator("MinifyHTML - urlBlocks", StringCell.TYPE).createSpec());
 		}
-		if (pageSpeedResult.formattedResults.ruleResults.MinifyJavaScript != null) {
+		if (pageSpeedResult.formattedResults != null && pageSpeedResult.formattedResults.ruleResults.MinifyJavaScript != null) {
 			hasRules.add("MinifyJavaScript");
 			allColSpecs.add(new DataColumnSpecCreator("MinifyJavaScript - ruleImpact", DoubleCell.TYPE).createSpec());
 			allColSpecs.add(new DataColumnSpecCreator("MinifyJavaScript - summary", StringCell.TYPE).createSpec());
 			allColSpecs.add(new DataColumnSpecCreator("MinifyJavaScript - urlBlocks", StringCell.TYPE).createSpec());
 		}
-		if (pageSpeedResult.formattedResults.ruleResults.MinimizeRenderBlockingResources != null) {
+		if (pageSpeedResult.formattedResults != null && pageSpeedResult.formattedResults.ruleResults.MinimizeRenderBlockingResources != null) {
 			hasRules.add("MinimizeRenderBlockingResources");
 			allColSpecs.add(new DataColumnSpecCreator("MinimizeRenderBlockingResources - ruleImpact", DoubleCell.TYPE).createSpec());
 			allColSpecs.add(new DataColumnSpecCreator("MinimizeRenderBlockingResources - summary", StringCell.TYPE).createSpec());
 			allColSpecs.add(new DataColumnSpecCreator("MinimizeRenderBlockingResources - urlBlocks", StringCell.TYPE).createSpec());
 		}
-		if (pageSpeedResult.formattedResults.ruleResults.OptimizeImages != null) {
+		if (pageSpeedResult.formattedResults != null && pageSpeedResult.formattedResults.ruleResults.OptimizeImages != null) {
 			hasRules.add("OptimizeImages");
 			allColSpecs.add(new DataColumnSpecCreator("OptimizeImages - ruleImpact", DoubleCell.TYPE).createSpec());
 			allColSpecs.add(new DataColumnSpecCreator("OptimizeImages - summary", StringCell.TYPE).createSpec());
 			allColSpecs.add(new DataColumnSpecCreator("OptimizeImages - urlBlocks", StringCell.TYPE).createSpec());
 		}
-		if (pageSpeedResult.formattedResults.ruleResults.PrioritizeVisibleContent != null) {
+		if (pageSpeedResult.formattedResults != null && pageSpeedResult.formattedResults.ruleResults.PrioritizeVisibleContent != null) {
 			hasRules.add("PrioritizeVisibleContent");
 			allColSpecs.add(new DataColumnSpecCreator("PrioritizeVisibleContent - ruleImpact", DoubleCell.TYPE).createSpec());
 			allColSpecs.add(new DataColumnSpecCreator("PrioritizeVisibleContent - summary", StringCell.TYPE).createSpec());
 		}
-		if (pageSpeedResult.formattedResults.ruleResults.SizeContentToViewport != null) {
+		if (pageSpeedResult.formattedResults != null && pageSpeedResult.formattedResults.ruleResults.SizeContentToViewport != null) {
 			hasRules.add("SizeContentToViewport");
 			allColSpecs.add(new DataColumnSpecCreator("SizeContentToViewport - ruleImpact", DoubleCell.TYPE).createSpec());
 			allColSpecs.add(new DataColumnSpecCreator("SizeContentToViewport - summary", StringCell.TYPE).createSpec());
 		}
-		if (pageSpeedResult.formattedResults.ruleResults.SizeTapTargetAppropriately != null) {
+		if (pageSpeedResult.formattedResults != null && pageSpeedResult.formattedResults.ruleResults.SizeTapTargetAppropriately != null) {
 			hasRules.add("SizeTapTargetAppropriately");
 			allColSpecs.add(new DataColumnSpecCreator("SizeTapTargetAppropriately - ruleImpact", DoubleCell.TYPE).createSpec());
 			allColSpecs.add(new DataColumnSpecCreator("SizeTapTargetAppropriately - summary", StringCell.TYPE).createSpec());
 			allColSpecs.add(new DataColumnSpecCreator("SizeTapTargetAppropriately - urlBlocks", StringCell.TYPE).createSpec());
 		}
-		if (pageSpeedResult.formattedResults.ruleResults.UseLegibleFontSizes != null) {
+		if (pageSpeedResult.formattedResults != null && pageSpeedResult.formattedResults.ruleResults.UseLegibleFontSizes != null) {
 			hasRules.add("UseLegibleFontSizes");
 			allColSpecs.add(new DataColumnSpecCreator("UseLegibleFontSizes - ruleImpact", DoubleCell.TYPE).createSpec());
 			allColSpecs.add(new DataColumnSpecCreator("UseLegibleFontSizes - summary", StringCell.TYPE).createSpec());
@@ -298,31 +377,58 @@ public class GooglePageSpeedNodeModel extends NodeModel {
     	List<DataCell> cells = new ArrayList<DataCell>();
     	
 		cells.add(new StringCell(pageSpeedResult.id));
+		cells.add(new StringCell(pageSpeedResult.status));
 		cells.add(new StringCell(configuration.getStrategy().getStringValue()));
 		cells.add(new IntCell(pageSpeedResult.responseCode));
 		cells.add(new StringCell(pageSpeedResult.title));
-    	if (pageSpeedResult.ruleGroups.SPEED != null) {
-    		cells.add(new IntCell(pageSpeedResult.ruleGroups.SPEED.score));
+    	if (hasRules.contains("SPEED")) {
+	    	if (pageSpeedResult.ruleGroups != null && pageSpeedResult.ruleGroups.SPEED != null) {
+	    		cells.add(new IntCell(pageSpeedResult.ruleGroups.SPEED.score));
+	    	} else {
+	    		cells.add(new IntCell(0));
+	    	}
     	}
-    	if (pageSpeedResult.ruleGroups.USABILITY != null) {
-    		cells.add(new IntCell(pageSpeedResult.ruleGroups.USABILITY.score));
+    	if (hasRules.contains("USABILITY")) {
+	    	if (pageSpeedResult.ruleGroups != null && pageSpeedResult.ruleGroups.USABILITY != null) {
+	    		cells.add(new IntCell(pageSpeedResult.ruleGroups.USABILITY.score));
+	    	} else {
+	    		cells.add(new IntCell(0));
+	    	}
     	}
-    	cells.add(new IntCell(pageSpeedResult.pageStats.numberResources));
-    	cells.add(new IntCell(pageSpeedResult.pageStats.numberHosts));
-    	cells.add(new StringCell(pageSpeedResult.pageStats.totalRequestBytes));
-    	cells.add(new IntCell(pageSpeedResult.pageStats.numberStaticResources));
-    	cells.add(new StringCell(pageSpeedResult.pageStats.htmlResponseBytes));
-    	cells.add(new StringCell(pageSpeedResult.pageStats.cssResponseBytes));
-    	cells.add(new StringCell(pageSpeedResult.pageStats.imageResponseBytes));
-    	cells.add(new StringCell(pageSpeedResult.pageStats.javascriptResponseBytes));
-    	cells.add(new StringCell(pageSpeedResult.pageStats.otherResponseBytes));
-    	cells.add(new IntCell(pageSpeedResult.pageStats.numberJsResources));
-    	cells.add(new IntCell(pageSpeedResult.pageStats.numberCssResources));
+    	if (pageSpeedResult.pageStats != null) {
+	    	cells.add(new IntCell(pageSpeedResult.pageStats.numberResources));
+	    	cells.add(new IntCell(pageSpeedResult.pageStats.numberHosts));
+	    	cells.add(new StringCell(pageSpeedResult.pageStats.totalRequestBytes));
+	    	cells.add(new IntCell(pageSpeedResult.pageStats.numberStaticResources));
+	    	cells.add(new StringCell(pageSpeedResult.pageStats.htmlResponseBytes));
+	    	cells.add(new StringCell(pageSpeedResult.pageStats.cssResponseBytes));
+	    	cells.add(new StringCell(pageSpeedResult.pageStats.imageResponseBytes));
+	    	cells.add(new StringCell(pageSpeedResult.pageStats.javascriptResponseBytes));
+	    	cells.add(new StringCell(pageSpeedResult.pageStats.otherResponseBytes));
+	    	cells.add(new IntCell(pageSpeedResult.pageStats.numberJsResources));
+	    	cells.add(new IntCell(pageSpeedResult.pageStats.numberCssResources));
+    	} else {
+	    	cells.add(new IntCell(0));
+	    	cells.add(new IntCell(0));
+	    	cells.add(new StringCell(""));
+	    	cells.add(new IntCell(0));
+	    	cells.add(new StringCell(""));
+	    	cells.add(new StringCell(""));
+	    	cells.add(new StringCell(""));
+	    	cells.add(new StringCell(""));
+	    	cells.add(new StringCell(""));
+	    	cells.add(new IntCell(0));
+	    	cells.add(new IntCell(0));
+    	}
 		
-    	cells.add(new StringCell(pageSpeedResult.formattedResults.locale));
+    	if (pageSpeedResult.formattedResults != null) {
+    		cells.add(new StringCell(pageSpeedResult.formattedResults.locale));
+    	} else {
+    		cells.add(new StringCell(""));
+    	}
 
     	if (hasRules.contains("AvoidLandingPageRedirects")) {
-			if (pageSpeedResult.formattedResults.ruleResults.AvoidLandingPageRedirects != null) {
+			if (pageSpeedResult.formattedResults != null && pageSpeedResult.formattedResults.ruleResults.AvoidLandingPageRedirects != null) {
 		    	cells.add(new DoubleCell(pageSpeedResult.formattedResults.ruleResults.AvoidLandingPageRedirects.ruleImpact));
 		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.AvoidLandingPageRedirects.getSummary()));
 			} else {
@@ -331,7 +437,7 @@ public class GooglePageSpeedNodeModel extends NodeModel {
 			}
     	}
     	if (hasRules.contains("AvoidPlugins")) {
-			if (pageSpeedResult.formattedResults.ruleResults.AvoidPlugins != null) {
+			if (pageSpeedResult.formattedResults != null && pageSpeedResult.formattedResults.ruleResults.AvoidPlugins != null) {
 		    	cells.add(new DoubleCell(pageSpeedResult.formattedResults.ruleResults.AvoidPlugins.ruleImpact));
 		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.AvoidPlugins.getSummary()));
 			} else {
@@ -340,7 +446,7 @@ public class GooglePageSpeedNodeModel extends NodeModel {
 			}
 		}
     	if (hasRules.contains("ConfigureViewport")) {
-			if (pageSpeedResult.formattedResults.ruleResults.ConfigureViewport != null) {
+			if (pageSpeedResult.formattedResults != null && pageSpeedResult.formattedResults.ruleResults.ConfigureViewport != null) {
 		    	cells.add(new DoubleCell(pageSpeedResult.formattedResults.ruleResults.ConfigureViewport.ruleImpact));
 		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.ConfigureViewport.getSummary()));
 			} else {
@@ -349,7 +455,7 @@ public class GooglePageSpeedNodeModel extends NodeModel {
 			}
 		}
     	if (hasRules.contains("EnableGzipCompression")) {
-			if (pageSpeedResult.formattedResults.ruleResults.EnableGzipCompression != null) {
+			if (pageSpeedResult.formattedResults != null && pageSpeedResult.formattedResults.ruleResults.EnableGzipCompression != null) {
 		    	cells.add(new DoubleCell(pageSpeedResult.formattedResults.ruleResults.EnableGzipCompression.ruleImpact));
 		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.EnableGzipCompression.getSummary()));
 		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.EnableGzipCompression.getUrlBlocksSummary()));
@@ -360,7 +466,7 @@ public class GooglePageSpeedNodeModel extends NodeModel {
 			}
 		}
     	if (hasRules.contains("LeverageBrowserCaching")) {
-			if (pageSpeedResult.formattedResults.ruleResults.LeverageBrowserCaching != null) {
+			if (pageSpeedResult.formattedResults != null && pageSpeedResult.formattedResults.ruleResults.LeverageBrowserCaching != null) {
 		    	cells.add(new DoubleCell(pageSpeedResult.formattedResults.ruleResults.LeverageBrowserCaching.ruleImpact));
 		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.LeverageBrowserCaching.getSummary()));
 		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.LeverageBrowserCaching.getUrlBlocksSummary()));
@@ -371,7 +477,7 @@ public class GooglePageSpeedNodeModel extends NodeModel {
 			}
 		}
     	if (hasRules.contains("MainResourceServerResponseTime")) {
-			if (pageSpeedResult.formattedResults.ruleResults.MainResourceServerResponseTime != null) {
+			if (pageSpeedResult.formattedResults != null && pageSpeedResult.formattedResults.ruleResults.MainResourceServerResponseTime != null) {
 		    	cells.add(new DoubleCell(pageSpeedResult.formattedResults.ruleResults.MainResourceServerResponseTime.ruleImpact));
 		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.MainResourceServerResponseTime.getSummary()));
 		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.MainResourceServerResponseTime.getUrlBlocksSummary()));
@@ -382,7 +488,7 @@ public class GooglePageSpeedNodeModel extends NodeModel {
 			}
 		}
     	if (hasRules.contains("MinifyCss")) {
-			if (pageSpeedResult.formattedResults.ruleResults.MinifyCss != null) {
+			if (pageSpeedResult.formattedResults != null && pageSpeedResult.formattedResults.ruleResults.MinifyCss != null) {
 		    	cells.add(new DoubleCell(pageSpeedResult.formattedResults.ruleResults.MinifyCss.ruleImpact));
 		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.MinifyCss.getSummary()));
 		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.MinifyCss.getUrlBlocksSummary()));
@@ -393,7 +499,7 @@ public class GooglePageSpeedNodeModel extends NodeModel {
 			}
 		}
     	if (hasRules.contains("MinifyHTML")) {
-			if (pageSpeedResult.formattedResults.ruleResults.MinifyHTML != null) {
+			if (pageSpeedResult.formattedResults != null && pageSpeedResult.formattedResults.ruleResults.MinifyHTML != null) {
 		    	cells.add(new DoubleCell(pageSpeedResult.formattedResults.ruleResults.MinifyHTML.ruleImpact));
 		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.MinifyHTML.getSummary()));
 		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.MinifyHTML.getUrlBlocksSummary()));
@@ -404,7 +510,7 @@ public class GooglePageSpeedNodeModel extends NodeModel {
 			}
 		}
     	if (hasRules.contains("MinifyJavaScript")) {
-			if (pageSpeedResult.formattedResults.ruleResults.MinifyJavaScript != null) {
+			if (pageSpeedResult.formattedResults != null && pageSpeedResult.formattedResults.ruleResults.MinifyJavaScript != null) {
 		    	cells.add(new DoubleCell(pageSpeedResult.formattedResults.ruleResults.MinifyJavaScript.ruleImpact));
 		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.MinifyJavaScript.getSummary()));
 		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.MinifyJavaScript.getUrlBlocksSummary()));
@@ -415,7 +521,7 @@ public class GooglePageSpeedNodeModel extends NodeModel {
 			}
 		}
     	if (hasRules.contains("MinimizeRenderBlockingResources")) {
-			if (pageSpeedResult.formattedResults.ruleResults.MinimizeRenderBlockingResources != null) {
+			if (pageSpeedResult.formattedResults != null && pageSpeedResult.formattedResults.ruleResults.MinimizeRenderBlockingResources != null) {
 		    	cells.add(new DoubleCell(pageSpeedResult.formattedResults.ruleResults.MinimizeRenderBlockingResources.ruleImpact));
 		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.MinimizeRenderBlockingResources.getSummary()));
 		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.MinimizeRenderBlockingResources.getUrlBlocksSummary()));
@@ -426,7 +532,7 @@ public class GooglePageSpeedNodeModel extends NodeModel {
 			}
 		}
     	if (hasRules.contains("OptimizeImages")) {
-			if (pageSpeedResult.formattedResults.ruleResults.OptimizeImages != null) {
+			if (pageSpeedResult.formattedResults != null && pageSpeedResult.formattedResults.ruleResults.OptimizeImages != null) {
 		    	cells.add(new DoubleCell(pageSpeedResult.formattedResults.ruleResults.OptimizeImages.ruleImpact));
 		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.OptimizeImages.getSummary()));
 		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.OptimizeImages.getUrlBlocksSummary()));
@@ -437,7 +543,7 @@ public class GooglePageSpeedNodeModel extends NodeModel {
 			}
 		}
     	if (hasRules.contains("PrioritizeVisibleContent")) {
-			if (pageSpeedResult.formattedResults.ruleResults.PrioritizeVisibleContent != null) {
+			if (pageSpeedResult.formattedResults != null && pageSpeedResult.formattedResults.ruleResults.PrioritizeVisibleContent != null) {
 		    	cells.add(new DoubleCell(pageSpeedResult.formattedResults.ruleResults.PrioritizeVisibleContent.ruleImpact));
 		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.PrioritizeVisibleContent.getSummary()));
 			} else {
@@ -446,7 +552,7 @@ public class GooglePageSpeedNodeModel extends NodeModel {
 			}
 		}
     	if (hasRules.contains("SizeContentToViewport")) {
-			if (pageSpeedResult.formattedResults.ruleResults.SizeContentToViewport != null) {
+			if (pageSpeedResult.formattedResults != null && pageSpeedResult.formattedResults.ruleResults.SizeContentToViewport != null) {
 		    	cells.add(new DoubleCell(pageSpeedResult.formattedResults.ruleResults.SizeContentToViewport.ruleImpact));
 		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.SizeContentToViewport.getSummary()));
 			} else {
@@ -455,7 +561,7 @@ public class GooglePageSpeedNodeModel extends NodeModel {
 			}
 		}
     	if (hasRules.contains("SizeTapTargetAppropriately")) {
-			if (pageSpeedResult.formattedResults.ruleResults.SizeTapTargetAppropriately != null) {
+			if (pageSpeedResult.formattedResults != null && pageSpeedResult.formattedResults.ruleResults.SizeTapTargetAppropriately != null) {
 		    	cells.add(new DoubleCell(pageSpeedResult.formattedResults.ruleResults.SizeTapTargetAppropriately.ruleImpact));
 		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.SizeTapTargetAppropriately.getSummary()));
 		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.SizeTapTargetAppropriately.getUrlBlocksSummary()));
@@ -466,7 +572,7 @@ public class GooglePageSpeedNodeModel extends NodeModel {
 			}
 		}
     	if (hasRules.contains("UseLegibleFontSizes")) {
-			if (pageSpeedResult.formattedResults.ruleResults.UseLegibleFontSizes != null) {
+			if (pageSpeedResult.formattedResults != null && pageSpeedResult.formattedResults.ruleResults.UseLegibleFontSizes != null) {
 		    	cells.add(new DoubleCell(pageSpeedResult.formattedResults.ruleResults.UseLegibleFontSizes.ruleImpact));
 		    	cells.add(new StringCell(pageSpeedResult.formattedResults.ruleResults.UseLegibleFontSizes.getSummary()));
 			} else {
@@ -507,6 +613,8 @@ public class GooglePageSpeedNodeModel extends NodeModel {
 		if (inSpecs[0].findColumnIndex(configuration.getUrl().getStringValue()) < 0) {
 			throw new InvalidSettingsException("A URL column in the data input table must exist and must be specified.");
 		}
+		
+		
 
         return new DataTableSpec[]{null};
     }
@@ -582,6 +690,7 @@ public class GooglePageSpeedNodeModel extends NodeModel {
     	String kind;
     	@Key
     	String id;
+    	String status;
     	@Key
     	int responseCode = 0;
     	@Key
