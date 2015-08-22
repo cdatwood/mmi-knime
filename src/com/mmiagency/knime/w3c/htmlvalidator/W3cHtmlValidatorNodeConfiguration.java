@@ -5,6 +5,7 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
+import org.knime.core.node.util.StringHistory;
 
 public class W3cHtmlValidatorNodeConfiguration {
 
@@ -20,12 +21,18 @@ public class W3cHtmlValidatorNodeConfiguration {
 	static final String FIELD_DEFAULT_URL_COLUMN = "url";
 	static final boolean FIELD_DEFAULT_SHOW_OUTLINE = false;
 
+	private static final StringHistory VALIDATOR_URL_HISTORY = StringHistory.getInstance(W3cHtmlValidatorNodeConfiguration.class.getCanonicalName());
+
 	private final SettingsModelString m_validatorUrl = getValidatorUrlSettingsModel();	
 	private final SettingsModelString m_url = getUrlColumnSettingsModel();	
 	private final SettingsModelBoolean m_showOutline = getShowOutlineSettingsModel();	
 
 	public W3cHtmlValidatorNodeConfiguration() {
-		
+    	
+    	if (VALIDATOR_URL_HISTORY.getHistory().length == 0) {
+    		VALIDATOR_URL_HISTORY.add(FIELD_DEFAULT_VALIDATOR_URL);
+    	}
+    	
 	}
 	
     public static SettingsModelString getValidatorUrlSettingsModel() {
@@ -38,7 +45,11 @@ public class W3cHtmlValidatorNodeConfiguration {
     	return new SettingsModelBoolean(FIELD_KEY_SHOW_OUTLINE, FIELD_DEFAULT_SHOW_OUTLINE);   
     }
 	
-	public SettingsModelString getValidatorUrl() {
+    public static StringHistory getValidatorUrlHistory() {
+    	return VALIDATOR_URL_HISTORY;
+    }
+
+    public SettingsModelString getValidatorUrl() {
 		return m_validatorUrl;
 	}
 	
@@ -55,7 +66,10 @@ public class W3cHtmlValidatorNodeConfiguration {
         m_validatorUrl.saveSettingsTo(settings);
         m_url.saveSettingsTo(settings);
         m_showOutline.saveSettingsTo(settings);
-
+        
+        if (!m_validatorUrl.getStringValue().isEmpty()) {
+        	VALIDATOR_URL_HISTORY.add(m_validatorUrl.getStringValue());
+        }
     }
 
     public void loadValidatedSettingsFrom(final NodeSettingsRO settings)
@@ -64,7 +78,10 @@ public class W3cHtmlValidatorNodeConfiguration {
         m_validatorUrl.loadSettingsFrom(settings);
         m_url.loadSettingsFrom(settings);
         m_showOutline.loadSettingsFrom(settings);
-
+        
+        if (!m_validatorUrl.getStringValue().isEmpty()) {
+        	VALIDATOR_URL_HISTORY.add(m_validatorUrl.getStringValue());
+        }
     }
 
     public void validateSettings(final NodeSettingsRO settings)
@@ -73,7 +90,10 @@ public class W3cHtmlValidatorNodeConfiguration {
         m_validatorUrl.validateSettings(settings);
     	m_url.validateSettings(settings);
         m_showOutline.validateSettings(settings);
-    	
+        
+        if (!m_validatorUrl.getStringValue().isEmpty()) {
+        	VALIDATOR_URL_HISTORY.add(m_validatorUrl.getStringValue());
+        }
     }
     
 }

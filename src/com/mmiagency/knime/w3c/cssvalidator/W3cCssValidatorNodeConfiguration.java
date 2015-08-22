@@ -7,6 +7,7 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
+import org.knime.core.node.util.StringHistory;
 
 public class W3cCssValidatorNodeConfiguration {
 	
@@ -36,12 +37,14 @@ public class W3cCssValidatorNodeConfiguration {
 	static final Map<String, String> FIELD_OPTIONS_WARNINGS = new HashMap<String, String>();
 	static final Map<String, String> FIELD_OPTIONS_VENDOR_EXTENSIONS = new HashMap<String, String>();
 	
+	private static final StringHistory VALIDATOR_URL_HISTORY = StringHistory.getInstance(W3cCssValidatorNodeConfiguration.class.getCanonicalName());
+
 	private final SettingsModelString m_validatorUrl = getValidatorUrlSettingsModel();	
 	private final SettingsModelString m_url = getUrlColumnSettingsModel();	
 	private final SettingsModelString m_profile = getProfileSettingsModel();	
 	private final SettingsModelString m_medium = getMediumSettingsModel();	
 	private final SettingsModelString m_warnings = getWarningsSettingsModel();	
-	private final SettingsModelString m_vendorExtensions = getVendorExtensionsSettingsModel();	
+	private final SettingsModelString m_vendorExtensions = getVendorExtensionsSettingsModel();		
 	
 	public W3cCssValidatorNodeConfiguration() {
     	FIELD_OPTIONS_PROFILE.put("No special profile", "none");
@@ -76,6 +79,10 @@ public class W3cCssValidatorNodeConfiguration {
     	FIELD_OPTIONS_VENDOR_EXTENSIONS.put("Default", "");
     	FIELD_OPTIONS_VENDOR_EXTENSIONS.put("Warnings", "true");
     	FIELD_OPTIONS_VENDOR_EXTENSIONS.put("Errors", "true");
+    	
+    	if (VALIDATOR_URL_HISTORY.getHistory().length == 0) {
+    		VALIDATOR_URL_HISTORY.add(FIELD_DEFAULT_VALIDATOR_URL);
+    	}
     }
 
     public static SettingsModelString getValidatorUrlSettingsModel() {
@@ -97,6 +104,10 @@ public class W3cCssValidatorNodeConfiguration {
     	return new SettingsModelString(FIELD_KEY_VENDOR_EXTENSIONS, FIELD_DEFAULT_VENDOR_EXTENSIONS);   
     }
     
+    public static StringHistory getValidatorUrlHistory() {
+    	return VALIDATOR_URL_HISTORY;
+    }
+
     public SettingsModelString getValidatorUrl() {
     	return m_validatorUrl;
     }
@@ -115,7 +126,7 @@ public class W3cCssValidatorNodeConfiguration {
     public SettingsModelString getVendorExtensions() {
     	return m_vendorExtensions;
     }
-
+    
     public void saveSettingsTo(final NodeSettingsWO settings) {
 
         m_validatorUrl.saveSettingsTo(settings);
@@ -124,7 +135,10 @@ public class W3cCssValidatorNodeConfiguration {
         m_medium.saveSettingsTo(settings);
         m_warnings.saveSettingsTo(settings);
         m_vendorExtensions.saveSettingsTo(settings);
-
+        
+        if (!m_validatorUrl.getStringValue().isEmpty()) {
+        	VALIDATOR_URL_HISTORY.add(m_validatorUrl.getStringValue());
+        }
     }
 
     public void loadValidatedSettingsFrom(final NodeSettingsRO settings)
@@ -137,6 +151,9 @@ public class W3cCssValidatorNodeConfiguration {
         m_warnings.loadSettingsFrom(settings);
         m_vendorExtensions.loadSettingsFrom(settings);
 
+        if (!m_validatorUrl.getStringValue().isEmpty()) {
+        	VALIDATOR_URL_HISTORY.add(m_validatorUrl.getStringValue());
+        }
     }
 
     public void validateSettings(final NodeSettingsRO settings)
@@ -149,5 +166,8 @@ public class W3cCssValidatorNodeConfiguration {
         m_warnings.validateSettings(settings);
         m_vendorExtensions.validateSettings(settings);
 
+        if (!m_validatorUrl.getStringValue().isEmpty()) {
+        	VALIDATOR_URL_HISTORY.add(m_validatorUrl.getStringValue());
+        }
     }    
 }

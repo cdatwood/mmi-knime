@@ -1,11 +1,26 @@
 package com.mmiagency.knime.w3c.cssvalidator;
 
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.util.Arrays;
+
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+
 import org.knime.core.data.StringValue;
+import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeDialogPane;
+import org.knime.core.node.NodeSettingsRO;
+import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentColumnNameSelection;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
+import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.util.DataValueColumnFilter;
+import org.knime.core.node.util.StringHistoryPanel;
 
 /**
  * <code>NodeDialog</code> for the "W3cCssValidatorNode" Node.
@@ -28,10 +43,12 @@ public class W3cCssValidatorNodeDialog extends DefaultNodeSettingsPane {
     @SuppressWarnings("unchecked")
 	protected W3cCssValidatorNodeDialog() {
         super();
-        
-        addDialogComponent(new DialogComponentString(
+
+        addDialogComponent(new DialogComponentStringSelection(
         		W3cCssValidatorNodeConfiguration.getValidatorUrlSettingsModel(),
-        		W3cCssValidatorNodeConfiguration.FIELD_LABEL_VALIDATOR_URL, true, 20));        
+        		W3cCssValidatorNodeConfiguration.FIELD_LABEL_VALIDATOR_URL, 
+        		Arrays.asList(W3cCssValidatorNodeConfiguration.getValidatorUrlHistory().getHistory()),
+        		true));
 
         addDialogComponent(new DialogComponentColumnNameSelection(
         		W3cCssValidatorNodeConfiguration.getUrlColumnSettingsModel(),
@@ -59,5 +76,6 @@ public class W3cCssValidatorNodeDialog extends DefaultNodeSettingsPane {
         		W3cCssValidatorNodeConfiguration.FIELD_LABEL_VENDOR_EXTENSIONS, 
         		W3cCssValidatorNodeConfiguration.FIELD_OPTIONS_VENDOR_EXTENSIONS.keySet().toArray(new String[W3cCssValidatorNodeConfiguration.FIELD_OPTIONS_VENDOR_EXTENSIONS.keySet().size()])));        
     }
+    
 }
 

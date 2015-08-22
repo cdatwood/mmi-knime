@@ -1,11 +1,16 @@
 package com.mmiagency.knime.w3c.htmlvalidator;
 
+import java.util.Arrays;
+
 import org.knime.core.data.StringValue;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentColumnNameSelection;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
+import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.util.DataValueColumnFilter;
+
+import com.mmiagency.knime.w3c.cssvalidator.W3cCssValidatorNodeConfiguration;
 
 
 /**
@@ -30,9 +35,11 @@ public class W3cHtmlValidatorNodeDialog extends DefaultNodeSettingsPane {
 	protected W3cHtmlValidatorNodeDialog() {
         super();
         
-        addDialogComponent(new DialogComponentString(
+        addDialogComponent(new DialogComponentStringSelection(
         		W3cHtmlValidatorNodeConfiguration.getValidatorUrlSettingsModel(),
-        		W3cHtmlValidatorNodeConfiguration.FIELD_LABEL_VALIDATOR_URL, true, 20));        
+        		W3cHtmlValidatorNodeConfiguration.FIELD_LABEL_VALIDATOR_URL,        
+		        Arrays.asList(W3cHtmlValidatorNodeConfiguration.getValidatorUrlHistory().getHistory()),
+		        true));
 
         addDialogComponent(new DialogComponentColumnNameSelection(
         		W3cHtmlValidatorNodeConfiguration.getUrlColumnSettingsModel(),
