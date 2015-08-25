@@ -21,16 +21,12 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
-import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
-import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.port.PortObjectSpec;
-import org.knime.twitter.api.data.TwitterApiConnectionPortObject;
-import org.knime.twitter.api.nodes.search.TwitterSearchConfiguration;
+import org.knime.twitter.api.data.TwitterApiConnection;
+import org.knime.twitter.api.data.TwitterApiConnectionPortObjectSpec;
 
 import twitter4j.ResponseList;
-import twitter4j.Trends;
 import twitter4j.Twitter;
-import twitter4j.Query.ResultType;
 import twitter4j.Location;
 import twitter4j.TwitterException;
 
@@ -59,8 +55,11 @@ public class TwitterTrendsNodeDialog extends NodeDialogPane {
     protected TwitterTrendsNodeDialog() {
     	
     	// set default woeid
-    	//TODO call initWoeid to initialize Woeid
-    	//TODO add listener to refresh Woeid list
+    	try {
+    		initWoeid(null);
+    	} catch (TwitterException te) {
+    		// this should not happen
+    	}
     	
         JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -85,7 +84,7 @@ public class TwitterTrendsNodeDialog extends NodeDialogPane {
         addTab("Config", panel);
     }
     
-    private void initWoeid(TwitterApiConnectionPortObject twitterPortObject) throws TwitterException {
+    private void initWoeid(TwitterApiConnection twitterApiConnection) throws TwitterException {
 
     	Vector woeidList = new Vector();
     	
@@ -95,7 +94,13 @@ public class TwitterTrendsNodeDialog extends NodeDialogPane {
     	woeidWorldwide.add("Worldwide");
     	woeidList.add(woeidWorldwide);
     	
-    	Twitter twitter = twitterPortObject.getTwitterApiConnection().getTwitter();
+    	if (twitterApiConnection == null) {
+        	m_woeid = new JComboBox(woeidList);
+        	m_woeid.setRenderer(new WoeidCellRenderer());
+    		return;
+    	}
+    	
+    	Twitter twitter = twitterApiConnection.getTwitter();
     	    	
     	ResponseList<Location> response = twitter.getAvailableTrends();
     	
@@ -117,6 +122,25 @@ public class TwitterTrendsNodeDialog extends NodeDialogPane {
      */
     @Override
     protected void loadSettingsFrom(NodeSettingsRO settings, PortObjectSpec[] specs) throws NotConfigurableException {
+
+        if(specs[0] == null) {
+            throw new NotConfigurableException("Missing Twitter API Connection");
+        } else {
+            TwitterApiConnectionPortObjectSpec connectionSpec = (TwitterApiConnectionPortObjectSpec)specs[0];
+            if(connectionSpec.getTwitterApiConnection() == null) {
+                throw new NotConfigurableException("Missing Twitter API Connection");
+            } else {
+            	
+            	// load locations
+            	try {
+            		initWoeid(connectionSpec.getTwitterApiConnection());
+            	} catch (TwitterException te) {
+            		throw new NotConfigurableException("Unable to initialize places", te);
+            	}
+            	
+            }
+        }
+        
     	TwitterTrendsNodeConfiguration config = new TwitterTrendsNodeConfiguration();
         config.loadInDialog(settings);
         m_woeid.setSelectedItem(config.getWoeid());
@@ -135,18 +159,19 @@ public class TwitterTrendsNodeDialog extends NodeDialogPane {
     }
 
     class WoeidCellRenderer extends JLabel implements ListCellRenderer {
-	    public WoeidCellRenderer() {
+		public WoeidCellRenderer() {
 	        setOpaque(true);
 	    }
 	
-	    public Component getListCellRendererComponent(JList list,
+	    @SuppressWarnings("unchecked")
+		public Component getListCellRendererComponent(JList list,
 	                                                  Object value,
 	                                                  int index,
 	                                                  boolean isSelected,
 	                                                  boolean cellHasFocus) {
 	
 	    	if (value != null) {
-	    		setText((String)((List)value).get(1));
+	    		setText(((List<String>)value).get(1));
 	    	}
 
 	        return this;
