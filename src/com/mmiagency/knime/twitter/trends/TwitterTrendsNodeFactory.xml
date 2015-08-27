@@ -1,37 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <knimeNode icon="./default.png" type="Source" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10.xsd">
-    <name>TwitterTrends</name>
+    <name>Twitter Trends</name>
     
     <shortDescription>
-        
+        Returns Twitter Trends data via Twitter API
     </shortDescription>
     
     <fullDescription>
-        <intro>Insert long description here...</intro>
-        
-        
-        <option name="short name of first option (like in the dialog)">description of first option</option>
-        <option name="short name of second option (like in the dialog)">description of second option</option>
-        <!-- possibly more options that can also be grouped by tabs -->
-        <!--
-        <tab name="Standard Options">
-            <option name="short name of first option (like in the dialog)">description of first option</option>
-            <option name="short name of second option (like in the dialog)">description of second option</option>
-        </tab>
-        <tab name="Advanced Options">
-            <option name="short name of first advanced option (like in the dialog)">description of first advanced option</option>
-        </tab>
-        -->
+        <intro>This node uses Twitter API Connector to connect to Twitter API to pull Trends data.  It will first make a call to trends/available to download a list of available cities/countries and populated a the Place drop down.  Select a Place and it will then make a call to trends/place to pull down Twitter Trends data for that specifc city or country.</intro>
+                
+        <option name="Place">This is a drop down of available places with Twitter Trends data.  This list is updated on the fly.</option>
+        <option name="Exclude">Setting this equal to hashtags will remove all hashtags from the trends list.</option>
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="In-Port name">Description of first input port...</inPort>
-        <!-- possibly more input ports here-->
-        <outPort index="0" name="Out-Port name">Description of first output port...</outPort>
-        <!-- possibly more output ports here-->
+        <inPort index="0" name="Twitter API Connection">Twitter API Connection node</inPort>
+        <outPort index="0" name="Twitter Trends Data">Twitter Trends data in table form</outPort>
     </ports>    
-    <views>
-        <view index="0" name="name of first view">Description of first view...</view>
-        <!--view index="1" name="name of second view">Description of second view...</view-->
-    </views>
 </knimeNode>

@@ -5,7 +5,14 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.swing.JComboBox;
@@ -43,9 +50,9 @@ import twitter4j.TwitterException;
  */
 public class TwitterTrendsNodeDialog extends NodeDialogPane {
 
-    private JComboBox<List> m_woeid = new JComboBox<List>();
-
+    private JComboBox<Integer> m_woeid;
     private JTextField m_exclude = new JTextField();
+    private Map<Integer, String> woeidMap = new LinkedHashMap<Integer, String>();
 
     /**
      * New pane for configuring TwitterTrends node dialog.
@@ -58,7 +65,9 @@ public class TwitterTrendsNodeDialog extends NodeDialogPane {
     	try {
     		initWoeid(null);
     	} catch (TwitterException te) {
-    		// this should not happen
+    		// this should not happen because 
+    		// we are not even talking to twitter 
+    		// at this point
     	}
     	
         JPanel panel = new JPanel(new GridBagLayout());
@@ -86,16 +95,17 @@ public class TwitterTrendsNodeDialog extends NodeDialogPane {
     
     private void initWoeid(TwitterApiConnection twitterApiConnection) throws TwitterException {
 
-    	Vector woeidList = new Vector();
+    	// don't run again if it's already initialized
+    	if (m_woeid != null && m_woeid.getItemCount() > 1) {
+    		return;
+    	}
     	
-    	List woeidWorldwide = new ArrayList();
-    	
-    	woeidWorldwide.add(new Integer(1));
-    	woeidWorldwide.add("Worldwide");
-    	woeidList.add(woeidWorldwide);
+    	// add worldwide as default
+    	woeidMap.put(1, "Worldwide");
     	
     	if (twitterApiConnection == null) {
-        	m_woeid = new JComboBox(woeidList);
+        	m_woeid = new JComboBox<Integer>();
+        	m_woeid.addItem(1);
         	m_woeid.setRenderer(new WoeidCellRenderer());
     		return;
     	}
@@ -107,14 +117,33 @@ public class TwitterTrendsNodeDialog extends NodeDialogPane {
     	for (Location location : response) {
     		// skip worldwide as it's already added as default
     		if (location.getWoeid() == 1) continue;
-    		woeidWorldwide = new ArrayList();
-    		woeidWorldwide.add(location.getWoeid());
-    		woeidWorldwide.add(location.getPlaceName() + ", " + location.getCountryName());    		
-        	woeidList.add(woeidWorldwide);
+    		woeidMap.put(location.getWoeid(), location.getCountryName() + ", " + location.getName());
     	}
     	
-    	m_woeid = new JComboBox(woeidList);
-    	m_woeid.setRenderer(new WoeidCellRenderer());
+    	woeidMap = sortByValue(woeidMap);
+
+    	for (Integer key : woeidMap.keySet()) {
+    		if (key == 1) continue; // already added by default
+    		m_woeid.addItem(key);
+    	}
+    }
+    
+    private Map sortByValue(Map unsortMap) {	 
+    	List list = new LinkedList(unsortMap.entrySet());
+     
+    	Collections.sort(list, new Comparator() {
+    		public int compare(Object o1, Object o2) {
+    			return ((Comparable) ((Map.Entry) (o1)).getValue())
+    						.compareTo(((Map.Entry) (o2)).getValue());
+    		}
+    	});
+     
+    	Map sortedMap = new LinkedHashMap();
+    	for (Iterator it = list.iterator(); it.hasNext();) {
+    		Map.Entry entry = (Map.Entry) it.next();
+    		sortedMap.put(entry.getKey(), entry.getValue());
+    	}
+    	return sortedMap;
     }
     
     /**
@@ -168,10 +197,9 @@ public class TwitterTrendsNodeDialog extends NodeDialogPane {
 	                                                  Object value,
 	                                                  int index,
 	                                                  boolean isSelected,
-	                                                  boolean cellHasFocus) {
-	
+	                                                  boolean cellHasFocus) {	    	
 	    	if (value != null) {
-	    		setText(((List<String>)value).get(1));
+	    		setText(woeidMap.get((Integer)value));
 	    	}
 
 	        return this;
