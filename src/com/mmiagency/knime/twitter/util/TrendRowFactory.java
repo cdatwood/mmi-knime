@@ -9,6 +9,7 @@ import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.def.StringCell;
 
 import twitter4j.Trend;
+import twitter4j.Location;
 
 public class TrendRowFactory {
 
@@ -17,8 +18,8 @@ public class TrendRowFactory {
      * @param trend The trend info return from Twitter Trends
      * @return Row containing trend
      */
-    public TrendRow createRow(final String id, final Trend trend) {
-        return new TrendRow(id, trend);
+    public TrendRow createRow(final String id, final Location location, final Trend trend) {
+        return new TrendRow(id, location, trend);
     }
 
     /**
@@ -26,6 +27,7 @@ public class TrendRowFactory {
      */
     public DataTableSpec tableSpec() {
         List<DataColumnSpec> colSpecs = new ArrayList<DataColumnSpec>();
+        colSpecs.add(new DataColumnSpecCreator("Location", StringCell.TYPE).createSpec());
         colSpecs.add(new DataColumnSpecCreator("Name", StringCell.TYPE).createSpec());
         colSpecs.add(new DataColumnSpecCreator("Query", StringCell.TYPE).createSpec());
         colSpecs.add(new DataColumnSpecCreator("URL", StringCell.TYPE).createSpec());

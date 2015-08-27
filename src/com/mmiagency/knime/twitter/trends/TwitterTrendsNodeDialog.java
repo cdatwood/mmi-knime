@@ -1,26 +1,19 @@
 package com.mmiagency.knime.twitter.trends;
 
-import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
+import java.util.TreeMap;
 
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.ListCellRenderer;
 
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
@@ -50,9 +43,11 @@ import twitter4j.TwitterException;
  */
 public class TwitterTrendsNodeDialog extends NodeDialogPane {
 
-    private JComboBox<Integer> m_woeid;
-    private JTextField m_exclude = new JTextField();
-    private Map<Integer, String> woeidMap = new LinkedHashMap<Integer, String>();
+    private final JComboBox<String> m_country = new JComboBox<String>();
+    private final JComboBox<String> m_city = new JComboBox<String>();
+    private final Map<Integer, String> woeidMap = new HashMap<Integer, String>();
+    private final Map<String, Integer> placeMap = new TreeMap<String, Integer>();
+    private final Map<String, List<String>> countryCityMap = new HashMap<String, List<String>>();
 
     /**
      * New pane for configuring TwitterTrends node dialog.
@@ -79,34 +74,54 @@ public class TwitterTrendsNodeDialog extends NodeDialogPane {
         gbc.weighty = 0;
         gbc.gridx = 0;
         gbc.gridy = 0;
-        panel.add(new JLabel("Place:"), gbc);
+        panel.add(new JLabel("Country:"), gbc);
         gbc.weightx = 1;
         gbc.gridx++;
-        panel.add(m_woeid, gbc);
+        panel.add(m_country, gbc);
         gbc.gridx = 0;
         gbc.weightx = 0;
         gbc.gridy++;
-        panel.add(new JLabel("Exclude:"), gbc);
-        gbc.gridx++;
+        panel.add(new JLabel("City:"), gbc);
         gbc.weightx = 1;
-        panel.add(m_exclude, gbc);
+        gbc.gridx++;
+        panel.add(m_city, gbc);
         addTab("Config", panel);
+        
+        // refresh m_city when m_country selection changes
+        m_country.addItemListener(new ItemListener() {
+            public void itemStateChanged(ItemEvent e) {
+            	// refresh m_city
+            	refreshCities();
+            }
+        });
+        
+    }
+    
+    protected void refreshCities() {
+    	String country = (String)m_country.getSelectedItem();
+    	List<String> cities = countryCityMap.get(country);
+    	m_city.removeAllItems();
+    	if (cities != null) {
+    		for (String city : cities) {
+    			m_city.addItem(city);
+    		}
+    	}
     }
     
     private void initWoeid(TwitterApiConnection twitterApiConnection) throws TwitterException {
 
     	// don't run again if it's already initialized
-    	if (m_woeid != null && m_woeid.getItemCount() > 1) {
+    	if (m_country.getItemCount() > 1) {
     		return;
     	}
     	
     	// add worldwide as default
     	woeidMap.put(1, "Worldwide");
+    	placeMap.put("Worldwide", 1);
     	
+    	// if Twitter API Connection is not available, use Worldwide as default
     	if (twitterApiConnection == null) {
-        	m_woeid = new JComboBox<Integer>();
-        	m_woeid.addItem(1);
-        	m_woeid.setRenderer(new WoeidCellRenderer());
+        	m_country.addItem("Worldwide");
     		return;
     	}
     	
@@ -117,33 +132,41 @@ public class TwitterTrendsNodeDialog extends NodeDialogPane {
     	for (Location location : response) {
     		// skip worldwide as it's already added as default
     		if (location.getWoeid() == 1) continue;
-    		woeidMap.put(location.getWoeid(), location.getCountryName() + ", " + location.getName());
+    		// check if it's city or country
+    		if (location.getPlaceCode() == 12) {
+    			woeidMap.put(location.getWoeid(), location.getCountryName());
+    			placeMap.put(location.getCountryName(), location.getWoeid());
+    		} else {
+    			woeidMap.put(location.getWoeid(), location.getCountryName() + "|" + location.getName());
+    			placeMap.put(location.getCountryName() + "|" + location.getName(), location.getWoeid());
+    		}
     	}
     	
-    	woeidMap = sortByValue(woeidMap);
-
-    	for (Integer key : woeidMap.keySet()) {
-    		if (key == 1) continue; // already added by default
-    		m_woeid.addItem(key);
-    	}
-    }
-    
-    private Map sortByValue(Map unsortMap) {	 
-    	List list = new LinkedList(unsortMap.entrySet());
-     
-    	Collections.sort(list, new Comparator() {
-    		public int compare(Object o1, Object o2) {
-    			return ((Comparable) ((Map.Entry) (o1)).getValue())
-    						.compareTo(((Map.Entry) (o2)).getValue());
+    	// split country and city
+    	List<String> cities;
+    	String[] tokens;
+    	String lastCountry = "";
+    	for (Map.Entry<String, Integer> entry : placeMap.entrySet()) {
+    		// skip worldwide as it's already added as default
+    		if (entry.getValue() == 1) continue; 
+    		tokens = entry.getKey().split("\\|");
+    		if (!lastCountry.equals(tokens[0])) {
+    			m_country.addItem(tokens[0]);
     		}
-    	});
-     
-    	Map sortedMap = new LinkedHashMap();
-    	for (Iterator it = list.iterator(); it.hasNext();) {
-    		Map.Entry entry = (Map.Entry) it.next();
-    		sortedMap.put(entry.getKey(), entry.getValue());
+    		lastCountry = tokens[0];
+			if (countryCityMap.containsKey(tokens[0])) {
+				cities = countryCityMap.get(tokens[0]);
+			} else {
+				cities = new ArrayList<String>();
+				countryCityMap.put(tokens[0], cities);
+			}
+    		if (tokens.length > 1) {
+  				cities.add(tokens[1]);
+    		} else {
+    			cities.add("-"+tokens[0]+"-");
+    		}
     	}
-    	return sortedMap;
+    	
     }
     
     /**
@@ -172,8 +195,14 @@ public class TwitterTrendsNodeDialog extends NodeDialogPane {
         
     	TwitterTrendsNodeConfiguration config = new TwitterTrendsNodeConfiguration();
         config.loadInDialog(settings);
-        m_woeid.setSelectedItem(config.getWoeid());
-        m_exclude.setText(config.getExclude());
+        String place = woeidMap.get(config.getWoeid());
+        String[] tokens = place.split("\\|");
+    	m_country.setSelectedItem(tokens[0]);
+        if (tokens.length > 1) {
+        	// refresh city
+        	refreshCities();
+        	m_city.setSelectedItem(tokens[1]);
+        }
     }
 
     /**
@@ -182,28 +211,12 @@ public class TwitterTrendsNodeDialog extends NodeDialogPane {
     @Override
     protected void saveSettingsTo(NodeSettingsWO settings) throws InvalidSettingsException {
     	TwitterTrendsNodeConfiguration config = new TwitterTrendsNodeConfiguration();
-    	config.setWoeid((Integer)m_woeid.getSelectedItem());
-    	config.setExclude(m_exclude.getText());
+    	if (m_city.getItemCount() == 0 || ((String)m_city.getSelectedItem()).startsWith("-")) {
+    		config.setWoeid(placeMap.get((String)m_country.getSelectedItem()));
+    	} else {
+    		config.setWoeid(placeMap.get((String)m_country.getSelectedItem() + "|" + (String)m_city.getSelectedItem()));
+    	}
         config.save(settings);
-    }
-
-    class WoeidCellRenderer extends JLabel implements ListCellRenderer {
-		public WoeidCellRenderer() {
-	        setOpaque(true);
-	    }
-	
-	    @SuppressWarnings("unchecked")
-		public Component getListCellRendererComponent(JList list,
-	                                                  Object value,
-	                                                  int index,
-	                                                  boolean isSelected,
-	                                                  boolean cellHasFocus) {	    	
-	    	if (value != null) {
-	    		setText(woeidMap.get((Integer)value));
-	    	}
-
-	        return this;
-	    }
     }
 }
 

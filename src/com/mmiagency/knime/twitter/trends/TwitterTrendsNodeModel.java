@@ -23,6 +23,7 @@ import com.mmiagency.knime.twitter.util.TrendRowFactory;
 import twitter4j.Trend;
 import twitter4j.Trends;
 import twitter4j.Twitter;
+import twitter4j.Location;
 
 
 /**
@@ -63,11 +64,10 @@ public class TwitterTrendsNodeModel extends NodeModel {
     	Twitter twitter = ((TwitterApiConnectionPortObject)inObjects[0]).getTwitterApiConnection().getTwitter();
     	
     	Trends trends = twitter.getPlaceTrends(m_config.getWoeid());
+    	Location location = trends.getLocation();
 
     	for (Trend trend : trends.getTrends()) {
-    		
-    		container.addRowToTable(factory.createRow("" + index++, trend));
-    		
+    		container.addRowToTable(factory.createRow("" + index++, location, trend));
     	}
     	
         container.close();
