@@ -1,6 +1,9 @@
 package com.mmiagency.knime.keyworddensity;
 
+import org.knime.core.data.StringValue;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
+import org.knime.core.node.defaultnodesettings.DialogComponentColumnNameSelection;
+import org.knime.core.node.util.DataValueColumnFilter;
 
 /**
  * <code>NodeDialog</code> for the "KeywordDensity" Node.
@@ -18,8 +21,14 @@ public class KeywordDensityNodeDialog extends DefaultNodeSettingsPane {
     /**
      * New pane for configuring the KeywordDensity node.
      */
-    protected KeywordDensityNodeDialog() {
+    @SuppressWarnings("unchecked")
+	protected KeywordDensityNodeDialog() {
 
+        addDialogComponent(new DialogComponentColumnNameSelection(
+        		KeywordDensityNodeConfiguration.getUrlColumnSettingsModel(),
+        		KeywordDensityNodeConfiguration.FIELD_LABEL_URL_COLUMN, 
+        		0, true,
+        		new DataValueColumnFilter(StringValue.class)));
     }
 }
 

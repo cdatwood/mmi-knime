@@ -2,36 +2,26 @@ package com.mmiagency.knime.keyworddensity;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
 
-import org.apache.lucene.analysis.en.EnglishAnalyzer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
-import org.apache.lucene.document.FieldType;
-import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.DocsAndPositionsEnum;
-import org.apache.lucene.index.DocsEnum;
-import org.apache.lucene.index.IndexOptions;
-import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.index.PostingsEnum;
-import org.apache.lucene.index.Terms;
-import org.apache.lucene.index.TermsEnum;
-import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.RAMDirectory;
-import org.apache.lucene.util.BytesRef;
-import org.apache.lucene.util.Version;
-import org.jsoup.Jsoup;
+import org.knime.core.data.DataCell;
+import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.StringValue;
+import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+
+import com.mmiagency.knime.keyworddensity.util.KeywordDensityHelper;
+import com.mmiagency.knime.keyworddensity.util.KeywordDensityRowEntry;
+import com.mmiagency.knime.keyworddensity.util.KeywordDensityRowFactory;
 
 /**
  * This is the model implementation of KeywordDensity.
@@ -41,12 +31,14 @@ import org.knime.core.node.NodeSettingsWO;
  */
 public class KeywordDensityNodeModel extends NodeModel {
     
+    private static final NodeLogger logger = NodeLogger.getLogger(KeywordDensityNodeModel.class);
+    
+    private KeywordDensityNodeConfiguration m_config = new KeywordDensityNodeConfiguration();
+    
     /**
      * Constructor for the node model.
      */
-    protected KeywordDensityNodeModel() {
-    
-        // TODO: Specify the amount of input and output ports needed.
+    protected KeywordDensityNodeModel() {    
         super(1, 1);
     }
 
@@ -56,55 +48,43 @@ public class KeywordDensityNodeModel extends NodeModel {
     @Override
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
+    	
+    	KeywordDensityRowFactory factory = new KeywordDensityRowFactory();
+    	
+        BufferedDataContainer container = exec.createDataContainer(factory.tableSpec());
+        int index = 0;
+        
+    	DataTableSpec inSpec = inData[0].getSpec();
+    	String urlColumnName = m_config.getUrl().getStringValue();
+    	int urlColumnIndex = inSpec.findColumnIndex(urlColumnName);
 
-        StandardAnalyzer analyzer = new StandardAnalyzer();
-        Directory directory = new RAMDirectory();
-        IndexWriterConfig config = new IndexWriterConfig(analyzer);
-        IndexWriter indexWriter = new IndexWriter(directory, config);    	
-        
-        FieldType textFieldType = new FieldType();
-        textFieldType.setIndexOptions(IndexOptions.DOCS_AND_FREQS);
-        textFieldType.setTokenized(true);
-        textFieldType.setStored(true);
-        textFieldType.setStoreTermVectors(true);
-        
-        Document doc = new Document();
-        Field textField = new Field("content", "", textFieldType);
-        
-        org.jsoup.nodes.Document jdoc = Jsoup.connect("http://mysolr.com").get();
-        String text = jdoc.select("body").text();
-        
-        textField.setStringValue(text);        
-        doc.add(textField);
-        
-        indexWriter.addDocument(doc);        
-        indexWriter.commit();
-        indexWriter.close();
-        
-        IndexReader indexReader = DirectoryReader.open(directory);
-        Terms termsVector = null;
-        TermsEnum termsEnum = null;
-        BytesRef term = null;
-        String val = null;
-        PostingsEnum postingsEnum = null;
-
-        for (int i = 0; i < indexReader.maxDoc(); i++) {
-            termsVector = indexReader.getTermVector(i, "content");
-            termsEnum = termsVector.iterator();
-            while ( (term = termsEnum.next()) != null ) {
-                val = term.utf8ToString();
-                postingsEnum = termsEnum.postings(postingsEnum);
-                if (postingsEnum.nextDoc() >= 0) {
-                	System.out.println(val + ": " + postingsEnum.freq());
-                }
-            }
-        }
-        
-        indexReader.close();
-        directory.close();
-        
-        // TODO: Return a BufferedDataTable for each output port 
-        return new BufferedDataTable[]{};
+    	for (Iterator<DataRow> it = inData[0].iterator(); it.hasNext();) {
+    		DataRow row = it.next();
+    		DataCell cell = row.getCell(urlColumnIndex);
+    		if (cell.isMissing()) {
+    			container.addRowToTable(factory.createRow("" + index++, "", "FAILED: Missing URL"));
+    			continue;
+    		}
+    		String url = ((StringValue)cell).getStringValue();
+    		// using helper class to process content
+    		KeywordDensityHelper helper = new KeywordDensityHelper(url);
+    		
+    		try {
+    			helper.execute();
+    		} catch (Exception e) {    			
+    			container.addRowToTable(factory.createRow("" + index++, url, "FAILED: " + e.getMessage()));
+    			continue;
+    		}
+    		
+    		for (Iterator<KeywordDensityRowEntry> it2 = helper.iterator(); it2.hasNext();) {
+    			KeywordDensityRowEntry entry = it2.next();
+    			container.addRowToTable(factory.createRow("" + index++, entry));
+    		}
+    	}
+    	
+    	container.close();
+    	
+        return new BufferedDataTable[]{container.getTable()};
     }
 
     /**
@@ -122,8 +102,15 @@ public class KeywordDensityNodeModel extends NodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
 
-        // TODO: generated method stub
-        return new DataTableSpec[]{null};
+		if (inSpecs.length<1) {
+			throw new InvalidSettingsException("You must link a table with URL column to this node.");
+		}
+		
+		if (inSpecs[0].findColumnIndex(m_config.getUrl().getStringValue()) < 0) {
+			throw new InvalidSettingsException("A URL column in the data input table must exist and must be specified.");
+		}
+
+		return new DataTableSpec[]{new KeywordDensityRowFactory().tableSpec()};
     }
 
     /**
@@ -131,7 +118,9 @@ public class KeywordDensityNodeModel extends NodeModel {
      */
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
-         // TODO: generated method stub
+
+    	m_config.saveSettingsTo(settings);
+
     }
 
     /**
@@ -140,7 +129,9 @@ public class KeywordDensityNodeModel extends NodeModel {
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
-        // TODO: generated method stub
+    	KeywordDensityNodeConfiguration config = new KeywordDensityNodeConfiguration();
+    	config.loadValidatedSettingsFrom(settings);
+    	m_config = config;
     }
 
     /**
@@ -149,7 +140,9 @@ public class KeywordDensityNodeModel extends NodeModel {
     @Override
     protected void validateSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
-        // TODO: generated method stub
+            
+    	m_config.validateSettings(settings);
+
     }
     
     /**

@@ -10,7 +10,7 @@
     <node category-path="/mmi/" factory-class="com.mmiagency.knime.w3c.htmlvalidator.W3cHtmlValidatorNodeFactory" id="com.mmiagency.knime.w3c.htmlvalidator.W3cHtmlValidatorNodeFactory"/>
     <node category-path="/mmi/" factory-class="com.mmiagency.knime.w3c.cssvalidator.W3cCssValidatorNodeFactory" id="com.mmiagency.knime.w3c.cssvalidator.W3cCssValidatorNodeFactory"/>
     <node category-path="/mmi/" factory-class="com.mmiagency.knime.twitter.trends.TwitterTrendsNodeFactory" id="com.mmiagency.knime.twitter.TwitterTrendsNodeFactory"/>
-  <node category-path="/" factory-class="com.mmiagency.knime.keyworddensity.KeywordDensityNodeFactory" id="com.mmiagency.knime.keyworddensity.KeywordDensityNodeFactory"/>
+    <node category-path="/mmi/" factory-class="com.mmiagency.knime.keyworddensity.KeywordDensityNodeFactory" id="com.mmiagency.knime.keyworddensity.KeywordDensityNodeFactory"/>
 </extension>
    
 </plugin>
