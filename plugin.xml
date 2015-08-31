@@ -2,7 +2,7 @@
 <?eclipse version="3.0"?><plugin>
 
   <extension point="org.knime.workbench.repository.categories">
-	<category description="MMI Agency" icon="icons/MMI_Knime_MMILogo_16x16.png" level-id="mmi" name="MMI Agency" path="/"/>
+	<category description="MMI Labs" icon="icons/MMI_Knime_MMILogo_16x16.png" level-id="mmi" name="MMI Labs" path="/"/>
   </extension>
    
   <extension point="org.knime.workbench.repository.nodes">
