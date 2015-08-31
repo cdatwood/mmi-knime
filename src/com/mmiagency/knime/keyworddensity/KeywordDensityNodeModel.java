@@ -56,6 +56,7 @@ public class KeywordDensityNodeModel extends NodeModel {
         
     	DataTableSpec inSpec = inData[0].getSpec();
     	String urlColumnName = m_config.getUrl().getStringValue();
+    	String exclude = m_config.getExclude().getStringValue();
     	int urlColumnIndex = inSpec.findColumnIndex(urlColumnName);
 
     	for (Iterator<DataRow> it = inData[0].iterator(); it.hasNext();) {
@@ -67,7 +68,7 @@ public class KeywordDensityNodeModel extends NodeModel {
     		}
     		String url = ((StringValue)cell).getStringValue();
     		// using helper class to process content
-    		KeywordDensityHelper helper = new KeywordDensityHelper(url);
+    		KeywordDensityHelper helper = new KeywordDensityHelper(url, exclude);
     		
     		try {
     			helper.execute();

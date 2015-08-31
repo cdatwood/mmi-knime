@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -40,9 +42,18 @@ public class KeywordDensityHelper {
 	private String m_url;
 	private int m_total = 0;
 	private Map<String, Integer> m_keywordMap = new HashMap<String, Integer>();
+	private List<String> m_excludeList = new ArrayList<String>();
 
-	public KeywordDensityHelper(final String url) {
+	public KeywordDensityHelper(final String url, final String exclude) {
 		m_url = url;
+		
+		if (exclude != null) {
+			String[] tokens = exclude.split(",");
+			for (String token : tokens) {
+				token = token.trim().toLowerCase();
+				m_excludeList.add(token);
+			}
+		}
 	}
 	
 	public void execute() throws IOException {
@@ -85,6 +96,10 @@ public class KeywordDensityHelper {
             termsEnum = termsVector.iterator();
             while ( (term = termsEnum.next()) != null ) {
                 val = term.utf8ToString();
+                // skip term matching exclude list
+                if (m_excludeList.contains(val)) {
+                	continue;
+                }
                 postingsEnum = termsEnum.postings(postingsEnum);
                 if (postingsEnum.nextDoc() >= 0) {
                 	add(val, postingsEnum.freq());

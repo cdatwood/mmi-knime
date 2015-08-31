@@ -3,35 +3,20 @@
     <name>Keyword Density</name>
     
     <shortDescription>
-        
+        This node analyzes text content retrieved from URL and calculates keyword density data.
     </shortDescription>
     
     <fullDescription>
-        <intro>Insert long description here...</intro>
-        
-        
-        <option name="short name of first option (like in the dialog)">description of first option</option>
-        <option name="short name of second option (like in the dialog)">description of second option</option>
-        <!-- possibly more options that can also be grouped by tabs -->
-        <!--
-        <tab name="Standard Options">
-            <option name="short name of first option (like in the dialog)">description of first option</option>
-            <option name="short name of second option (like in the dialog)">description of second option</option>
-        </tab>
-        <tab name="Advanced Options">
-            <option name="short name of first advanced option (like in the dialog)">description of first advanced option</option>
-        </tab>
-        -->
+        <intro>This node leverage Jsoup to parse HTML content and Lucene to tokenize terms and generate a list of term frequency.  You can also use the Exclude field to filter out certain keywords that should not be part of the report.</intro>
+
+        <option name="URL Column Name">A selection of String columns from the input table, the chosen column will be used in URL(s) submission.</option>
+        <option name="Exclude Terms">A comma separated list of terms to be excluded from final results</option>
+
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="In-Port name">Description of first input port...</inPort>
-        <!-- possibly more input ports here-->
-        <outPort index="0" name="Out-Port name">Description of first output port...</outPort>
-        <!-- possibly more output ports here-->
+        <inPort index="0" name="Incoming table with URL column">An input table that contains a URL column</inPort>
+        <outPort index="0" name="Table output of keyword density result">An output table keyword density results in percentages and actual frequencies</outPort>
     </ports>    
-    <views>
-        <view index="0" name="name of first view">Description of first view...</view>
-        <!--view index="1" name="name of second view">Description of second view...</view-->
-    </views>
+
 </knimeNode>
