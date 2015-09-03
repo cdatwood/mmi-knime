@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
@@ -14,6 +15,7 @@ import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.RowKey;
 import org.knime.core.data.def.DefaultRow;
 import org.knime.core.data.def.StringCell;
+import org.knime.core.data.def.IntCell;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
@@ -130,9 +132,25 @@ public class RandomDataNodeModel extends NodeModel {
         		String columnType = m_columnTypes.get(i).getStringValue();
         		String columnMin = m_columnMin.get(i).getStringValue();
         		String columnMax = m_columnMax.get(i).getStringValue();
-
         		
-                cells.add(new StringCell(columnType));
+        		if (columnType.equals(COLUMN_TYPE_STRING)) {        			
+                    cells.add(new StringCell(columnType));
+        		} else if (columnType.equals(COLUMN_TYPE_INTEGER)) {
+        			Integer minInteger = 0;
+        			Integer maxInteger = 100;
+        			Integer columnMinInteger = Util.toInteger(columnMin, null);
+        			if (columnMinInteger != null) {
+        				minInteger = columnMinInteger;
+        				maxInteger = minInteger + 100;
+        			}
+        			Integer columnMaxInteger = Util.toInteger(columnMin, null);
+        			if (columnMaxInteger != null) {
+        				maxInteger = columnMaxInteger;
+        			}
+                    cells.add(new IntCell(getRandomInteger(minInteger, maxInteger)));
+        		} else if (columnType.equals(COLUMN_TYPE_DATE)) {
+                    cells.add(new StringCell(columnType));
+        		} 
         	}        
             
 
@@ -143,6 +161,14 @@ public class RandomDataNodeModel extends NodeModel {
         return new BufferedDataTable[] {dc.getTable()};
     }
 
+    private static Integer getRandomInteger(int min, int max) {
+    	int size = max - min;
+        Random random = new Random();
+        int randomIncrement = random.nextInt(size);
+        return min + randomIncrement;
+    }
+
+    
     private DataTableSpec createSpec() {
 		System.out.println("CREATE SPEC: " + m_noOfRows);
         final LinkedList<DataColumnSpec> specs = new LinkedList<DataColumnSpec>();
@@ -265,7 +291,6 @@ public class RandomDataNodeModel extends NodeModel {
     			}
     			if (minInteger != null && maxInteger != null && maxInteger < minInteger) {
     				errors.add("Column " + columnNumber + " has max value that is less than min value: " + max + " max < " + min + " min");
-   				
     			}
     			
     		}
@@ -278,6 +303,9 @@ public class RandomDataNodeModel extends NodeModel {
     			Date maxDate = Util.toDate(DATE_TYPE_FORMAT, max, null);
     			if (!Util.isBlankOrNull(max) && maxDate == null) {
     				errors.add("Column " + columnNumber + " has an invalid max date value: " + max);
+    			}
+    			if (minDate != null && maxDate != null && maxDate.before(minDate)) {
+    				errors.add("Column " + columnNumber + " has max value that is less than min value: " + max + " max < " + min + " min");
     			}
     		}
     	}
