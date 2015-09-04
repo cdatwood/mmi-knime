@@ -3,7 +3,9 @@ package com.mmiagency.knime.randomdata;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -14,8 +16,8 @@ import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.RowKey;
 import org.knime.core.data.def.DefaultRow;
-import org.knime.core.data.def.StringCell;
 import org.knime.core.data.def.IntCell;
+import org.knime.core.data.def.StringCell;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
@@ -120,7 +122,7 @@ public class RandomDataNodeModel extends NodeModel {
         final DataTableSpec newSpec = createSpec();
         final BufferedDataContainer dc = exec.createDataContainer(newSpec);
         final int totalNoOfRows = m_noOfRows.getIntValue();
-        
+try {        
         for (int rowIdx = 0; rowIdx < totalNoOfRows; rowIdx++) {
             exec.checkCanceled();
             final LinkedList<DataCell> cells = new LinkedList<DataCell>();
@@ -136,20 +138,46 @@ public class RandomDataNodeModel extends NodeModel {
         		if (columnType.equals(COLUMN_TYPE_STRING)) {        			
                     cells.add(new StringCell(columnType));
         		} else if (columnType.equals(COLUMN_TYPE_INTEGER)) {
+        			// Set the default minimum and max integers
         			Integer minInteger = 0;
         			Integer maxInteger = 100;
+        			
+        			// If a minimum value is configured by the user, update the min value and set the max value = min + 100
         			Integer columnMinInteger = Util.toInteger(columnMin, null);
         			if (columnMinInteger != null) {
         				minInteger = columnMinInteger;
         				maxInteger = minInteger + 100;
         			}
-        			Integer columnMaxInteger = Util.toInteger(columnMin, null);
+        			// If a maximum value is configured by the user, update the value
+        			Integer columnMaxInteger = Util.toInteger(columnMax, null);
         			if (columnMaxInteger != null) {
         				maxInteger = columnMaxInteger;
         			}
-                    cells.add(new IntCell(getRandomInteger(minInteger, maxInteger)));
+        			// Update the random integer
+        			Integer randomInteger = generateRandomInteger(minInteger, maxInteger);
+        			System.out.println(columnMinInteger + " - " + columnMaxInteger + " -> " + randomInteger); 
+        			cells.add(new IntCell(randomInteger));
         		} else if (columnType.equals(COLUMN_TYPE_DATE)) {
-                    cells.add(new StringCell(columnType));
+        			
+        			// Set the default dates to the 100 years ago and the current date
+        			Date maxDate = Util.getDateDaysAgo(0);
+        			Date minDate = Util.getDateYearsAgo(maxDate, 100);
+        			
+        			// If a minimum value is configured by the user, update the min value and set the max value = min + 100
+        			Date columnMinDate = Util.toDate(DATE_TYPE_FORMAT, columnMin, null);
+        			if (columnMinDate != null) {
+        				minDate = columnMinDate;
+        				maxDate = Util.getDateYearsAgo(minDate, -100);
+        			}
+        			// If a maximum value is configured by the user, update the value
+        			Date columnMaxDate = Util.toDate(DATE_TYPE_FORMAT, columnMax, null);
+        			if (columnMaxDate != null) {
+        				maxDate = columnMaxDate;
+        			}
+        			// Update the random Date
+        			Date randomDate = generateRandomDate(minDate, maxDate);
+        			System.out.println(columnMinDate + " - " + columnMaxDate + " -> " + randomDate); 
+                    cells.add(new StringCell(Util.formatDate(DATE_TYPE_FORMAT, randomDate, "")));
         		} 
         	}        
             
@@ -159,13 +187,34 @@ public class RandomDataNodeModel extends NodeModel {
         }
         dc.close();
         return new BufferedDataTable[] {dc.getTable()};
+} catch (Exception e) {
+	e.printStackTrace(System.out);
+	throw e;
+}
     }
 
-    private static Integer getRandomInteger(int min, int max) {
-    	int size = max - min;
+    private static Integer generateRandomInteger(int min, int max) {
         Random random = new Random();
-        int randomIncrement = random.nextInt(size);
-        return min + randomIncrement;
+        int randomNumber = random.nextInt(max - min) + min;
+        return randomNumber;
+    }
+    
+    private static Date generateRandomDate(Date minDate, Date maxDate) {
+    	long MILLIS_PER_DAY = 1000*60*60*24;
+    	GregorianCalendar s = new GregorianCalendar();
+    	s.setTimeInMillis(minDate.getTime());
+    	GregorianCalendar e = new GregorianCalendar();
+    	e.setTimeInMillis(maxDate.getTime());
+
+    	// Get difference in milliseconds
+    	long endL =  e.getTimeInMillis() +  e.getTimeZone().getOffset(e.getTimeInMillis());
+    	long startL = s.getTimeInMillis() + s.getTimeZone().getOffset(s.getTimeInMillis());
+    	long dayDiff = (endL - startL) / MILLIS_PER_DAY;
+
+    	Calendar cal = Calendar.getInstance();
+    	cal.setTime(minDate);
+    	cal.add(Calendar.DATE, new Random().nextInt((int)dayDiff));          
+    	return cal.getTime();
     }
 
     
@@ -175,7 +224,14 @@ public class RandomDataNodeModel extends NodeModel {
         
     	for (int i = 0;i < MAX_COLUMNS; i++) {
     		if (!shouldProcessColumn(m_columnNames.get(i).getStringValue(), m_columnActive.get(i).getBooleanValue())) continue;
-    		specs.add(new DataColumnSpecCreator(m_columnNames.get(i).getStringValue(), StringCell.TYPE).createSpec());
+    		
+    		String columnType = m_columnTypes.get(i).getStringValue();
+    		if (columnType.equals(COLUMN_TYPE_STRING) || columnType.equals(COLUMN_TYPE_DATE)) {       			
+        		specs.add(new DataColumnSpecCreator(m_columnNames.get(i).getStringValue(), StringCell.TYPE).createSpec());
+    		} else if (columnType.equals(COLUMN_TYPE_INTEGER)) {
+        		specs.add(new DataColumnSpecCreator(m_columnNames.get(i).getStringValue(), IntCell.TYPE).createSpec());
+    		}
+    		
     	}        
 
         return new DataTableSpec(specs.toArray(new DataColumnSpec[0]));

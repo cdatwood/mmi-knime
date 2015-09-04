@@ -1,8 +1,10 @@
 package com.mmiagency.knime.util;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Iterator;
 
 public class Util {
@@ -93,6 +95,42 @@ public class Util {
        		return null;
        	}
     }
+
+    public static String formatDate(String dateFormat, Date date, String defaultString)  {
+    	if (date == null) return defaultString;
+    	SimpleDateFormat format = new SimpleDateFormat(dateFormat);
+       	try	{	
+       		String formattedDate = format.format(date);
+       		return formattedDate;
+       	} catch (Exception e) {
+       		return defaultString;
+       	}
+    }
+
+    
+    public static Date getDateDaysAgo(int daysAgo) throws Exception {
+        Date today = new Date();
+        return getDateDaysAgo(today, daysAgo);
+    }
+
+    public static Date getDateDaysAgo(Date date, int daysAgo) throws Exception {
+        GregorianCalendar cal = new GregorianCalendar();
+        cal.setTime(date);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        cal.add(Calendar.DATE, daysAgo * -1);
+        return cal.getTime();
+    }    
+
+    public static Date getDateYearsAgo(Date date, int yearsAgo) throws Exception {
+        GregorianCalendar cal = new GregorianCalendar();
+        cal.setTime(date);
+        cal.add(Calendar.YEAR, yearsAgo * -1);
+        return cal.getTime();
+    }    
+
     
 }
 
