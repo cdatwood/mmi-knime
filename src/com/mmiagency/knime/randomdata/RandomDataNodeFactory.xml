@@ -11,8 +11,8 @@
 		<option name="Total Rows">Total rows of data to generate</option>
 		<option name="Per Field: Column Name">The name of the table column</option>
         <option name="Per Field: Type">Type of field (Date, String, Integer)</option>
-        <option name="Per Field: Min">The minimum value for the random data.  Types: String -&gt; Minimum text length (default 1), Integer -&gt; Min number, Date -&gt; Earliest Date (m/d/yyyy format), defaults to 1/1/2000</option>
-        <option name="Per Field: Max">The maximum value for the random data.  Types: String -&gt; Max text length (default 32), Integer -&gt; Max number, Date -&gt; Latest Date (m/d/yyyy format), defaults to 1/1/2100</option>
+        <option name="Per Field: Min">The minimum value for the random data.  Types: String -&gt; Minimum text length (default 1), Integer -&gt; Min number, Date -&gt; Earliest Date (m/d/yyyy format), defaults to 100 years ago</option>
+        <option name="Per Field: Max">The maximum value for the random data.  Types: String -&gt; Max text length (default 32), Integer -&gt; Max number, Date -&gt; Latest Date (m/d/yyyy format), defaults to current date</option>
 	</fullDescription>
 	
 	<ports>
