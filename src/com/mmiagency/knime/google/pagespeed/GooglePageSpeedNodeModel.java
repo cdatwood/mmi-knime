@@ -41,6 +41,7 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.json.jackson.JacksonFactory;
 import com.google.api.client.util.Key;
+import com.oracle.jrockit.jfr.DataType;
 
 
 /**
@@ -107,7 +108,7 @@ public class GooglePageSpeedNodeModel extends NodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
 
-        logger.info("Loading URLs from incoming tables");
+        logger.debug("Loading URLs from incoming tables");
 
     	DataTableSpec inSpec = inData[0].getSpec();
     	String urlColumnName = configuration.getUrl().getStringValue();
@@ -601,21 +602,33 @@ public class GooglePageSpeedNodeModel extends NodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
         
-        // TODO: check if user settings are available, fit to the incoming
-        // table structure, and the incoming types are feasible for the node
-        // to execute. If the node can execute in its current state return
-        // the spec of its output data table(s) (if you can, otherwise an array
-        // with null elements), or throw an exception with a useful user message
 		if (inSpecs.length<1) {
 			throw new InvalidSettingsException("You must link a table with URL column to this node.");
 		}
 		
-		if (inSpecs[0].findColumnIndex(configuration.getUrl().getStringValue()) < 0) {
+		// user has not set up URL column yet, auto-guessing URL column
+		if (configuration.getUrl().getStringValue().isEmpty()) {
+			if (inSpecs[0].findColumnIndex(configuration.FIELD_DEFAULT_URL_COLUMN) >= 0) {
+				// found URL column
+				configuration.getUrl().setStringValue(configuration.FIELD_DEFAULT_URL_COLUMN);
+				setWarningMessage("Auto-guessing: Using column '"+configuration.FIELD_DEFAULT_URL_COLUMN+"' as URL column");
+			} else {
+				// URL column doesn't exist, now check the first String column
+				for (Iterator<DataColumnSpec> it = inSpecs[0].iterator(); it.hasNext();) {
+					DataColumnSpec columnSpec = it.next();
+					if (columnSpec.getType().equals(StringCell.TYPE)) {
+						configuration.getUrl().setStringValue(columnSpec.getName());
+						setWarningMessage("Auto-guessing: Using first string column '"+columnSpec.getName()+"' as URL column");
+						break;
+					}
+				}
+			}
+		}		
+		
+		if (configuration.getUrl().getStringValue().isEmpty()) {
 			throw new InvalidSettingsException("A URL column in the data input table must exist and must be specified.");
 		}
 		
-		
-
         return new DataTableSpec[]{null};
     }
 
@@ -650,41 +663,16 @@ public class GooglePageSpeedNodeModel extends NodeModel {
     	configuration.validateSettings(settings);
 
     }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadInternals(final File internDir,
-            final ExecutionMonitor exec) throws IOException,
-            CanceledExecutionException {
-        
-        // TODO load internal data. 
-        // Everything handed to output ports is loaded automatically (data
-        // returned by the execute method, models loaded in loadModelContent,
-        // and user settings set through loadSettingsFrom - is all taken care 
-        // of). Load here only the other internals that need to be restored
-        // (e.g. data used by the views).
+	@Override
+	protected void loadInternals(File nodeInternDir, ExecutionMonitor exec)
+			throws IOException, CanceledExecutionException {		
+	}
 
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveInternals(final File internDir,
-            final ExecutionMonitor exec) throws IOException,
-            CanceledExecutionException {
-       
-        // TODO save internal models. 
-        // Everything written to output ports is saved automatically (data
-        // returned by the execute method, models saved in the saveModelContent,
-        // and user settings saved through saveSettingsTo - is all taken care 
-        // of). Save here only the other internals that need to be preserved
-        // (e.g. data used by the views).
-
-    }
-    
+	@Override
+	protected void saveInternals(File nodeInternDir, ExecutionMonitor exec)
+			throws IOException, CanceledExecutionException {		
+	}  
+	
     public static class PageSpeedResult {
     	@Key
     	String kind;
