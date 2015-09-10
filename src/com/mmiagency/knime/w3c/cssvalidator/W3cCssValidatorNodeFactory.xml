@@ -7,7 +7,7 @@
     </shortDescription>
     
     <fullDescription>
-        <intro>This node submits URL(s) to W3C CSS Validator service to evaluate quality of the CSS source files.</intro>
+        <intro>This node submits URL(s) to W3C CSS Validator service to evaluate quality of the CSS source files.  It uses W3C's host <a href="http://jigsaw.w3.org/css-validator/validator">http://jigsaw.w3.org/css-validator/validator</a> by default.  Note that there is an unpublicized quota limit on W3C's host.  Sending a large batch of URLs through this node to W3C's host can result in your IP being banned from their website.  To avoid exceeding their quota limit, you should consider setting up your own validator host.  You can follow their <a href="https://jigsaw.w3.org/css-validator/DOWNLOAD.html">instruction</a> to set up your own host.</intro>
         
         <option name="CSS Validator URL">CSS Validator URL, default to W3C's URL</option>
         <option name="URL Column Name">A selection of String columns from the input table, the chosen column will be used in URL(s) submission.</option>

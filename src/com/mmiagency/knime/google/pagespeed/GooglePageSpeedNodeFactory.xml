@@ -7,7 +7,20 @@
     </shortDescription>
     
     <fullDescription>
-        <intro>This node submits URL(s) to Google PageSpeed Insights service to pull PageSpeed scores and other metrics provided by PageSpeed.</intro>
+        <intro>This node submits URL(s) to Google PageSpeed Insights service to pull PageSpeed scores and other metrics provided by PageSpeed.<br/><br/>
+        You will need a <a href="https://www.google.com/accounts/NewAccount">Google Account</a> to obtain a Google PageSpeed Insight API key.  To acquire an API key:<br/><br/>
+        <ol>
+        	<li>Go to <a href="https://console.developers.google.com/">Google Developers Console</a></li>
+        	<li>Select a project, or create a new one.</li>
+        	<li>In the sidebar on the left, expand <strong>APIs and auth</strong>. Next, click <strong>APIs</strong>. Select the <strong>Enabled APIs</strong> link in the API section to see a list of all your enabled APIs. Make sure that the PageSpeed Insights API is on the list of enabled APIs. If you have not enabled it, select the API from the list of APIs, then select the <strong>Enable API</strong> button for the API.</li>
+            <li>In the sidebar on the left, select <strong>Credentials</strong>.</li>
+            <li>Click <strong>Add credentials</strong> and select <strong>API key</strong>.</li>
+            <li>Click <strong>Server key</strong>.</li>
+            <li>Specify a name for the key and click <strong>Create</strong></li>
+            <li>An <strong>API key</strong> should be shown.</li>
+        </ol>
+        Google imposes a quota limit on PageSpeed Insights API usage.  The current limit (as of September, 2015) is 25,000 requests / day and 1 requests / second.  This node a hard-coded pause for 1 second between sending requests to Google to avoid exceeding quota.
+        </intro>
         
         <option name="Google API Key">Google API Key that's necessary to use the service.</option>
         <option name="URL Column Name">A selection of String columns from the input table, the chosen column will be used in URL(s) submission.</option>

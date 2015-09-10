@@ -7,7 +7,7 @@
     </shortDescription>
     
     <fullDescription>
-        <intro>This node submits URL(s) to W3C Nu HTML Validator service to evaluate quality of the HTML source.</intro>
+        <intro>This node submits URL(s) to W3C Nu HTML Validator service to evaluate quality of the HTML source.  It uses W3C's host <a href="https://validator.w3.org/nu/">https://validator.w3.org/nu/</a> by default.  Note that there is an unpublicized quota limit on W3C's host.  Sending a large batch of URLs through this node to W3C's host can result in your IP being banned from their website.  To avoid exceeding their quota limit, you should consider setting up your own validator host.  You can follow their <a href="https://validator.w3.org/docs/install.html">instruction</a> to set up your own host.</intro>
         
         <option name="HTML Validator URL">HTML Validator URL, default to W3C's URL</option>
         <option name="URL Column Name">A selection of String columns from the input table, the chosen column will be used in URL(s) submission.</option>
