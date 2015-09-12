@@ -17,6 +17,7 @@ import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.MissingCell;
 import org.knime.core.data.RowKey;
 import org.knime.core.data.StringValue;
 import org.knime.core.data.def.DefaultRow;
@@ -75,6 +76,10 @@ public class W3cHtmlValidatorNodeModel extends NodeModel {
     	    	
     	int urlColumnIndex = inSpec.findColumnIndex(urlColumnName);
 		
+    	if (urlColumnIndex < 0) {
+			throw new InvalidSettingsException("You must link a table with URL column to this node.");
+    	}
+    	
     	// prepare output data container        
         DataColumnSpec[] summaryColSpecs = new DataColumnSpec[5];
         summaryColSpecs[0] = new DataColumnSpecCreator("url", StringCell.TYPE).createSpec();
@@ -98,18 +103,14 @@ public class W3cHtmlValidatorNodeModel extends NodeModel {
         
     	for (Iterator<DataRow> it = inData.iterator(); it.hasNext();) {
     		DataRow row = it.next();
-    		String url = ((StringValue)row.getCell(urlColumnIndex)).getStringValue();
-    		// put results in outgoing table
+    		
+			DataCell cell = row.getCell(urlColumnIndex);
+			
+			String url = "";
+
+			// put results in outgoing table
     		RowKey key = new RowKey("Row " + summaryRowCount++);
 
-    		// retrieve validator results
-    		String validatorUrl = m_configuration.getValidatorUrl().getStringValue() + "?doc=" + URLEncoder.encode(url, "UTF-8");
-    		if (m_configuration.getShowOutline().getBooleanValue()) {
-    			validatorUrl += "&showoutline=yes";
-    		}
-    		
-    		logger.info("Validation URL: " + validatorUrl);
-    		
     		DataCell[] summaryCells = new DataCell[5];
     		
     		summaryCells[0] = new StringCell(url);
@@ -121,11 +122,32 @@ public class W3cHtmlValidatorNodeModel extends NodeModel {
     		boolean goodRespond = true;
     		String errorMessage = null;
     		
-    		Connection con = Jsoup.connect(validatorUrl).userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.21 (KHTML, like Gecko) Chrome/19.0.1042.0 Safari/535.21").timeout(10000);    		
-    	    Connection.Response resp = null;
     	    Document doc = null;
+    	    Connection.Response resp = null;
+
     	    try {
-    	    	resp = con.execute();
+    			if (cell.getClass() == MissingCell.class) {
+    				throw new Exception("URL value is missing");
+    			}
+    			
+    			if (cell.getClass() != StringCell.class) {
+    				throw new Exception("The specified URL column \"" + urlColumnName + "\" is not a string column.  Please specify a string column for URLs.");
+    			}
+    			
+    			url = ((StringValue)cell).getStringValue();    	
+
+        		// set URL in summary
+        		summaryCells[0] = new StringCell(url);
+    			
+        		// retrieve validator results
+        		String validatorUrl = m_configuration.getValidatorUrl().getStringValue() + "?doc=" + URLEncoder.encode(url, "UTF-8");
+        		if (m_configuration.getShowOutline().getBooleanValue()) {
+        			validatorUrl += "&showoutline=yes";
+        		}
+        		
+        		Connection con = Jsoup.connect(validatorUrl).userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.21 (KHTML, like Gecko) Chrome/19.0.1042.0 Safari/535.21").timeout(10000);    		
+    			
+    			resp = con.execute();
     	    	doc = con.get();
     	    } catch (HttpStatusException hse) {
     	    	goodRespond = false;
@@ -143,7 +165,7 @@ public class W3cHtmlValidatorNodeModel extends NodeModel {
     		
     		int number = 1;
     		
-    		if (resp.statusCode() == 200) {
+    		if (goodRespond && resp.statusCode() == 200) {
         		summaryCells[4] = new StringCell("success");
 	    		Elements results = doc.select("#results ol li");
 	    		
@@ -235,7 +257,7 @@ public class W3cHtmlValidatorNodeModel extends NodeModel {
             try {
             	Thread.sleep(1000);
             } catch (InterruptedException e) {
-            	// do nothing
+            	throw new Exception("Processing interrupted", e);
             }
             
     	}
@@ -270,11 +292,38 @@ public class W3cHtmlValidatorNodeModel extends NodeModel {
 			throw new InvalidSettingsException("You must link a table with URL column to this node.");
 		}
 		
-		if (inSpecs[0].findColumnIndex(m_configuration.getUrl().getStringValue()) < 0) {
-			throw new InvalidSettingsException("A URL column in the data input table must exist and must be specified.");
-		}
+		// user has not set up URL column yet, auto-guessing URL column
+		if (m_configuration.getUrl().getStringValue().isEmpty()) {
+			int index = inSpecs[0].findColumnIndex(m_configuration.FIELD_DEFAULT_URL_COLUMN); 
+			boolean found = false;
+			if (index >= 0) {
+				DataColumnSpec columnSpec = inSpecs[0].getColumnSpec(index);
+				// check if column is of string type
+				if (columnSpec.getType().equals(StringCell.TYPE)) {
+					// found URL column
+					m_configuration.getUrl().setStringValue(m_configuration.FIELD_DEFAULT_URL_COLUMN);
+					setWarningMessage("Auto-guessing: Using column '"+m_configuration.FIELD_DEFAULT_URL_COLUMN+"' as URL column");
+					found = true;
+				}
+			}
+			
+			// if URL column is still not found 
+			if (!found) {
+				// URL column doesn't exist, now check the first String column
+				for (Iterator<DataColumnSpec> it = inSpecs[0].iterator(); it.hasNext();) {
+					DataColumnSpec columnSpec = it.next();
+					if (columnSpec.getType().equals(StringCell.TYPE)) {
+						m_configuration.getUrl().setStringValue(columnSpec.getName());
+						setWarningMessage("Auto-guessing: Using first string column '"+columnSpec.getName()+"' as URL column");
+						break;
+					}
+				}
+			}
+		}		
 		
-		// TODO flow variables
+		if (m_configuration.getUrl().getStringValue().isEmpty()) {
+			throw new InvalidSettingsException("A string column for URLs in the data input table must exist and must be specified.  Please create a URL column or pick the right column in this node's configuration.");
+		}
 
         return new DataTableSpec[]{null, null};
     }

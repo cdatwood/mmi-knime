@@ -54,8 +54,6 @@ public class TwitterTrendsNodeModel extends NodeModel {
      */
     @Override
     protected PortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
-
-    	logger.debug("Executing");
     	
     	TrendRowFactory factory = new TrendRowFactory();
         BufferedDataContainer container = exec.createDataContainer(factory.tableSpec());

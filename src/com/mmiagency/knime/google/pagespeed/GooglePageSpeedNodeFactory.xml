@@ -19,7 +19,7 @@
             <li>Specify a name for the key and click <strong>Create</strong></li>
             <li>An <strong>API key</strong> should be shown.</li>
         </ol>
-        Google imposes a quota limit on PageSpeed Insights API usage.  The current limit (as of September, 2015) is 25,000 requests / day and 1 requests / second.  This node a hard-coded pause for 1 second between sending requests to Google to avoid exceeding quota.
+        Google imposes a quota limit on PageSpeed Insights API usage.  The current limit (as of September, 2015) is 25,000 requests / day and 1 requests / second.  This node has a hard-coded pause for 1 second between sending requests to Google to avoid exceeding quota.
         </intro>
         
         <option name="Google API Key">Google API Key that's necessary to use the service.</option>

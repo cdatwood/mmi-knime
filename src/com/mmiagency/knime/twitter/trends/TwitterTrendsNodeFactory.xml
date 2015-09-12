@@ -7,7 +7,7 @@
     </shortDescription>
     
     <fullDescription>
-        <intro>This node uses Twitter API Connector to connect to Twitter API to pull Trends data.  It will first make a call to trends/available to download a list of available cities/countries and populated a the Place drop down.  Select a Country/City and it will then make a call to trends/place to pull down Twitter Trends data for that specifc city or country.</intro>
+        <intro>This node uses Twitter API Connector to connect to Twitter API to pull Trends data.  It will first make a call to trends/available to download a list of available cities/countries and populated a the Place drop down.  Select a Country/City and it will then make a call to trends/place to pull down Twitter Trends data for that specific city or country.</intro>
                 
         <option name="Country">This is a drop down of available countries with Twitter Trends data.  This list is updated on the fly.</option>
         <option name="City">This is a drop down of available cities with Twitter Trends data.  This list is updated on the fly.</option>

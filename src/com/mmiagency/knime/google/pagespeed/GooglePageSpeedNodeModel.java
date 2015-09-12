@@ -14,6 +14,7 @@ import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.MissingCell;
 import org.knime.core.data.RowKey;
 import org.knime.core.data.StringValue;
 import org.knime.core.data.def.DefaultRow;
@@ -41,7 +42,6 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.json.jackson.JacksonFactory;
 import com.google.api.client.util.Key;
-import com.oracle.jrockit.jfr.DataType;
 
 
 /**
@@ -115,22 +115,44 @@ public class GooglePageSpeedNodeModel extends NodeModel {
     	    	
     	int urlColumnIndex = inSpec.findColumnIndex(urlColumnName);
     	
+    	if (urlColumnIndex < 0) {
+			throw new InvalidSettingsException("You must link a table with URL column to this node.");
+    	}
+    	
     	// prepare output data container
         BufferedDataContainer container = null;
         
         int i = 0;
         Queue<PageSpeedResult> pageSpeedErrors = new LinkedList<PageSpeedResult>();
-        
+
+        DataRow row = null;
+        DataCell cell = null;
+		PageSpeedResult pageSpeedResult = null;
+		boolean hasError = false;
+		String url = null;
+		
     	for (Iterator<DataRow> it = inData[0].iterator(); it.hasNext();) {
-    		DataRow row = it.next();
-    		String url = ((StringValue)row.getCell(urlColumnIndex)).getStringValue();
-    	
-    		// call pagespeed function    		
-    		PageSpeedResult pageSpeedResult = null;
-    		boolean hasError = false;
     		
+    		row = it.next();
+    		
+    		pageSpeedResult = null;
+    		hasError = false;
+    		url = "";
+
     		try {
-	    		pageSpeedResult = retrievePageSpeedResult(url);
+    			cell = row.getCell(urlColumnIndex);
+    			
+    			if (cell.getClass() == MissingCell.class) {
+    				throw new Exception("URL value is missing");
+    			}
+    			
+    			if (cell.getClass() != StringCell.class) {
+    				throw new Exception("The specified URL column \"" + urlColumnName + "\" is not a string column.  Please specify a string column for URLs.");
+    			}
+    			
+    			url = ((StringValue)cell).getStringValue();
+
+    			pageSpeedResult = retrievePageSpeedResult(url);
 	    		
 	    		if (pageSpeedResult == null 
 	    				|| pageSpeedResult.pageStats == null
@@ -144,6 +166,13 @@ public class GooglePageSpeedNodeModel extends NodeModel {
 	    			pageSpeedErrors.add(pageSpeedResult);
 	    			hasError = true;
 	    		}
+    		} catch (IndexOutOfBoundsException e) {
+    			logger.error("URL value is missing");
+    			pageSpeedResult = new PageSpeedResult();
+    			pageSpeedResult.id = url;
+    			pageSpeedResult.status = "URL value is missing";
+    			pageSpeedErrors.add(pageSpeedResult);
+    			hasError = true;
     		} catch (Throwable t) {
     			logger.error("Unable to retrieve PageSpeed results for url: " + url + ", error: " + t.getMessage());
     			pageSpeedResult = new PageSpeedResult();
@@ -209,7 +238,7 @@ public class GooglePageSpeedNodeModel extends NodeModel {
             try {
             	Thread.sleep(1000);
             } catch (InterruptedException e) {
-            	// do nothing
+            	throw new Exception("Processing interrupted", e);
             }
             
             i++;
@@ -608,11 +637,21 @@ public class GooglePageSpeedNodeModel extends NodeModel {
 		
 		// user has not set up URL column yet, auto-guessing URL column
 		if (configuration.getUrl().getStringValue().isEmpty()) {
-			if (inSpecs[0].findColumnIndex(configuration.FIELD_DEFAULT_URL_COLUMN) >= 0) {
-				// found URL column
-				configuration.getUrl().setStringValue(configuration.FIELD_DEFAULT_URL_COLUMN);
-				setWarningMessage("Auto-guessing: Using column '"+configuration.FIELD_DEFAULT_URL_COLUMN+"' as URL column");
-			} else {
+			int index = inSpecs[0].findColumnIndex(configuration.FIELD_DEFAULT_URL_COLUMN); 
+			boolean found = false;
+			if (index >= 0) {
+				DataColumnSpec columnSpec = inSpecs[0].getColumnSpec(index);
+				// check if column is of string type
+				if (columnSpec.getType().equals(StringCell.TYPE)) {
+					// found URL column
+					configuration.getUrl().setStringValue(configuration.FIELD_DEFAULT_URL_COLUMN);
+					setWarningMessage("Auto-guessing: Using column '"+configuration.FIELD_DEFAULT_URL_COLUMN+"' as URL column");
+					found = true;
+				}
+			}
+			
+			// if URL column is still not found 
+			if (!found) {
 				// URL column doesn't exist, now check the first String column
 				for (Iterator<DataColumnSpec> it = inSpecs[0].iterator(); it.hasNext();) {
 					DataColumnSpec columnSpec = it.next();
@@ -626,7 +665,7 @@ public class GooglePageSpeedNodeModel extends NodeModel {
 		}		
 		
 		if (configuration.getUrl().getStringValue().isEmpty()) {
-			throw new InvalidSettingsException("A URL column in the data input table must exist and must be specified.");
+			setWarningMessage("Please specify a URL column");
 		}
 		
         return new DataTableSpec[]{null};
