@@ -142,7 +142,7 @@ public class GooglePageSpeedNodeModel extends NodeModel {
     		try {
     			cell = row.getCell(urlColumnIndex);
     			
-    			if (cell.getClass() == MissingCell.class) {
+    			if (cell.isMissing()) {
     				throw new Exception("URL value is missing");
     			}
     			
