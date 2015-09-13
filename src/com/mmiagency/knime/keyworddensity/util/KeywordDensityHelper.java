@@ -1,6 +1,7 @@
 package com.mmiagency.knime.keyworddensity.util;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
@@ -40,27 +41,59 @@ import org.jsoup.Jsoup;
 public class KeywordDensityHelper {
 	
 	private String m_url;
+	private String m_content;
 	private int m_total = 0;
 	private Map<String, Integer> m_keywordMap = new HashMap<String, Integer>();
 	private List<String> m_excludeList = new ArrayList<String>();
+	private boolean m_includeMetaKeywords = true;
+	private boolean m_includeMetaDescription = true;
+	private boolean m_includePageTitle = true;
 
-	public KeywordDensityHelper(final String url, final String exclude) {
+	public KeywordDensityHelper(final String url, final String content, final String exclude, final boolean includeMetaKeywords, final boolean includeMetaDescription, final boolean includePageTitle) {
 		m_url = url;
+		m_content = content;
 		
 		if (exclude != null) {
-			String[] tokens = exclude.split(",");
+			exclude.replace(",", " ");
+			String[] tokens = exclude.split(" ");
 			for (String token : tokens) {
 				token = token.trim().toLowerCase();
 				m_excludeList.add(token);
 			}
 		}
+		
+		m_includeMetaKeywords = includeMetaKeywords;
+		m_includeMetaDescription = includeMetaDescription;
+		m_includePageTitle = includePageTitle;
 	}
 	
 	public void execute() throws IOException {
 		
+		org.jsoup.nodes.Document jdoc = null;
+		
 		// pull content using Jsoup 
-        org.jsoup.nodes.Document jdoc = Jsoup.connect(m_url).get();
-        String text = jdoc.select("body").text();
+		if (m_content != null && !m_content.trim().isEmpty()) {
+			jdoc = Jsoup.parse(m_content);
+		} else {
+			jdoc = Jsoup.connect(m_url).get();
+		}
+		
+		StringWriter text = new StringWriter();
+        
+        if (m_includeMetaKeywords) {
+        	text.write(jdoc.select("meta[name=keywords]").attr("content"));
+        	text.write(" ");
+        }
+        if (m_includeMetaDescription) {
+        	text.write(jdoc.select("meta[name=description]").attr("content"));
+        	text.write(" ");
+        }
+        if (m_includePageTitle) {
+        	text.write(jdoc.select("title").text());
+        	text.write(" ");
+        }
+
+        text.write(jdoc.select("body").text());
 
         // analyze content with Lucene
         StandardAnalyzer analyzer = new StandardAnalyzer();
@@ -77,7 +110,7 @@ public class KeywordDensityHelper {
         Document doc = new Document();
         Field textField = new Field("content", "", textFieldType);
                 
-        textField.setStringValue(text);        
+        textField.setStringValue(text.toString());        
         doc.add(textField);
         
         indexWriter.addDocument(doc);        
@@ -173,7 +206,7 @@ public class KeywordDensityHelper {
 			return new KeywordDensityRowEntry(
 					url,
 					mapEntry.getKey(),
-					percentageFormat.format(new BigDecimal(mapEntry.getValue()).divide(total, 2, RoundingMode.HALF_UP).doubleValue()),
+					new BigDecimal(mapEntry.getValue()).divide(total, 8, RoundingMode.HALF_UP).doubleValue(),
 					mapEntry.getValue()
 					);
 		}

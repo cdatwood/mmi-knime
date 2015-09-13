@@ -5,9 +5,11 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import org.knime.core.data.DataCell;
+import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.StringValue;
+import org.knime.core.data.def.StringCell;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
@@ -56,8 +58,16 @@ public class KeywordDensityNodeModel extends NodeModel {
         
     	DataTableSpec inSpec = inData[0].getSpec();
     	String urlColumnName = m_config.getUrl().getStringValue();
+    	String contentColumnName = m_config.getContent().getStringValue();
+    	String excludeColumnName = m_config.getExcludeColumn().getStringValue();
     	String exclude = m_config.getExclude().getStringValue();
+    	boolean includeMetaKeywords = m_config.getIncludeMetaKeywords().getBooleanValue();
+    	boolean includeMetaDescription = m_config.getIncludeMetaDescription().getBooleanValue();
+    	boolean includePageTitle = m_config.getIncludePageTitle().getBooleanValue();
+    	
     	int urlColumnIndex = inSpec.findColumnIndex(urlColumnName);
+    	int contentColumnIndex = inSpec.findColumnIndex(contentColumnName);
+    	int excludeColumnIndex = inSpec.findColumnIndex(excludeColumnName);
 
     	for (Iterator<DataRow> it = inData[0].iterator(); it.hasNext();) {
     		DataRow row = it.next();
@@ -66,9 +76,46 @@ public class KeywordDensityNodeModel extends NodeModel {
     			container.addRowToTable(factory.createRow("" + index++, "", "FAILED: Missing URL"));
     			continue;
     		}
+			if (cell.getClass() != StringCell.class) {
+    			container.addRowToTable(factory.createRow("" + index++, "", 
+    					"The specified URL column \"" + urlColumnName + "\" is not a string column.  Please specify a string column for URLs."));
+    			continue;
+			}
+			
     		String url = ((StringValue)cell).getStringValue();
+
+    		String content = null;
+			
+			// content
+			if (contentColumnIndex >= 0) {
+				DataCell contentCell = row.getCell(contentColumnIndex);
+				if (contentCell.isMissing()) {
+					// do nothing, we will pull content from URL
+				} else if (contentCell.getClass() != StringCell.class) {
+					setWarningMessage("Content column is not a string for URL: " + url);
+				} else {
+					content = ((StringValue)contentCell).getStringValue();
+				}
+			}
+			
+    		String urlExclude = "";
+			
+			// url specific exclude
+			if (excludeColumnIndex >= 0) {
+				DataCell urlExcludeCell = row.getCell(excludeColumnIndex);
+				if (urlExcludeCell.isMissing()) {
+					// do nothing, because some URLs may not have specific exclude terms
+				} else if (urlExcludeCell.getClass() != StringCell.class) {
+					setWarningMessage("URL Exclude Terms is not a string for URL: " + url);
+				} else {
+					urlExclude = ((StringValue)urlExcludeCell).getStringValue();
+				}
+			}
+			
     		// using helper class to process content
-    		KeywordDensityHelper helper = new KeywordDensityHelper(url, exclude);
+    		KeywordDensityHelper helper = new KeywordDensityHelper(url, content,
+    				exclude + " " + urlExclude, includeMetaKeywords, 
+    				includeMetaDescription, includePageTitle);
     		
     		try {
     			helper.execute();
@@ -107,8 +154,37 @@ public class KeywordDensityNodeModel extends NodeModel {
 			throw new InvalidSettingsException("You must link a table with URL column to this node.");
 		}
 		
-		if (inSpecs[0].findColumnIndex(m_config.getUrl().getStringValue()) < 0) {
-			throw new InvalidSettingsException("A URL column in the data input table must exist and must be specified.");
+		// user has not set up URL column yet, auto-guessing URL column
+		if (m_config.getUrl().getStringValue().isEmpty()) {
+			int index = inSpecs[0].findColumnIndex(m_config.FIELD_DEFAULT_URL_COLUMN); 
+			boolean found = false;
+			if (index >= 0) {
+				DataColumnSpec columnSpec = inSpecs[0].getColumnSpec(index);
+				// check if column is of string type
+				if (columnSpec.getType().equals(StringCell.TYPE)) {
+					// found URL column
+					m_config.getUrl().setStringValue(m_config.FIELD_DEFAULT_URL_COLUMN);
+					setWarningMessage("Auto-guessing: Using column '"+m_config.FIELD_DEFAULT_URL_COLUMN+"' as URL column");
+					found = true;
+				}
+			}
+			
+			// if URL column is still not found 
+			if (!found) {
+				// URL column doesn't exist, now check the first String column
+				for (Iterator<DataColumnSpec> it = inSpecs[0].iterator(); it.hasNext();) {
+					DataColumnSpec columnSpec = it.next();
+					if (columnSpec.getType().equals(StringCell.TYPE)) {
+						m_config.getUrl().setStringValue(columnSpec.getName());
+						setWarningMessage("Auto-guessing: Using first string column '"+columnSpec.getName()+"' as URL column");
+						break;
+					}
+				}
+			}
+		}		
+		
+		if (m_config.getUrl().getStringValue().isEmpty()) {
+			setWarningMessage("A string column for URLs in the data input table must exist and must be specified.  Please create a URL column or pick the right column in this node's configuration.");
 		}
 
 		return new DataTableSpec[]{new KeywordDensityRowFactory().tableSpec()};

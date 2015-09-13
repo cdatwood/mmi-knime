@@ -4,6 +4,7 @@ import org.knime.core.data.StringValue;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentColumnNameSelection;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
+import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.util.DataValueColumnFilter;
 
 /**
@@ -24,6 +25,7 @@ public class KeywordDensityNodeDialog extends DefaultNodeSettingsPane {
      */
     @SuppressWarnings("unchecked")
 	protected KeywordDensityNodeDialog() {
+        super();
 
         addDialogComponent(new DialogComponentColumnNameSelection(
         		KeywordDensityNodeConfiguration.getUrlColumnSettingsModel(),
@@ -31,9 +33,33 @@ public class KeywordDensityNodeDialog extends DefaultNodeSettingsPane {
         		0, true,
         		new DataValueColumnFilter(StringValue.class)));
         
+        addDialogComponent(new DialogComponentColumnNameSelection(
+        		KeywordDensityNodeConfiguration.getContentColumnSettingsModel(),
+        		KeywordDensityNodeConfiguration.FIELD_LABEL_CONTENT_COLUMN, 
+        		0, false, true,
+        		new DataValueColumnFilter(StringValue.class)));
+
+        addDialogComponent(new DialogComponentColumnNameSelection(
+        		KeywordDensityNodeConfiguration.getExcludeColumnSettingsModel(),
+        		KeywordDensityNodeConfiguration.FIELD_LABEL_EXCLUDE_COLUMN, 
+        		0, false, true,
+        		new DataValueColumnFilter(StringValue.class)));
+
         addDialogComponent(new DialogComponentString(
         		KeywordDensityNodeConfiguration.getExcludeSettingsModel(),
-        		KeywordDensityNodeConfiguration.FIELD_LABEL_EXCLUDE, true, 30));        
+        		KeywordDensityNodeConfiguration.FIELD_LABEL_EXCLUDE, false, 30));        
+        
+        addDialogComponent(new DialogComponentBoolean(
+        		KeywordDensityNodeConfiguration.getIncludeMetaKeywordsSettingsModel(), 
+        		KeywordDensityNodeConfiguration.FIELD_LABEL_INCLUDE_META_KEYWORDS));
+        
+        addDialogComponent(new DialogComponentBoolean(
+        		KeywordDensityNodeConfiguration.getIncludeMetaDescriptionSettingsModel(), 
+        		KeywordDensityNodeConfiguration.FIELD_LABEL_INCLUDE_META_DESCRIPTION));
+        
+        addDialogComponent(new DialogComponentBoolean(
+        		KeywordDensityNodeConfiguration.getIncludePageTitleSettingsModel(), 
+        		KeywordDensityNodeConfiguration.FIELD_LABEL_INCLUDE_PAGE_TITLE));
     }
 }
 

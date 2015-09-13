@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.knime.core.data.DataCell;
 import org.knime.core.data.def.DefaultRow;
+import org.knime.core.data.def.DoubleCell;
 import org.knime.core.data.def.IntCell;
 import org.knime.core.data.def.StringCell;
 
@@ -15,12 +16,12 @@ public class KeywordDensityRow extends DefaultRow {
 	}
 
     private static DataCell[] createCells(final String url, 
-    		final String keyword, final String percentage, 
+    		final String keyword, final double percentage, 
     		final int frequency) {
         List<DataCell> cells = new ArrayList<DataCell>();
         cells.add(new StringCell(url));
         cells.add(new StringCell(keyword));
-        cells.add(new StringCell(percentage));
+        cells.add(new DoubleCell(percentage));
         cells.add(new IntCell(frequency));
         return cells.toArray(new DataCell[cells.size()]);
     }

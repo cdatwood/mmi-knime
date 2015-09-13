@@ -3,11 +3,11 @@ package com.mmiagency.knime.keyworddensity.util;
 public class KeywordDensityRowEntry {
 	private String url;
 	private String keyword;
-	private String percentage;
+	private double percentage;
 	private int frequency;
 	
 	public KeywordDensityRowEntry(final String url, final String keyword,
-			final String percentage, final int frequency) {
+			final Double percentage, final int frequency) {
 		this.url = url;
 		this.keyword = keyword;
 		this.percentage = percentage;
@@ -26,10 +26,10 @@ public class KeywordDensityRowEntry {
 	public void setKeyword(String keyword) {
 		this.keyword = keyword;
 	}
-	public String getPercentage() {
+	public double getPercentage() {
 		return percentage;
 	}
-	public void setPercentage(String percentage) {
+	public void setPercentage(double percentage) {
 		this.percentage = percentage;
 	}
 	public int getFrequency() {
