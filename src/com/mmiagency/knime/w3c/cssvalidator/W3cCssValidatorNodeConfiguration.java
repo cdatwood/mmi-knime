@@ -108,7 +108,7 @@ public class W3cCssValidatorNodeConfiguration {
     	return new SettingsModelString(FIELD_KEY_VALIDATOR_URL, FIELD_DEFAULT_VALIDATOR_URL);   
     }
     public static SettingsModelString getUrlColumnSettingsModel() {
-    	return new SettingsModelString(FIELD_KEY_URL_COLUMN, FIELD_DEFAULT_URL_COLUMN);   
+    	return new SettingsModelString(FIELD_KEY_URL_COLUMN, "");   
     }
     public static SettingsModelString getProfileSettingsModel() {
     	return new SettingsModelString(FIELD_KEY_PROFILE, FIELD_DEFAULT_PROFILE);   

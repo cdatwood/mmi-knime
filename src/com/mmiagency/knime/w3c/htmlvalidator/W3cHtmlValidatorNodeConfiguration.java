@@ -58,7 +58,7 @@ public class W3cHtmlValidatorNodeConfiguration {
     	return new SettingsModelString(FIELD_KEY_VALIDATOR_URL, FIELD_DEFAULT_VALIDATOR_URL);   
     }
     public static SettingsModelString getUrlColumnSettingsModel() {
-    	return new SettingsModelString(FIELD_KEY_URL_COLUMN, FIELD_DEFAULT_URL_COLUMN);   
+    	return new SettingsModelString(FIELD_KEY_URL_COLUMN, "");   
     }
     public static SettingsModelBoolean getShowOutlineSettingsModel() {
     	return new SettingsModelBoolean(FIELD_KEY_SHOW_OUTLINE, FIELD_DEFAULT_SHOW_OUTLINE);   

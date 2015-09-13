@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
- * ------------------------------------------------------------------------
+====================================================================
  * Copyright by MMI Agency, Houston, Texas, USA
  * Website: http://www.mmiagency.com; Contact: 713-929-6900
  *
@@ -16,7 +16,7 @@
  * General Public License for more details. You should have received a 
  * copy of the GNU General Public License along with the KNIME Nodes. If 
  * not, see <http://www.gnu.org/licenses/>.
- * ------------------------------------------------------------------------
+====================================================================
 -->
 <knimeNode icon="./default.png" type="Manipulator" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10.xsd">
     <name>Google PageSpeed Insight</name>

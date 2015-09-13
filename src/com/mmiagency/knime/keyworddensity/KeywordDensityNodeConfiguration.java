@@ -64,7 +64,7 @@ public class KeywordDensityNodeConfiguration {
 	}
 	
     public static SettingsModelString getUrlColumnSettingsModel() {
-    	return new SettingsModelString(FIELD_KEY_URL_COLUMN, FIELD_DEFAULT_URL_COLUMN);   
+    	return new SettingsModelString(FIELD_KEY_URL_COLUMN, "");   
     }
     
     public static SettingsModelString getContentColumnSettingsModel() {
