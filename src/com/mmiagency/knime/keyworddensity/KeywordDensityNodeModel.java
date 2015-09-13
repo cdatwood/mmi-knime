@@ -1,3 +1,22 @@
+/*
+ * ------------------------------------------------------------------------
+ * Copyright by MMI Agency, Houston, Texas, USA
+ * Website: http://www.mmiagency.com; Contact: 713-929-6900
+ *
+ * The MMI KNIME Node is Copyright (C) 2015, MMI Agency The KNIME Nodes 
+ * are free software: you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License as published by the Free 
+ * Software Foundation, either version 3 of the License, or (at your 
+ * option) any later version. 
+ * 
+ * The KNIME Nodes are distributed in the hope that it will be useful, 
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of 
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU 
+ * General Public License for more details. You should have received a 
+ * copy of the GNU General Public License along with the KNIME Nodes. If 
+ * not, see <http://www.gnu.org/licenses/>.
+ * ------------------------------------------------------------------------
+ */
 package com.mmiagency.knime.keyworddensity;
 
 import java.io.File;
@@ -16,7 +35,6 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -32,8 +50,6 @@ import com.mmiagency.knime.keyworddensity.util.KeywordDensityRowFactory;
  * @author Ed Ng
  */
 public class KeywordDensityNodeModel extends NodeModel {
-    
-    private static final NodeLogger logger = NodeLogger.getLogger(KeywordDensityNodeModel.class);
     
     private KeywordDensityNodeConfiguration m_config = new KeywordDensityNodeConfiguration();
     
@@ -156,15 +172,15 @@ public class KeywordDensityNodeModel extends NodeModel {
 		
 		// user has not set up URL column yet, auto-guessing URL column
 		if (m_config.getUrl().getStringValue().isEmpty()) {
-			int index = inSpecs[0].findColumnIndex(m_config.FIELD_DEFAULT_URL_COLUMN); 
+			int index = inSpecs[0].findColumnIndex(KeywordDensityNodeConfiguration.FIELD_DEFAULT_URL_COLUMN); 
 			boolean found = false;
 			if (index >= 0) {
 				DataColumnSpec columnSpec = inSpecs[0].getColumnSpec(index);
 				// check if column is of string type
 				if (columnSpec.getType().equals(StringCell.TYPE)) {
 					// found URL column
-					m_config.getUrl().setStringValue(m_config.FIELD_DEFAULT_URL_COLUMN);
-					setWarningMessage("Auto-guessing: Using column '"+m_config.FIELD_DEFAULT_URL_COLUMN+"' as URL column");
+					m_config.getUrl().setStringValue(KeywordDensityNodeConfiguration.FIELD_DEFAULT_URL_COLUMN);
+					setWarningMessage("Auto-guessing: Using column '"+KeywordDensityNodeConfiguration.FIELD_DEFAULT_URL_COLUMN+"' as URL column");
 					found = true;
 				}
 			}

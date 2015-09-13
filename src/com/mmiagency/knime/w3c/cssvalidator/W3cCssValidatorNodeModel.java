@@ -1,3 +1,22 @@
+/*
+ * ------------------------------------------------------------------------
+ * Copyright by MMI Agency, Houston, Texas, USA
+ * Website: http://www.mmiagency.com; Contact: 713-929-6900
+ *
+ * The MMI KNIME Node is Copyright (C) 2015, MMI Agency The KNIME Nodes 
+ * are free software: you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License as published by the Free 
+ * Software Foundation, either version 3 of the License, or (at your 
+ * option) any later version. 
+ * 
+ * The KNIME Nodes are distributed in the hope that it will be useful, 
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of 
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU 
+ * General Public License for more details. You should have received a 
+ * copy of the GNU General Public License along with the KNIME Nodes. If 
+ * not, see <http://www.gnu.org/licenses/>.
+ * ------------------------------------------------------------------------
+ */
 package com.mmiagency.knime.w3c.cssvalidator;
 
 import java.io.File;
@@ -18,7 +37,6 @@ import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
-import org.knime.core.data.MissingCell;
 import org.knime.core.data.RowKey;
 import org.knime.core.data.StringValue;
 import org.knime.core.data.def.DefaultRow;
@@ -31,7 +49,6 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -44,10 +61,6 @@ import org.knime.core.node.NodeSettingsWO;
  */
 public class W3cCssValidatorNodeModel extends NodeModel {
     
-    // the logger instance
-    private static final NodeLogger logger = NodeLogger
-            .getLogger(W3cCssValidatorNodeModel.class);
-
     private W3cCssValidatorNodeConfiguration m_configuration = new W3cCssValidatorNodeConfiguration();
 
 	/**
@@ -395,15 +408,15 @@ public class W3cCssValidatorNodeModel extends NodeModel {
 		
 		// user has not set up URL column yet, auto-guessing URL column
 		if (m_configuration.getUrl().getStringValue().isEmpty()) {
-			int index = inSpecs[0].findColumnIndex(m_configuration.FIELD_DEFAULT_URL_COLUMN); 
+			int index = inSpecs[0].findColumnIndex(W3cCssValidatorNodeConfiguration.FIELD_DEFAULT_URL_COLUMN); 
 			boolean found = false;
 			if (index >= 0) {
 				DataColumnSpec columnSpec = inSpecs[0].getColumnSpec(index);
 				// check if column is of string type
 				if (columnSpec.getType().equals(StringCell.TYPE)) {
 					// found URL column
-					m_configuration.getUrl().setStringValue(m_configuration.FIELD_DEFAULT_URL_COLUMN);
-					setWarningMessage("Auto-guessing: Using column '"+m_configuration.FIELD_DEFAULT_URL_COLUMN+"' as URL column");
+					m_configuration.getUrl().setStringValue(W3cCssValidatorNodeConfiguration.FIELD_DEFAULT_URL_COLUMN);
+					setWarningMessage("Auto-guessing: Using column '"+W3cCssValidatorNodeConfiguration.FIELD_DEFAULT_URL_COLUMN+"' as URL column");
 					found = true;
 				}
 			}
