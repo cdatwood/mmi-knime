@@ -126,7 +126,7 @@ public class W3cHtmlValidatorNodeModel extends NodeModel {
     	    Connection.Response resp = null;
 
     	    try {
-    			if (cell.getClass() == MissingCell.class) {
+    			if (cell.isMissing()) {
     				throw new Exception("URL value is missing");
     			}
     			
