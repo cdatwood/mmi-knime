@@ -10,7 +10,12 @@
         <intro>This node leverage Jsoup to parse HTML content and Lucene to tokenize terms and generate a list of term frequency.  You can also use the Exclude field to filter out certain keywords that should not be part of the report.</intro>
 
         <option name="URL Column Name">A selection of String columns from the input table, the chosen column will be used in URL(s) submission.</option>
-        <option name="Exclude Terms">A comma separated list of terms to be excluded from final results</option>
+        <option name="Content Column Name">A String column that contains HTML content of the specified URL.  If there is a value in this column, the node will parse the value instead of pulling content from URL.  This setting is optional.</option>
+        <option name="Exclude Terms Column Name">A String column that contains comma separated list of terms to be excluded from URL content.  This setting is URL specific.</option>
+        <option name="Exclude Terms">A comma separated list of terms to be excluded from all results.  This setting applies to all URLs.</option>
+        <option name="Include Meta Keywords">Indicates whether to include meta tag keywords, default is yes.</option>
+        <option name="Include Meta Description">Indicates whether to include meta tag description, default is yes.</option>
+        <option name="Include Page Title">Indicates whether to include page title, default is yes.</option>
 
     </fullDescription>
     

@@ -26,7 +26,7 @@ public class KeywordDensityNodeDialog extends DefaultNodeSettingsPane {
     @SuppressWarnings("unchecked")
 	protected KeywordDensityNodeDialog() {
         super();
-
+        
         addDialogComponent(new DialogComponentColumnNameSelection(
         		KeywordDensityNodeConfiguration.getUrlColumnSettingsModel(),
         		KeywordDensityNodeConfiguration.FIELD_LABEL_URL_COLUMN, 
