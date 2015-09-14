@@ -122,10 +122,13 @@ public class RandomDataNodeModel extends NodeModel {
         final DataTableSpec newSpec = createSpec();
         final BufferedDataContainer dc = exec.createDataContainer(newSpec);
         final int totalNoOfRows = m_noOfRows.getIntValue();
-try {        
+        
+        RandomDataUtil randomDataUtil = new RandomDataUtil();
+        
         for (int rowIdx = 0; rowIdx < totalNoOfRows; rowIdx++) {
             exec.checkCanceled();
             final LinkedList<DataCell> cells = new LinkedList<DataCell>();
+
             
         	for (int i = 0;i < MAX_COLUMNS; i++) {
         		if (!shouldProcessColumn(m_columnNames.get(i).getStringValue(), m_columnActive.get(i).getBooleanValue())) continue;
@@ -136,7 +139,25 @@ try {
         		String columnMax = m_columnMax.get(i).getStringValue();
         		
         		if (columnType.equals(COLUMN_TYPE_STRING)) {        			
-                    cells.add(new StringCell(columnType));
+        			// Set the default minimum and max integers
+        			Integer minTextLength = 10;
+        			Integer maxTextLength = 100;
+        			
+        			// If a minimum value is configured by the user, update the min value and set the max value = min + 100
+        			Integer columnMinTextLength = Util.toInteger(columnMin, null);
+        			if (columnMinTextLength != null) {
+        				minTextLength = columnMinTextLength;
+        				maxTextLength = minTextLength + 100;
+        			}
+        			// If a maximum value is configured by the user, update the value
+        			Integer columnMaxTextLength = Util.toInteger(columnMax, null);
+        			if (columnMaxTextLength != null) {
+        				maxTextLength = columnMaxTextLength;
+        			}
+        			// Update the random integer
+        			Integer randomInteger = generateRandomInteger(minTextLength, maxTextLength);
+        			System.out.println(columnMinTextLength + " - " + columnMaxTextLength + " -> " + randomInteger); 
+                    cells.add(new StringCell(randomDataUtil.randomText(randomInteger)));
         		} else if (columnType.equals(COLUMN_TYPE_INTEGER)) {
         			// Set the default minimum and max integers
         			Integer minInteger = 0;
@@ -187,10 +208,6 @@ try {
         }
         dc.close();
         return new BufferedDataTable[] {dc.getTable()};
-} catch (Exception e) {
-	e.printStackTrace(System.out);
-	throw e;
-}
     }
 
     private static Integer generateRandomInteger(int min, int max) {
@@ -337,16 +354,23 @@ try {
     		
     		// For "String", "Integer" types, validate max/min as numbers
     		if (type.equals(COLUMN_TYPE_STRING) || type.equals(COLUMN_TYPE_INTEGER)) {
-    			Integer minInteger = Util.toInteger(min, null);
-    			Integer maxInteger = Util.toInteger(max, null);
-    			if (!Util.isBlankOrNull(min) && minInteger == null) {
-    				errors.add("Column " + columnNumber + " has an invalid min value: " + min);
+    			String valueLabel = "value";
+    			if (type.equals(COLUMN_TYPE_STRING)) valueLabel = "length";
+    			
+    			
+    			Integer minValue = Util.toInteger(min, null);
+    			Integer maxValue = Util.toInteger(max, null);
+    			if (!Util.isBlankOrNull(min) && minValue == null) {
+    				errors.add("Column " + columnNumber + " has an invalid min " + valueLabel + ": " + min);
     			}
-    			if (!Util.isBlankOrNull(max) && maxInteger == null) {
-    				errors.add("Column " + columnNumber + " has an invalid max value: " + max);
+    			if (!Util.isBlankOrNull(max) && maxValue == null) {
+    				errors.add("Column " + columnNumber + " has an invalid max " + valueLabel + ": " + max);
     			}
-    			if (minInteger != null && maxInteger != null && maxInteger < minInteger) {
-    				errors.add("Column " + columnNumber + " has max value that is less than min value: " + max + " max < " + min + " min");
+    			if (minValue != null && minValue < 0) {
+    				errors.add("Column " + columnNumber + " requires a positive number for min " + valueLabel + ": " + min);    				
+    			}
+    			if (minValue != null && maxValue != null && maxValue < minValue) {
+    				errors.add("Column " + columnNumber + " has max " + valueLabel + " that is less than min " + valueLabel + ": " + max + " max < " + min + " min");
     			}
     			
     		}
