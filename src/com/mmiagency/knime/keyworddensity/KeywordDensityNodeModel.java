@@ -92,7 +92,7 @@ public class KeywordDensityNodeModel extends NodeModel {
     			container.addRowToTable(factory.createRow("" + index++, "", "FAILED: Missing URL"));
     			continue;
     		}
-			if (cell.getClass() != StringCell.class) {
+			if (!(cell instanceof StringValue)) {
     			container.addRowToTable(factory.createRow("" + index++, "", 
     					"The specified URL column \"" + urlColumnName + "\" is not a string column.  Please specify a string column for URLs."));
     			continue;
@@ -107,10 +107,10 @@ public class KeywordDensityNodeModel extends NodeModel {
 				DataCell contentCell = row.getCell(contentColumnIndex);
 				if (contentCell.isMissing()) {
 					// do nothing, we will pull content from URL
-				} else if (contentCell.getClass() != StringCell.class) {
-					setWarningMessage("Content column is not a string for URL: " + url);
-				} else {
+				} else if (contentCell instanceof StringValue) {
 					content = ((StringValue)contentCell).getStringValue();
+				} else {
+					setWarningMessage("Content column is not a string for URL: " + url);
 				}
 			}
 			
@@ -121,10 +121,10 @@ public class KeywordDensityNodeModel extends NodeModel {
 				DataCell urlExcludeCell = row.getCell(excludeColumnIndex);
 				if (urlExcludeCell.isMissing()) {
 					// do nothing, because some URLs may not have specific exclude terms
-				} else if (urlExcludeCell.getClass() != StringCell.class) {
-					setWarningMessage("URL Exclude Terms is not a string for URL: " + url);
-				} else {
+				} else if (urlExcludeCell instanceof StringValue) {
 					urlExclude = ((StringValue)urlExcludeCell).getStringValue();
+				} else {
+					setWarningMessage("URL Exclude Terms is not a string for URL: " + url);
 				}
 			}
 			

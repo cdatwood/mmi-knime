@@ -164,7 +164,7 @@ public class GooglePageSpeedNodeModel extends NodeModel {
     				throw new Exception("URL value is missing");
     			}
     			
-    			if (cell.getClass() != StringCell.class) {
+    			if (!(cell instanceof StringValue)) {
     				throw new Exception("The specified URL column \"" + urlColumnName + "\" is not a string column.  Please specify a string column for URLs.");
     			}
     			
