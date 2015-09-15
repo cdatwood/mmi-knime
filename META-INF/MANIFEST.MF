@@ -18,10 +18,10 @@ Bundle-ClassPath: mmiagency.jar,
 Bundle-Activator: 
  com.mmiagency.knime.google.pagespeed.GooglePageSpeedNodePlugin
 Bundle-Vendor: MMI Agency
-Require-Bundle: org.eclipse.core.runtime,
- org.knime.workbench.core,
- org.knime.workbench.repository,
- org.knime.base,
+Require-Bundle: org.eclipse.core.runtime;bundle-version="3.7.0",
+ org.knime.workbench.core;bundle-version="2.11.0",
+ org.knime.workbench.repository;bundle-version="2.11.0",
+ org.knime.base;bundle-version="2.11.0",
  org.knime.twitter.api;bundle-version="2.12.0",
  org.twitter4j;bundle-version="4.0.1",
  org.apache.lucene;bundle-version="2.9.1",
