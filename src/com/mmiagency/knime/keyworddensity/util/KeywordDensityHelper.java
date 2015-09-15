@@ -35,18 +35,14 @@ import java.util.TreeMap;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
-import org.apache.lucene.document.FieldType;
-import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.IndexOptions;
+import org.apache.lucene.document.Field.TermVector;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.index.PostingsEnum;
-import org.apache.lucene.index.Terms;
-import org.apache.lucene.index.TermsEnum;
+import org.apache.lucene.index.IndexWriter.MaxFieldLength;
+import org.apache.lucene.index.TermFreqVector;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
-import org.apache.lucene.util.BytesRef;
+import org.apache.lucene.util.Version;
 import org.jsoup.Jsoup;
 
 /**
@@ -115,48 +111,35 @@ public class KeywordDensityHelper {
         text.write(jdoc.select("body").text());
 
         // analyze content with Lucene
-        StandardAnalyzer analyzer = new StandardAnalyzer();
+        StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_CURRENT);
         Directory directory = new RAMDirectory();
-        IndexWriterConfig config = new IndexWriterConfig(analyzer);
-        IndexWriter indexWriter = new IndexWriter(directory, config);    	
-        
-        FieldType textFieldType = new FieldType();
-        textFieldType.setIndexOptions(IndexOptions.DOCS_AND_FREQS);
-        textFieldType.setTokenized(true);
-        textFieldType.setStored(true);
-        textFieldType.setStoreTermVectors(true);
-        
+        IndexWriter indexWriter = new IndexWriter(directory, analyzer, MaxFieldLength.LIMITED);    	
+
         Document doc = new Document();
-        Field textField = new Field("content", "", textFieldType);
-                
-        textField.setStringValue(text.toString());        
+        Field textField = new Field("content", text.toString(), Field.Store.YES, Field.Index.ANALYZED, TermVector.WITH_POSITIONS_OFFSETS);
+               
         doc.add(textField);
         
         indexWriter.addDocument(doc);        
         indexWriter.commit();
         indexWriter.close();
         
-        IndexReader indexReader = DirectoryReader.open(directory);
-        Terms termsVector = null;
-        TermsEnum termsEnum = null;
-        BytesRef term = null;
-        String val = null;
-        PostingsEnum postingsEnum = null;
+        IndexReader indexReader = IndexReader.open(directory, true);
+
+        TermFreqVector termFreqVector = null;
 
         for (int i = 0; i < indexReader.maxDoc(); i++) {
-            termsVector = indexReader.getTermVector(i, "content");
-            termsEnum = termsVector.iterator();
-            while ( (term = termsEnum.next()) != null ) {
-                val = term.utf8ToString();
-                // skip term matching exclude list
-                if (m_excludeList.contains(val)) {
-                	continue;
-                }
-                postingsEnum = termsEnum.postings(postingsEnum);
-                if (postingsEnum.nextDoc() >= 0) {
-                	add(val, postingsEnum.freq());
-                }
-            }
+        	termFreqVector = indexReader.getTermFreqVector(i, "content");
+
+        	String[] terms = termFreqVector.getTerms();
+        	int[] freqs = termFreqVector.getTermFrequencies();
+
+        	for (int n = 0; n < termFreqVector.size(); n++) {
+        		if (m_excludeList.contains(terms[n])) {
+        			continue;
+        		}
+        		add(terms[n], freqs[n]);
+        	}
         }
         
         indexReader.close();
@@ -221,7 +204,7 @@ public class KeywordDensityHelper {
 
 		public Object next() {
 			Map.Entry<String, Integer> mapEntry = iterator.next();
-			KeywordDensityRowFactory factory = new KeywordDensityRowFactory();
+			new KeywordDensityRowFactory();
 			return new KeywordDensityRowEntry(
 					url,
 					mapEntry.getKey(),
