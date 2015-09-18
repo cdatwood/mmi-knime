@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+====================================================================
+ * Copyright by MMI Agency, Houston, Texas, USA
+ * Website: http://www.mmiagency.com; Contact: 713-929-6900
+ *
+ * The MMI KNIME Node is Copyright (C) 2015, MMI Agency The KNIME Nodes 
+ * are free software: you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License as published by the Free 
+ * Software Foundation, either version 3 of the License, or (at your 
+ * option) any later version. 
+ * 
+ * The KNIME Nodes are distributed in the hope that it will be useful, 
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of 
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU 
+ * General Public License for more details. You should have received a 
+ * copy of the GNU General Public License along with the KNIME Nodes. If 
+ * not, see <http://www.gnu.org/licenses/>.
+====================================================================
+-->
+<knimeNode icon="./default.png" type="Manipulator" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10.xsd">
+	<name>Random Data Generator</name>
+	
+	<shortDescription>
+		Creates a data table with random data based on the specified definitions
+	</shortDescription>
+	
+	<fullDescription>
+		<intro>Creates a data table with random data based definitions specified for each field column.  Up to 1,000 field columns can be created.	The number of rows generated can be configured.</intro>
+		<option name="Total Rows">Total rows of data to generate</option>
+		<option name="Per Field: Column Name">The name of the table column</option>
+        <option name="Per Field: Type">Type of field (Date, String, Integer)</option>
+        <option name="Per Field: Min">The minimum value for the random data.  Types: String -&gt; Minimum text length (default 1), Integer -&gt; Min number, Date -&gt; Earliest Date (m/d/yyyy format), defaults to 100 years ago</option>
+        <option name="Per Field: Max">The maximum value for the random data.  Types: String -&gt; Max text length (default 32), Integer -&gt; Max number, Date -&gt; Latest Date (m/d/yyyy format), defaults to current date</option>
+	</fullDescription>
+	
+	<ports>
+		<outPort index="0" name="Generated Table">Random data table.</outPort>
+	</ports>	
+</knimeNode>
