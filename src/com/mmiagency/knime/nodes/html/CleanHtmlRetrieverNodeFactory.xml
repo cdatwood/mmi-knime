@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+====================================================================
+ * Copyright by MMI Agency, Houston, Texas, USA
+ * Website: http://www.mmiagency.com; Contact: 713-929-6900
+ *
+ * The MMI KNIME Node is Copyright (C) 2015, MMI Agency The KNIME Nodes 
+ * are free software: you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License as published by the Free 
+ * Software Foundation, either version 3 of the License, or (at your 
+ * option) any later version. 
+ * 
+ * The KNIME Nodes are distributed in the hope that it will be useful, 
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of 
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU 
+ * General Public License for more details. You should have received a 
+ * copy of the GNU General Public License along with the KNIME Nodes. If 
+ * not, see <http://www.gnu.org/licenses/>.
+====================================================================
+-->
+<knimeNode icon="./default.png" type="Manipulator" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10.xsd">
+    <name>Clean HTML Retriever</name>
+    
+    <shortDescription>
+        This node parses HTML content, clean up errors and output result in proper XHTML format.
+    </shortDescription>
+    
+    <fullDescription>
+        <intro>This node takes URL from a column, retrieves its content (assuming to be in HTML form) for parsing.  If HTML content is available in another column, it can take HTML content directly instead of pulling from URL.  HTML content is then parsed and clean up using <a href="http://htmlcleaner.sourceforge.net/">HtmlCleaner</a> to output in XHTML form.  The result can be configured to output in either String for XML type.</intro>
+        
+        <option name="URL Column Name">URL column name</option>
+        <option name="Content Column Name">Content column name.  If available, the node will use this content instead of pulling from URL.</option>
+        <option name="Output Column Name">Column name of the resulting parsed XHTML content, default name is "XHTML".</option>
+        <option name="Output result as XML">Output result as String or XML type.  XML type is useful when this node is part of XML analysis workflow.</option>
+
+    </fullDescription>
+    
+    <ports>
+        <inPort index="0" name="URL / HTML input">An input table that contains URL / content columns</inPort>
+        <outPort index="0" name="XHTML result">An output table URL and XHTML results</outPort>
+    </ports>    
+
+</knimeNode>

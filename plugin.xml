@@ -12,6 +12,7 @@
     <node category-path="/mmi/" factory-class="com.mmiagency.knime.nodes.twitter.trends.TwitterTrendsNodeFactory" id="com.mmiagency.knime.nodes.twitter.TwitterTrendsNodeFactory"/>
     <node category-path="/mmi/" factory-class="com.mmiagency.knime.nodes.keyworddensity.KeywordDensityNodeFactory" id="com.mmiagency.knime.nodes.keyworddensity.KeywordDensityNodeFactory"/>
     <node category-path="/mmi/" factory-class="com.mmiagency.knime.nodes.randomdata.RandomDataNodeFactory" id="com.mmiagency.knime.nodes.randomdata.RandomDataNodeFactory"/>
+    <node category-path="/mmi/" factory-class="com.mmiagency.knime.nodes.html.CleanHtmlRetrieverNodeFactory" id="com.mmiagency.knime.nodes.html.CleanHtmlRetrieverNodeFactory"/>
   </extension>
    
 </plugin>
