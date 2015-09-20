@@ -40,7 +40,7 @@
     
     <ports>
         <inPort index="0" name="Incoming table with URL column">An input table that contains a URL column</inPort>
-        <outPort index="0" name="Table output of keyword density result">An output table keyword density results in percentages and actual frequencies</outPort>
+        <outPort index="0" name="Table output of keyword density result">An output table with keyword density results in percentages and actual frequencies</outPort>
     </ports>    
 
 </knimeNode>
