@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode icon="./default.png" type="Source" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10.xsd">
+    <name>XML Sitemap Reader</name>
+    
+    <shortDescription>
+        Read Sitemap URL and produce a table output with sitemap entries.
+    </shortDescription>
+    
+    <fullDescription>
+        <intro>This node expects a sitemap URL input and produces sitemap entries in an output table. It also support sitemap index.</intro>
+        
+        <option name="Sitemap URL">A sitemap URL</option>
+
+    </fullDescription>
+    
+    <ports>
+        <outPort index="0" name="Sitemap entries">Sitemap entries</outPort>
+    </ports>    
+</knimeNode>

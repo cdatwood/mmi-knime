@@ -2,17 +2,22 @@
 <?eclipse version="3.0"?><plugin>
 
   <extension point="org.knime.workbench.repository.categories">
-	<category description="MMI Labs" icon="icons/MMI_Knime_MMILogo_16x16.png" level-id="mmi" name="MMI Labs" path="/"/>
+    <category description="MMI Labs" icon="icons/MMI_Knime_MMILogo_16x16.png" level-id="mmi" name="MMI Labs" path="/community"/>
   </extension>
-   
+
+  <extension point="org.knime.product.splashExtension">
+    <splashExtension icon="icons/MMI_Knime_MMILogo_16x16.png" id="MMI" tooltip="MMI Agency"/>
+  </extension>     
+  
   <extension point="org.knime.workbench.repository.nodes">
-    <node category-path="/mmi/" factory-class="com.mmiagency.knime.nodes.google.pagespeed.GooglePageSpeedNodeFactory" id="com.mmiagency.knime.nodes.google.pagespeed.GooglePageSpeedNodeFactory"/>
-    <node category-path="/mmi/" factory-class="com.mmiagency.knime.nodes.w3c.htmlvalidator.W3cHtmlValidatorNodeFactory" id="com.mmiagency.knime.nodes.w3c.htmlvalidator.W3cHtmlValidatorNodeFactory"/>
-    <node category-path="/mmi/" factory-class="com.mmiagency.knime.nodes.w3c.cssvalidator.W3cCssValidatorNodeFactory" id="com.mmiagency.knime.nodes.w3c.cssvalidator.W3cCssValidatorNodeFactory"/>
-    <node category-path="/mmi/" factory-class="com.mmiagency.knime.nodes.twitter.trends.TwitterTrendsNodeFactory" id="com.mmiagency.knime.nodes.twitter.TwitterTrendsNodeFactory"/>
-    <node category-path="/mmi/" factory-class="com.mmiagency.knime.nodes.keyworddensity.KeywordDensityNodeFactory" id="com.mmiagency.knime.nodes.keyworddensity.KeywordDensityNodeFactory"/>
-    <node category-path="/mmi/" factory-class="com.mmiagency.knime.nodes.randomdata.RandomDataNodeFactory" id="com.mmiagency.knime.nodes.randomdata.RandomDataNodeFactory"/>
-    <node category-path="/mmi/" factory-class="com.mmiagency.knime.nodes.html.CleanHtmlRetrieverNodeFactory" id="com.mmiagency.knime.nodes.html.CleanHtmlRetrieverNodeFactory"/>
+    <node category-path="/community/mmi/" factory-class="com.mmiagency.knime.nodes.google.pagespeed.GooglePageSpeedNodeFactory" id="com.mmiagency.knime.nodes.google.pagespeed.GooglePageSpeedNodeFactory"/>
+    <node category-path="/community/mmi/" factory-class="com.mmiagency.knime.nodes.w3c.htmlvalidator.W3cHtmlValidatorNodeFactory" id="com.mmiagency.knime.nodes.w3c.htmlvalidator.W3cHtmlValidatorNodeFactory"/>
+    <node category-path="/community/mmi/" factory-class="com.mmiagency.knime.nodes.w3c.cssvalidator.W3cCssValidatorNodeFactory" id="com.mmiagency.knime.nodes.w3c.cssvalidator.W3cCssValidatorNodeFactory"/>
+    <node category-path="/community/mmi/" factory-class="com.mmiagency.knime.nodes.twitter.trends.TwitterTrendsNodeFactory" id="com.mmiagency.knime.nodes.twitter.TwitterTrendsNodeFactory"/>
+    <node category-path="/community/mmi/" factory-class="com.mmiagency.knime.nodes.keyworddensity.KeywordDensityNodeFactory" id="com.mmiagency.knime.nodes.keyworddensity.KeywordDensityNodeFactory"/>
+    <node category-path="/community/mmi/" factory-class="com.mmiagency.knime.nodes.randomdata.RandomDataNodeFactory" id="com.mmiagency.knime.nodes.randomdata.RandomDataNodeFactory"/>
+    <node category-path="/community/mmi/" factory-class="com.mmiagency.knime.nodes.html.CleanHtmlRetrieverNodeFactory" id="com.mmiagency.knime.nodes.html.CleanHtmlRetrieverNodeFactory"/>
+    <node category-path="/community/mmi/" factory-class="com.mmiagency.knime.nodes.sitemap.XMLSitemapReaderNodeFactory" id="com.mmiagency.knime.nodes.sitemap.XMLSitemapReaderNodeFactory"/>
   </extension>
    
 </plugin>
