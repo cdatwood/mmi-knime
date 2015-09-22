@@ -19,11 +19,14 @@
  */
 package com.mmiagency.knime.nodes.html;
 
+import java.util.Arrays;
+
 import org.knime.core.data.StringValue;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentColumnNameSelection;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
+import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.util.DataValueColumnFilter;
 
 /**
@@ -65,6 +68,17 @@ public class CleanHtmlRetrieverNodeDialog extends DefaultNodeSettingsPane {
         		CleanHtmlRetrieverNodeConfiguration.getXmlSettingsModel(), 
         		CleanHtmlRetrieverNodeConfiguration.FIELD_LABEL_XML));
 
+        addDialogComponent(new DialogComponentStringSelection(
+        		CleanHtmlRetrieverNodeConfiguration.getUserAgentSettingsModel(),
+        		CleanHtmlRetrieverNodeConfiguration.FIELD_LABEL_USER_AGENT, 
+        		Arrays.asList(CleanHtmlRetrieverNodeConfiguration.getUserAgentHistory().getHistory()),
+        		true));
+        
+        addDialogComponent(new DialogComponentStringSelection(
+        		CleanHtmlRetrieverNodeConfiguration.getRetriesSettingsModel(),
+        		CleanHtmlRetrieverNodeConfiguration.FIELD_LABEL_RETRIES, 
+        		CleanHtmlRetrieverNodeConfiguration.getRetriesOptions(),
+        		true));
     }
 }
 

@@ -45,6 +45,7 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 
 import com.google.api.client.http.GenericUrl;
+import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpResponse;
@@ -82,6 +83,7 @@ public class CleanHtmlRetrieverNodeModel extends NodeModel {
     	DataTableSpec inSpec = inData[0].getSpec();
     	String urlColumnName = m_config.getUrl().getStringValue();
     	String contentColumnName = m_config.getContent().getStringValue();
+    	String userAgent = m_config.getUserAgent().getStringValue();
     	String encoding = "UTF-8";
     	String detectedEncoding = encoding;
     	
@@ -132,6 +134,10 @@ public class CleanHtmlRetrieverNodeModel extends NodeModel {
 
 		    	GenericUrl genericUrl = new GenericUrl(url);
 		    	HttpRequest httpRequest = httpRequestFactory.buildGetRequest(genericUrl);
+		    	httpRequest.setFollowRedirects(true);
+		    	httpRequest.setNumberOfRetries(3);
+		    	HttpHeaders httpHeaders = httpRequest.getHeaders();
+		    	httpHeaders.setUserAgent(userAgent);
 		    	HttpResponse httpResponse = httpRequest.execute();
 
 				if (m_config.getEncodingMap().containsKey(httpResponse.getContentCharset())) {

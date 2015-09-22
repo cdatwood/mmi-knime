@@ -32,6 +32,8 @@
         <option name="Content Column Name">Content column name.  If available, the node will use this content instead of pulling from URL.</option>
         <option name="Output Column Name">Column name of the resulting parsed XHTML content, default name is "XHTML".</option>
         <option name="Output result as XML">Output result as String or XML type.  XML type is useful when this node is part of XML analysis workflow.</option>
+        <option name="User agent">User agent to be used in header for HTTP request.</option>
+        <option name="Number of retries">Number of retries after a failure per URL requests.</option>
 
     </fullDescription>
     
