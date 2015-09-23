@@ -43,6 +43,7 @@ import org.apache.lucene.index.TermFreqVector;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 
 /**
@@ -90,7 +91,17 @@ public class KeywordDensityHelper {
 		if (m_content != null && !m_content.trim().isEmpty()) {
 			jdoc = Jsoup.parse(m_content);
 		} else {
-			jdoc = Jsoup.connect(m_url).get();
+	        Connection conn = Jsoup.connect(m_url);
+	        
+	        conn.validateTLSCertificates(false);
+	        conn.followRedirects(true);
+	        conn.userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:40.0) Gecko/20100101 Firefox/40.0");
+	        conn.header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+	        conn.header("Accept-Language", "en-US,en;q=0.5");
+	        conn.header("Accept-Encoding", "gzip, deflate");
+	        
+	        conn.execute();
+	        jdoc = conn.get();
 		}
 		
 		StringWriter text = new StringWriter();
