@@ -23,11 +23,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
-import org.apache.commons.io.IOUtils;
 import org.htmlcleaner.CleanerProperties;
 import org.htmlcleaner.HtmlCleaner;
 import org.htmlcleaner.PrettyXmlSerializer;
 import org.htmlcleaner.TagNode;
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataRow;
@@ -43,13 +45,6 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-
-import com.google.api.client.http.GenericUrl;
-import com.google.api.client.http.HttpHeaders;
-import com.google.api.client.http.HttpRequest;
-import com.google.api.client.http.HttpRequestFactory;
-import com.google.api.client.http.HttpResponse;
-import com.google.api.client.http.javanet.NetHttpTransport;
 
 /**
  * This is the model implementation of TidyHtmlRetriever.
@@ -83,15 +78,9 @@ public class CleanHtmlRetrieverNodeModel extends NodeModel {
     	DataTableSpec inSpec = inData[0].getSpec();
     	String urlColumnName = m_config.getUrl().getStringValue();
     	String contentColumnName = m_config.getContent().getStringValue();
-    	String userAgent = m_config.getUserAgent().getStringValue();
-    	String encoding = "UTF-8";
-    	String detectedEncoding = encoding;
     	
     	int urlColumnIndex = inSpec.findColumnIndex(urlColumnName);
     	int contentColumnIndex = inSpec.findColumnIndex(contentColumnName);
-
-    	NetHttpTransport netHttpTransport = new NetHttpTransport();
-    	HttpRequestFactory httpRequestFactory = netHttpTransport.createRequestFactory();
     	
 		HtmlCleaner cleaner = new HtmlCleaner();
 		
@@ -109,9 +98,7 @@ public class CleanHtmlRetrieverNodeModel extends NodeModel {
     					"The specified URL column \"" + urlColumnName + "\" is not a string column.  Please specify a string column for URLs."));
     			continue;
 			}
-			
-		    detectedEncoding = encoding;
-		    
+					    
     		String url = ((StringValue)cell).getStringValue();
 
     		String content = null;
@@ -132,20 +119,18 @@ public class CleanHtmlRetrieverNodeModel extends NodeModel {
 			
 			if (content == null) {
 
-		    	GenericUrl genericUrl = new GenericUrl(url);
-		    	HttpRequest httpRequest = httpRequestFactory.buildGetRequest(genericUrl);
-		    	httpRequest.setFollowRedirects(true);
-		    	httpRequest.setNumberOfRetries(3);
-		    	HttpHeaders httpHeaders = httpRequest.getHeaders();
-		    	httpHeaders.setUserAgent(userAgent);
-		    	HttpResponse httpResponse = httpRequest.execute();
-
-				if (m_config.getEncodingMap().containsKey(httpResponse.getContentCharset())) {
-					// override default encoding with detected encoding
-					detectedEncoding = m_config.getEncodingMap().get(httpResponse.getContentCharset());
-				}
-				
-				html = IOUtils.toString(httpResponse.getContent(), detectedEncoding);
+		        Connection conn = Jsoup.connect(url);
+		        
+		        conn.validateTLSCertificates(false);
+		        conn.followRedirects(true);
+		        conn.userAgent(m_config.getUserAgent().getStringValue());
+		        conn.header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+		        conn.header("Accept-Language", "en-US,en;q=0.5");
+		        conn.header("Accept-Encoding", "gzip, deflate");
+		        
+		        conn.execute();
+		        Document doc = conn.get();
+		        html = doc.html();
 
 			} else {
 				html = content;

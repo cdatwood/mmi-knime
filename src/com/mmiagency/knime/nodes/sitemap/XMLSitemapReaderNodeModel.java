@@ -55,20 +55,48 @@ public class XMLSitemapReaderNodeModel extends NodeModel {
         super(0, 1);
     }
 
-    private int processSitemap(BufferedDataContainer container, int id, String url) throws IOException {
+    private int processSitemap(final BufferedDataContainer container, final ExecutionContext exec, final int id, final String url) throws IOException, CanceledExecutionException {
     	int index = id;
         Connection conn = Jsoup.connect(url);
+        
         conn.validateTLSCertificates(false);
         conn.followRedirects(true);
-        conn.userAgent("Mozilla");
+        conn.userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:40.0) Gecko/20100101 Firefox/40.0");
+        conn.header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+        conn.header("Accept-Language", "en-US,en;q=0.5");
+        conn.header("Accept-Encoding", "gzip, deflate");
+        
         conn.execute();
         Document doc = conn.get();
+        
+        // check if sitemap is an index page
+        Elements sitemapindex = doc.select("sitemapindex");
+        if (sitemapindex != null && sitemapindex.size() > 0) {
+        	// iterate through each individual sitemap
+        	Elements locs = sitemapindex.select("loc");
+        	for (Element loc : locs) {        		
+        		try {
+        			index = processSitemap(container, exec, index, loc.text()); 
+        		} catch (Exception e) {
+         			container.addRowToTable(m_config.createRow(""+index++, url, loc.text(), "FAILED: "+e.getMessage(), "", 0));        			
+        		}
+        		
+    	        // check if the execution monitor was canceled
+    	        exec.checkCanceled();
+    	        exec.setProgress(index / (double)locs.size(), 
+    	            "Adding row " + index++);
+        	}
+        	// finish processing index, return now
+        	return index;
+        }
+        
     	Elements urlTags = doc.select("url");
+    	
     	for (Element urlTag : urlTags) {
     		String loc = "";
     		String lastmod = "";
     		String changefreq = "";
-    		double priority = -1;
+    		double priority = 0;
     		Elements elements = urlTag.select("loc");
     		if (elements.size() > 0) {
     			loc = elements.get(0).text();
@@ -100,33 +128,9 @@ public class XMLSitemapReaderNodeModel extends NodeModel {
 		BufferedDataContainer container = exec.createDataContainer(m_config.tableSpec());
         int index = 0;
     	String sitemapUrl = m_config.getUrl().getStringValue();
-        Connection conn = Jsoup.connect(sitemapUrl);
-        conn.validateTLSCertificates(false);
-        conn.followRedirects(true);
-        conn.userAgent("Mozilla");
-        conn.execute();
-        Document doc = conn.get();
-        
-        Elements sitemapindex = doc.select("sitemapindex");
-        
-        if (sitemapindex != null && sitemapindex.size() > 0) {
-        	Elements locs = sitemapindex.select("loc");
-        	for (Element loc : locs) {        		
-        		try {
-        			index = processSitemap(container, index, loc.text()); 
-        		} catch (Exception e) {
-         			container.addRowToTable(m_config.createRow(""+index++, sitemapUrl, loc.text(), "FAILED: "+e.getMessage(), "", -1));        			
-        		}
-        		
-    	        // check if the execution monitor was canceled
-    	        exec.checkCanceled();
-    	        exec.setProgress(index / (double)locs.size(), 
-    	            "Adding row " + index++);
-        	}
-        } else {
-			index = processSitemap(container, index, doc.select("loc").text()); 
-        }
-
+    	
+    	processSitemap(container, exec, index, sitemapUrl); 
+    	
         container.close();
     	
         return new BufferedDataTable[]{container.getTable()};

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: MMI Data Analytics Node extensions for KNIME Workbench
 Bundle-SymbolicName: com.mmiagency.knime.nodes;singleton:=true
-Bundle-Version: 0.0.10
+Bundle-Version: 0.0.11
 Bundle-ClassPath: mmiagency.jar,
  lib/google/google-api-client-1.20.0.jar,
  lib/google/google-http-client-1.20.0.jar,
