@@ -43,11 +43,11 @@ public class AnchorTextService
 	 * 
 	 * @see #getAnchorText(String, String, String, int, int, int)
 	 */
-	public String getAnchorText(String objectURL, String scope, String sort, BigInteger col)
+	public String getAnchorText(String objectURL, String scope, String sort, BigInteger col) throws Exception
 	{
 		return getAnchorText(objectURL, scope, sort, col, -1, -1);
 	}
-	public String getAnchorText(String objectURL, String scope, String sort, long col) { return getAnchorText(objectURL, scope, sort, BigInteger.valueOf(col)); }
+	public String getAnchorText(String objectURL, String scope, String sort, long col) throws Exception { return getAnchorText(objectURL, scope, sort, BigInteger.valueOf(col)); }
 	
 	/**
 	 * This method returns a set of anchor text terms of phrases aggregated across links to a page or domain.
@@ -67,8 +67,7 @@ public class AnchorTextService
 	 * @param limit The size of the page can by specified using the Limit parameter.
 	 * @return a set of anchor text terms of phrases aggregated across links to a page or domain.
 	 */
-	public String getAnchorText(String objectURL, String scope, String sort, BigInteger col, int offset, int limit)
-	{
+	public String getAnchorText(String objectURL, String scope, String sort, BigInteger col, int offset, int limit) throws Exception {
 		String urlToFetch = "http://lsapi.seomoz.com/linkscape/anchor-text/" + URLEncoder.encode(objectURL) + "?" + authenticator.getAuthenticationStr();
 		
 		if(scope != null)
@@ -96,7 +95,7 @@ public class AnchorTextService
 		
 		return response;
 	}
-	public String getAnchorText(String objectURL, String scope, String sort, long col, int offset, int limit) { return getAnchorText(objectURL, scope, sort, BigInteger.valueOf(col), offset, limit); }
+	public String getAnchorText(String objectURL, String scope, String sort, long col, int offset, int limit) throws Exception { return getAnchorText(objectURL, scope, sort, BigInteger.valueOf(col), offset, limit); }
 
 	/**
 	 * @param authenticator the authenticator to set

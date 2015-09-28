@@ -17,30 +17,41 @@
  * not, see <http://www.gnu.org/licenses/>.
  * ------------------------------------------------------------------------
  */
-package com.mmiagency.knime.nodes.moz.urlmetrics;
+package com.mmiagency.knime.nodes.moz.linkmetrics;
 
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
-import org.knime.core.node.util.StringHistory;
 
-import com.mmiagency.knime.nodes.moz.data.MozApiConnection;
-import com.mmiagency.knime.nodes.util.Util;
+public class MozLinkMetricsNodeConfiguration {
 
-public class MozUrlMetricsNodeConfiguration {
 
-	public MozUrlMetricsNodeConfiguration() {
-    	
+	public MozLinkMetricsNodeConfiguration() {
+   	
 	}
-	
+
 	// URL
 	private final SettingsModelString m_url = getUrlColumnSettingsModel();	
     public static SettingsModelString getUrlColumnSettingsModel() {return new SettingsModelString("url", "");}
 	public SettingsModelString getUrl() {return m_url;}
+
+	// Scope
+	private final SettingsModelString m_scope = getScopeSettingsModel();	
+    public static SettingsModelString getScopeSettingsModel() {return new SettingsModelString("scope", "");}
+	public SettingsModelString getScope() {return m_scope;}
+
+	// Sort
+	private final SettingsModelString m_sort = getSortSettingsModel();	
+    public static SettingsModelString getSortSettingsModel() {return new SettingsModelString("sort", "");}
+	public SettingsModelString getSort() {return m_sort;}
+
+	// Max Results
+	private final SettingsModelIntegerBounded m_maxResults = getMaxResultsSettingsModel();	
+    public static SettingsModelIntegerBounded getMaxResultsSettingsModel() {return new SettingsModelIntegerBounded("noOfRows", 100, 1, Integer.MAX_VALUE);}
+	public SettingsModelIntegerBounded getMaxResults() {return m_maxResults;}
 
 	// Delay Between Calls
 	private final SettingsModelDoubleBounded m_delayBetweenCalls = getDelayBetweenCallsSettingsModel();	
@@ -50,17 +61,27 @@ public class MozUrlMetricsNodeConfiguration {
 	
     public void saveSettingsTo(final NodeSettingsWO settings) {
         m_url.saveSettingsTo(settings);
+        m_scope.saveSettingsTo(settings);
+        m_sort.saveSettingsTo(settings);
+        m_maxResults.saveSettingsTo(settings);
         m_delayBetweenCalls.saveSettingsTo(settings);
     }
 
     public void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_url.loadSettingsFrom(settings);
+        m_scope.loadSettingsFrom(settings);
+        m_sort.loadSettingsFrom(settings);
+        m_maxResults.loadSettingsFrom(settings);
         m_delayBetweenCalls.loadSettingsFrom(settings);
     }
 
     public void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
     	m_url.validateSettings(settings);
+    	m_scope.validateSettings(settings);
+    	m_sort.validateSettings(settings);
+    	m_maxResults.validateSettings(settings);
     	m_delayBetweenCalls.validateSettings(settings);
     }
-    
+  
 }
+

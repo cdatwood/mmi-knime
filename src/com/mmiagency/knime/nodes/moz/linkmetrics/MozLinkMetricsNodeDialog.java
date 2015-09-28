@@ -17,7 +17,7 @@
  * not, see <http://www.gnu.org/licenses/>.
  * ------------------------------------------------------------------------
  */
-package com.mmiagency.knime.nodes.moz.urlmetrics;
+package com.mmiagency.knime.nodes.moz.linkmetrics;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -46,18 +46,19 @@ import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentColumnNameSelection;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
+import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.util.DataValueColumnFilter;
 
-import com.mmiagency.knime.nodes.moz.linkmetrics.MozLinkMetricsNodeConfiguration;
+import com.mmiagency.knime.nodes.randomdata.RandomDataNodeModel;
 import com.mmiagency.knime.nodes.w3c.htmlvalidator.W3cHtmlValidatorNodeConfiguration;
 
 /**
  * 
  * @author Phuc Truong
  */
-public class MozUrlMetricsNodeDialog extends DefaultNodeSettingsPane {
+public class MozLinkMetricsNodeDialog extends DefaultNodeSettingsPane {
 
     /**
      * New pane for configuring W3cHtmlValidatorNode node dialog.
@@ -65,10 +66,32 @@ public class MozUrlMetricsNodeDialog extends DefaultNodeSettingsPane {
      * components.
      */
     @SuppressWarnings("unchecked")
-	protected MozUrlMetricsNodeDialog() {
+	protected MozLinkMetricsNodeDialog() {
         super();
         
+        String[] scopes = new String[] {
+        		"page_to_page", 
+        		"page_to_subdomain",
+        		"page_to_domain",
+        		"subdomain_to_page",
+        		"subdomain_to_subdomain",
+        		"subdomain_to_domain",
+        		"domain_to_page",
+        		"domain_to_subdomain",
+        		"domain_to_domain"
+        		};
+        
+        String sort[] = new String[] {
+        		"page_authority",
+        		"domain_authority",
+        		"domains_linking_domain",
+        		"domains_linking_page"
+        		};
+        
         addDialogComponent(new DialogComponentColumnNameSelection(MozLinkMetricsNodeConfiguration.getUrlColumnSettingsModel(), "URL Column Name", 0, true, new DataValueColumnFilter(StringValue.class)));
+    	addDialogComponent(new DialogComponentStringSelection(MozLinkMetricsNodeConfiguration.getScopeSettingsModel(), "Scope", scopes));
+    	addDialogComponent(new DialogComponentStringSelection(MozLinkMetricsNodeConfiguration.getSortSettingsModel(), "Sort", sort));
+        addDialogComponent(new DialogComponentNumber(MozLinkMetricsNodeConfiguration.getMaxResultsSettingsModel(), "Max Results: ", Integer.valueOf(100)));
         addDialogComponent(new DialogComponentNumber(MozLinkMetricsNodeConfiguration.getDelayBetweenCallsSettingsModel(), "Delay Between Calls: ", Integer.valueOf(5)));
     }
 }

@@ -21,6 +21,7 @@ package com.mmiagency.knime.nodes.moz.urlmetrics;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -49,7 +50,6 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
 import com.google.gson.Gson;
-import com.mmiagency.knime.nodes.google.pagespeed.GooglePageSpeedNodeModel;
 import com.mmiagency.knime.nodes.moz.api.authentication.Authenticator;
 import com.mmiagency.knime.nodes.moz.api.response.UrlResponse;
 import com.mmiagency.knime.nodes.moz.api.service.URLMetricsService;
@@ -66,7 +66,7 @@ import com.mmiagency.knime.nodes.util.Util;
  */
 public class MozUrlMetricsNodeModel extends NodeModel {
     
-    private static final NodeLogger logger = NodeLogger.getLogger(GooglePageSpeedNodeModel.class);
+    private static final NodeLogger logger = NodeLogger.getLogger(MozUrlMetricsNodeModel.class);
     
     MozUrlMetricsNodeConfiguration m_config = new MozUrlMetricsNodeConfiguration();
 
@@ -113,13 +113,17 @@ public class MozUrlMetricsNodeModel extends NodeModel {
 				logger.error("Skipping blank url: " + url);
 				continue;
 			}
+
+			// Update the progress
+			BigDecimal progressPercentage = new BigDecimal(rowIndex).divide(new BigDecimal(inputTable.getRowCount()), 2, BigDecimal.ROUND_HALF_UP);
+			exec.setProgress(progressPercentage.doubleValue(), "Processing " + (rowIndex + 1) + " of " + inputTable.getRowCount() + ": "+ url);
+			
 			
 			// Process the URL using MOZ
     		try {    			
-    			processMozUrl(authenticator, dc, rowIndex, url);
-    			rowIndex++;
+    			rowIndex = processMozUrlMetrics(authenticator, dc, rowIndex, url, exec);		
     		} catch (Exception e) {
-    			logger.error("Unable to retrieve PageSpeed results for url: " + url + ", error: " + e.getMessage());
+    			logger.error("Unable to retrieve UrlMetrics results for url: " + url + ", error: " + e.getMessage());
     		}
     	}
         
@@ -141,11 +145,29 @@ public class MozUrlMetricsNodeModel extends NodeModel {
     public static String MOZ_FIELD_DOMAIN_AUTHORITY = "pda";
     public static String MOZ_FIELD_TIME_LAST_CRAWLED = "ulc";
     
-    private void processMozUrl(Authenticator authenticator, BufferedDataContainer dc, int rowIndex, String url) throws Exception {
+    private Long m_lastApiCallMillis = null;
+    
+    private int processMozUrlMetrics(Authenticator authenticator, BufferedDataContainer dc, int rowIndex, String url, final ExecutionContext exec) throws Exception {
+   	
+    	
+		// Sleep 5 seconds between calls
+		if (m_lastApiCallMillis != null) {
+	    	BigDecimal delayBetweenCalls = new BigDecimal(m_config.getDelayBetweenCalls().getDoubleValue());
+	    	long sleepBetweenCalls =  delayBetweenCalls.multiply(new BigDecimal(1000)).setScale(0, BigDecimal.ROUND_HALF_UP).longValue();
+			
+    		long currentTimeMillis = System.currentTimeMillis();
+    		long timeElapsedSinceLastCall = currentTimeMillis - m_lastApiCallMillis;
+    		if (timeElapsedSinceLastCall < sleepBetweenCalls) {
+        		exec.setProgress("Delaying " +  delayBetweenCalls + " seconds between calls, Next URL: " + url + " -> Row: " + (rowIndex + 1));
+    			Thread.sleep(sleepBetweenCalls - timeElapsedSinceLastCall);
+    		}
+		}
     	
     	// Make the Moz Call
         URLMetricsService urlMetricsService = new URLMetricsService(authenticator);
         String response = urlMetricsService.getUrlMetrics(url);
+        m_lastApiCallMillis = System.currentTimeMillis();    	        
+        
         Gson gson = new Gson();
         UrlResponse result = gson.fromJson(response, UrlResponse.class);
         
@@ -166,6 +188,8 @@ public class MozUrlMetricsNodeModel extends NodeModel {
     	cells.add(new StringCell(result.getUlc())); // Time Last Crawled
     	final DefaultRow row = new DefaultRow(RowKey.createRowKey(rowIndex), cells);
     	dc.addRowToTable(row);
+    	rowIndex++;
+    	return rowIndex;
     }
 
     private DataTableSpec createTableSpec() {

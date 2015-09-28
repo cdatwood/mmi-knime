@@ -43,7 +43,7 @@ public class URLMetricsService
 	 * 			  col = 0 fetches all the data
 	 * @return
 	 */
-	public String getUrlMetrics(String objectURL, BigInteger col)
+	public String getUrlMetrics(String objectURL, BigInteger col) throws Exception
 	{
 		
 		String urlToFetch = "http://lsapi.seomoz.com/linkscape/url-metrics/" + URLEncoder.encode(objectURL) + "?" + authenticator.getAuthenticationStr();
@@ -56,7 +56,7 @@ public class URLMetricsService
 		
 		return response;
 	}
-	public String getUrlMetrics(String objectURL, long col) { return getUrlMetrics(objectURL, BigInteger.valueOf(col)); }
+	public String getUrlMetrics(String objectURL, long col) throws Exception { return getUrlMetrics(objectURL, BigInteger.valueOf(col)); }
 	
 	/**
 	 * 
@@ -67,7 +67,7 @@ public class URLMetricsService
 	 * 
 	 * @see URLMetricsService#getUrlMetrics(String, int)
 	 */
-	public String getUrlMetrics(String objectURL)
+	public String getUrlMetrics(String objectURL) throws Exception
 	{
 		return getUrlMetrics(objectURL, 0);		
 	}

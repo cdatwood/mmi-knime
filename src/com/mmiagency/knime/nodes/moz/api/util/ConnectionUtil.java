@@ -28,8 +28,7 @@ public class ConnectionUtil
 	 * @param urlToFetch url to be connected
 	 * @return the http get response
 	 */
-	public static String makeRequest(String urlToFetch)
-	{
+	public static String makeRequest(String urlToFetch) throws Exception {
         HttpClient httpclient = new DefaultHttpClient();
 
         HttpGet httpget = new HttpGet(urlToFetch); 
@@ -44,10 +43,12 @@ public class ConnectionUtil
 		catch (ClientProtocolException e) 
 		{
 			e.printStackTrace();
+			throw e;
 		} 
 		catch (IOException e) 
 		{
 			e.printStackTrace();
+			throw e;
 		}
         httpclient.getConnectionManager().shutdown();        
         return responseBody;

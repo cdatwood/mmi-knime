@@ -42,7 +42,7 @@ private Authenticator authenticator;
 	 * @param limit The size of the page can by specified using the Limit parameter. 
 	 * @return
 	 */
-	public String getTopPages(String objectURL, BigInteger col, int offset, int limit)
+	public String getTopPages(String objectURL, BigInteger col, int offset, int limit) throws Exception
 	{
 		String urlToFetch = "http://lsapi.seomoz.com/linkscape/top-pages/" + URLEncoder.encode(objectURL) + "?" + authenticator.getAuthenticationStr();
 		if(offset >= 0 )
@@ -63,7 +63,7 @@ private Authenticator authenticator;
 		
 		return response;
 	}
-	public String getTopPages(String objectURL, long col, int offset, int limit) { return getTopPages(objectURL, BigInteger.valueOf(col), offset, limit); }
+	public String getTopPages(String objectURL, long col, int offset, int limit) throws Exception { return getTopPages(objectURL, BigInteger.valueOf(col), offset, limit); }
 	
 	/**
 	 * 
@@ -73,11 +73,11 @@ private Authenticator authenticator;
 	 * 
 	 * @see #getTopPages(String, int, int, int)
 	 */
-	public String getTopPages(String objectURL, BigInteger col)
+	public String getTopPages(String objectURL, BigInteger col) throws Exception
 	{
 		return getTopPages(objectURL, col, -1, -1);
 	}
-	public String getTopPages(String objectURL, long col) { return getTopPages(objectURL, BigInteger.valueOf(col)); }
+	public String getTopPages(String objectURL, long col) throws Exception { return getTopPages(objectURL, BigInteger.valueOf(col)); }
 	
 	/**
 	 * 
@@ -86,7 +86,7 @@ private Authenticator authenticator;
 	 * 
 	 * @see #getTopPages(String, int, int, int)
 	 */
-	public String getTopPages(String objectURL)
+	public String getTopPages(String objectURL) throws Exception
 	{
 		return getTopPages(objectURL, 0);
 	}
