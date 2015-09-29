@@ -182,7 +182,6 @@ public class RandomDataUtil {
         return wordsWithLength.get(randomIndex);            
     }
 
-
     public String randomSentence(int length) {
         if (length < maxWordLength) return randomWord(length);
 
@@ -197,11 +196,18 @@ public class RandomDataUtil {
                     word = word.substring(0, 1).toUpperCase() + word.substring(1);
                 }
                 currentText.append(word);
+
+                int remainingLength = length - currentText.length();
+                if (remainingLength == 1) {
+                    currentText.append(".");
+                    return currentText.toString();
+                } else if (remainingLength == 0) {
+                    return currentText.toString();
+                }
             } else {
                 currentText.append(" ");
                 int remainingLength = length - currentText.length();
 
-                //System.out.println(remainingLength + " -> " + (maxWordLength + 1));
                 if (remainingLength == 1) {
                     currentText.append(".");
                     return currentText.toString();
