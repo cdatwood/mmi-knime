@@ -102,28 +102,33 @@ public class XMLSitemapReaderNodeModel extends NodeModel {
         
     	Elements urlTags = doc.select("url");
     	
-    	for (Element urlTag : urlTags) {
-    		String loc = "";
-    		String lastmod = "";
-    		String changefreq = "";
-    		double priority = 0;
-    		Elements elements = urlTag.select("loc");
-    		if (elements.size() > 0) {
-    			loc = elements.get(0).text();
-    		}
-    		elements = urlTag.select("lastmod");
-    		if (elements.size() > 0) {
-    			lastmod = elements.get(0).text();
-    		}
-    		elements = urlTag.select("changefreq");
-    		if (elements.size() > 0) {
-    			changefreq = elements.get(0).text();
-    		}
-    		elements = urlTag.select("priority");
-    		if (elements.size() > 0) {
-    			priority = new Double(elements.get(0).text());
-    		}
- 			container.addRowToTable(m_config.createRow(""+index++, url, loc, lastmod, changefreq, priority));
+    	if (urlTags.size() <= 0) {
+			setWarningMessage("FAILED on URL \"" + url + "\": Content is not in sitemap XML format");
+			container.addRowToTable(m_config.createRow(""+index++, url, "", "", "", 0));
+		} else {    	
+	    	for (Element urlTag : urlTags) {
+	    		String loc = "";
+	    		String lastmod = "";
+	    		String changefreq = "";
+	    		double priority = 0;
+	    		Elements elements = urlTag.select("loc");
+	    		if (elements.size() > 0) {
+	    			loc = elements.get(0).text();
+	    		}
+	    		elements = urlTag.select("lastmod");
+	    		if (elements.size() > 0) {
+	    			lastmod = elements.get(0).text();
+	    		}
+	    		elements = urlTag.select("changefreq");
+	    		if (elements.size() > 0) {
+	    			changefreq = elements.get(0).text();
+	    		}
+	    		elements = urlTag.select("priority");
+	    		if (elements.size() > 0) {
+	    			priority = new Double(elements.get(0).text());
+	    		}
+	 			container.addRowToTable(m_config.createRow(""+index++, url, loc, lastmod, changefreq, priority));
+	    	}
     	}
     	return index;
     }
