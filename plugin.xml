@@ -6,8 +6,12 @@
   </extension>
 
   <extension point="org.knime.product.splashExtension">
-    <splashExtension icon="icons/MMI_Knime_MMILogo_16x16.png" id="MMI" tooltip="MMI Agency"/>
-  </extension>     
+     <splashExtension
+        icon="icons/MMI_Knime_MMILogo_16x16.png"
+        id="MMI"
+        tooltip="MMI Agency">
+     </splashExtension>
+  </extension>  
   
   <extension point="org.knime.workbench.repository.nodes">
     <node category-path="/community/mmi/" factory-class="com.mmiagency.knime.nodes.google.pagespeed.GooglePageSpeedNodeFactory" id="com.mmiagency.knime.nodes.google.pagespeed.GooglePageSpeedNodeFactory"/>
