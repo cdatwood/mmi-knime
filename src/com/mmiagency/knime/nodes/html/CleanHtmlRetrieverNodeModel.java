@@ -21,7 +21,6 @@ package com.mmiagency.knime.nodes.html;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.Iterator;
 
 import org.htmlcleaner.CleanerProperties;
