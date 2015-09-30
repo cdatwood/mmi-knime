@@ -152,7 +152,7 @@ public class RandomDataNodeModel extends NodeModel {
         	for (int i = 0;i < MAX_COLUMNS; i++) {
         		if (!shouldProcessColumn(m_columnNames.get(i).getStringValue(), m_columnActive.get(i).getBooleanValue())) continue;
         		
-        		Integer columnNumber = i + 1;
+        		//Integer columnNumber = i + 1;
         		String columnType = m_columnTypes.get(i).getStringValue();
         		String columnMin = m_columnMin.get(i).getStringValue();
         		String columnMax = m_columnMax.get(i).getStringValue();
@@ -276,7 +276,6 @@ public class RandomDataNodeModel extends NodeModel {
     /**
      * {@inheritDoc}
      */
-    @SuppressWarnings("unused")
     @Override
     protected void loadInternals(final File nodeInternDir, final ExecutionMonitor exec) throws IOException, CanceledExecutionException {
     	System.out.println("LOAD INTERNALS: " + m_noOfRows);
@@ -286,7 +285,6 @@ public class RandomDataNodeModel extends NodeModel {
     /**
      * {@inheritDoc}
      */
-    @SuppressWarnings("unused")
     @Override
     protected void saveInternals(final File nodeInternDir, final ExecutionMonitor exec) throws IOException, CanceledExecutionException {
     	System.out.println("SAVE INTERNALS: " + m_noOfRows);
@@ -342,7 +340,7 @@ public class RandomDataNodeModel extends NodeModel {
     	System.out.println("VALIDATE SETTINGS: " + m_noOfRows);
         m_noOfRows.validateSettings(settings);
         
-        final int totalNoOfRows = ((SettingsModelInteger) m_noOfRows.createCloneWithValidatedValue(settings)).getIntValue();
+        //final int totalNoOfRows = ((SettingsModelInteger) m_noOfRows.createCloneWithValidatedValue(settings)).getIntValue();
         
         List<SettingsModelString> columnNames = new ArrayList<SettingsModelString>();
         List<SettingsModelString> columnTypes = new ArrayList<SettingsModelString>();
@@ -356,19 +354,17 @@ public class RandomDataNodeModel extends NodeModel {
         	columnMax.add((SettingsModelString) m_columnMax.get(i).createCloneWithValidatedValue(settings));
         	columnActive.add((SettingsModelBoolean) m_columnActive.get(i).createCloneWithValidatedValue(settings));
     	}
-
-        
         
         List<String> errors = new ArrayList<String>();
     	for (int i = 0;i < MAX_COLUMNS; i++) {
     		if (!shouldProcessColumn(m_columnNames.get(i).getStringValue(), m_columnActive.get(i).getBooleanValue())) continue;
     		
     		Integer columnNumber = i + 1;
-    		String name = columnNames.get(i).getStringValue();
+    		//String name = columnNames.get(i).getStringValue();
     		String type = columnTypes.get(i).getStringValue();
     		String min = columnMin.get(i).getStringValue();
     		String max = columnMax.get(i).getStringValue();
-    		Boolean active = columnActive.get(i).getBooleanValue();
+    		//Boolean active = columnActive.get(i).getBooleanValue();
     		System.out.println("Validating: " + columnNumber + " -> " + type + " -> " + min + " -> " + max);
     		
     		// For "String", "Integer" types, validate max/min as numbers

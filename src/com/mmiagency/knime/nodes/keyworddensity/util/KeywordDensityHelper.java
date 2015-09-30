@@ -165,7 +165,7 @@ public class KeywordDensityHelper {
 		m_total += frequency;
 	}
 	
-	public Iterator iterator() {
+	public Iterator<KeywordDensityRowEntry> iterator() {
 		return new KeywordDensityIterator(m_url, m_keywordMap, m_total);
 	}
 	
@@ -193,7 +193,7 @@ public class KeywordDensityHelper {
 	    }
 	}
     
-	private class KeywordDensityIterator implements Iterator {
+	private class KeywordDensityIterator implements Iterator<KeywordDensityRowEntry> {
 
 		private String url;
 		private BigDecimal total;
@@ -213,7 +213,7 @@ public class KeywordDensityHelper {
 			return iterator.hasNext();
 		}
 
-		public Object next() {
+		public KeywordDensityRowEntry next() {
 			Map.Entry<String, Integer> mapEntry = iterator.next();
 			new KeywordDensityRowFactory();
 			return new KeywordDensityRowEntry(
