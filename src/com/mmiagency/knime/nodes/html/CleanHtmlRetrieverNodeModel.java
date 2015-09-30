@@ -94,7 +94,7 @@ public class CleanHtmlRetrieverNodeModel extends NodeModel {
     			container.addRowToTable(m_config.createRow("" + index++, "", "FAILED: Missing URL"));
     			continue;
     		}
-			if (!(cell instanceof StringValue)) {
+    		if (!(cell.getType().isCompatible(StringValue.class))) {
     			container.addRowToTable(m_config.createRow("" + index++, "", 
     					"The specified URL column \"" + urlColumnName + "\" is not a string column.  Please specify a string column for URLs."));
     			continue;
@@ -109,7 +109,7 @@ public class CleanHtmlRetrieverNodeModel extends NodeModel {
 				DataCell contentCell = row.getCell(contentColumnIndex);
 				if (contentCell.isMissing()) {
 					// do nothing, we will pull content from URL
-				} else if (contentCell instanceof StringValue) {
+				} else if (contentCell.getType().isCompatible(StringValue.class)) {
 					content = ((StringValue)contentCell).getStringValue();
 				} else {
 					setWarningMessage("Content column is not a string for URL: " + url);
