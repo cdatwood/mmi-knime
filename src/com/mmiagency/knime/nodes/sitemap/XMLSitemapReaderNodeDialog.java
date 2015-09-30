@@ -19,10 +19,8 @@
  */
 package com.mmiagency.knime.nodes.sitemap;
 
-import org.knime.core.node.FlowVariableModel;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
-import org.knime.core.node.workflow.FlowVariable;
 
 /**
  * <code>NodeDialog</code> for the "XMLSitemapReader" Node.
