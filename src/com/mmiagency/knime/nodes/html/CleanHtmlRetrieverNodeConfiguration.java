@@ -20,23 +20,12 @@
 package com.mmiagency.knime.nodes.html;
 
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.knime.core.data.DataCell;
-import org.knime.core.data.DataColumnSpec;
-import org.knime.core.data.DataColumnSpecCreator;
-import org.knime.core.data.DataRow;
-import org.knime.core.data.DataTableSpec;
-import org.knime.core.data.RowKey;
-import org.knime.core.data.def.DefaultRow;
-import org.knime.core.data.def.StringCell;
-import org.knime.core.data.xml.XMLCell;
-import org.knime.core.data.xml.XMLCellFactory;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -191,35 +180,4 @@ public class CleanHtmlRetrieverNodeConfiguration {
         }
     }
     
-    public DataTableSpec tableSpec() {
-        List<DataColumnSpec> colSpecs = new ArrayList<DataColumnSpec>();
-        colSpecs.add(new DataColumnSpecCreator("URL", StringCell.TYPE).createSpec());
-        if (m_xml.getBooleanValue()) {
-        	colSpecs.add(new DataColumnSpecCreator(m_output.getStringValue(), XMLCell.TYPE).createSpec());
-        } else {
-        	colSpecs.add(new DataColumnSpecCreator(m_output.getStringValue(), StringCell.TYPE).createSpec());
-        }
-        return new DataTableSpec(colSpecs.toArray(new DataColumnSpec[colSpecs.size()]));
-    }
-    
-    public DataRow createRow(String id, String url, String xhtml) {
-        List<DataCell> cells = new ArrayList<DataCell>();
-        cells.add(new StringCell(url));
-        if (m_xml.getBooleanValue()) {
-        	try {
-				cells.add(XMLCellFactory.create(xhtml));
-			} catch (Exception e) {
-				try {
-					cells.add(XMLCellFactory.create("<error>"+e.getMessage()+"</error>"));
-				} catch (Exception e2) {
-					// this should not throw an exception
-				}
-				e.printStackTrace();
-			}
-        } else {
-        	cells.add(new StringCell(xhtml));
-        }
-        RowKey key = new RowKey(id);
-        return new DefaultRow(key, cells.toArray(new DataCell[cells.size()]));
-    }
 }

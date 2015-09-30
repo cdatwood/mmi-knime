@@ -32,11 +32,17 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
+import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.MissingCell;
 import org.knime.core.data.StringValue;
+import org.knime.core.data.container.CellFactory;
+import org.knime.core.data.container.ColumnRearranger;
+import org.knime.core.data.container.SingleCellFactory;
 import org.knime.core.data.def.StringCell;
-import org.knime.core.node.BufferedDataContainer;
+import org.knime.core.data.xml.XMLCell;
+import org.knime.core.data.xml.XMLCellFactory;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
@@ -72,94 +78,10 @@ public class CleanHtmlRetrieverNodeModel extends NodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
 
-		BufferedDataContainer container = exec.createDataContainer(m_config.tableSpec());
-        int index = 0;
-        
-    	DataTableSpec inSpec = inData[0].getSpec();
-    	String urlColumnName = m_config.getUrl().getStringValue();
-    	String contentColumnName = m_config.getContent().getStringValue();
-    	
-    	int urlColumnIndex = inSpec.findColumnIndex(urlColumnName);
-    	int contentColumnIndex = inSpec.findColumnIndex(contentColumnName);
-    	
-		HtmlCleaner cleaner = new HtmlCleaner();
-		
-		CleanerProperties props = cleaner.getProperties();
+        ColumnRearranger c = createColumnRearranger(inData[0].getDataTableSpec());
+        BufferedDataTable out = exec.createColumnRearrangeTable(inData[0], c, exec);
+        return new BufferedDataTable[]{out};    	
 
-		for (Iterator<DataRow> it = inData[0].iterator(); it.hasNext();) {
-    		DataRow row = it.next();
-    		DataCell cell = row.getCell(urlColumnIndex);
-    		if (cell.isMissing()) {
-    			container.addRowToTable(m_config.createRow("" + index++, "", "FAILED: Missing URL"));
-    			continue;
-    		}
-    		if (!(cell.getType().isCompatible(StringValue.class))) {
-    			container.addRowToTable(m_config.createRow("" + index++, "", 
-    					"The specified URL column \"" + urlColumnName + "\" is not a string column.  Please specify a string column for URLs."));
-    			continue;
-			}
-					    
-    		String url = ((StringValue)cell).getStringValue();
-
-    		String content = null;
-			
-			// content
-			if (contentColumnIndex >= 0) {
-				DataCell contentCell = row.getCell(contentColumnIndex);
-				if (contentCell.isMissing()) {
-					// do nothing, we will pull content from URL
-				} else if (contentCell.getType().isCompatible(StringValue.class)) {
-					content = ((StringValue)contentCell).getStringValue();
-				} else {
-					setWarningMessage("Content column is not a string for URL: " + url);
-				}
-			}
-
-			String html = null;
-			String result = null;
-			
-			if (content == null) {
-
-				try {
-			        Connection conn = Jsoup.connect(url);
-			        
-			        conn.validateTLSCertificates(false);
-			        conn.followRedirects(true);
-			        conn.userAgent(m_config.getUserAgent().getStringValue());
-			        conn.header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
-			        conn.header("Accept-Language", "en-US,en;q=0.5");
-			        conn.header("Accept-Encoding", "gzip, deflate");
-			        
-			        conn.execute();
-			        Document doc = conn.get();
-			        html = doc.html();
-				} catch (Throwable e) {
-					setWarningMessage("FAILED on URL \"" + url + "\": " + e.getMessage());
-				}
-
-			} else {
-				html = content;
-			}
-			
-			if (html != null) {
-				// clean html
-				TagNode node = cleaner.clean(html);
-				result = new PrettyXmlSerializer(props).getAsString(node);
-			} else {
-				result = "";
-			}
-			
-		    container.addRowToTable(m_config.createRow("" + index, url, result));
-			
-            // check if the execution monitor was canceled
-            exec.checkCanceled();
-            exec.setProgress(index / (double)inData[0].getRowCount(), 
-                "Adding row " + index++);
-    	}
-    	
-    	container.close();
-    	
-        return new BufferedDataTable[]{container.getTable()};
     }
 
     /**
@@ -205,10 +127,103 @@ public class CleanHtmlRetrieverNodeModel extends NodeModel {
 		if (m_config.getUrl().getStringValue().isEmpty()) {
 			setWarningMessage("A string column for URLs in the data input table must exist and must be specified.  Please create a URL column or pick the right column in this node's configuration.");
 		}
-
-		return new DataTableSpec[]{m_config.tableSpec()};
+		
+		ColumnRearranger c = createColumnRearranger(inSpecs[0]);
+	    DataTableSpec result = c.createSpec();
+	    return new DataTableSpec[]{result};
     }
+    
+    private ColumnRearranger createColumnRearranger(DataTableSpec in) {
+        ColumnRearranger c = new ColumnRearranger(in);
+        // column spec of the appended column
+        DataColumnSpec newColSpec = null;
+        if (m_config.getXml().getBooleanValue()) {
+        	newColSpec = new DataColumnSpecCreator(m_config.getOutput().getStringValue(), XMLCell.TYPE).createSpec();
+        } else {
+        	newColSpec = new DataColumnSpecCreator(m_config.getOutput().getStringValue(), StringCell.TYPE).createSpec();
+        }
 
+    	String urlColumnName = m_config.getUrl().getStringValue();
+    	String contentColumnName = m_config.getContent().getStringValue();
+    	
+    	final int urlColumnIndex = in.findColumnIndex(urlColumnName);
+    	final int contentColumnIndex = in.findColumnIndex(contentColumnName);
+        
+        // utility object that performs the calculation
+        CellFactory factory = new SingleCellFactory(newColSpec) {
+            public DataCell getCell(DataRow row) {
+            	
+        		HtmlCleaner cleaner = new HtmlCleaner();
+        		
+        		CleanerProperties props = cleaner.getProperties();
+        		
+        		DataCell urlCell = row.getCell(urlColumnIndex);
+        		
+        		if (urlCell.isMissing()) {
+					setWarningMessage("FAILED, missing URL");
+					return new MissingCell("FAILED, missing URL");
+        		}
+        		
+        		String url = ((StringValue)urlCell).getStringValue();
+
+        		String content = null;
+    			
+    			// content
+    			if (contentColumnIndex >= 0) {
+    				DataCell contentCell = row.getCell(contentColumnIndex);
+    				if (contentCell.isMissing()) {
+    					// do nothing, we will pull content from URL
+    				}
+    			}
+
+    			String html = content;
+    			String result = null;
+    			
+    			if (content == null) {
+
+    				try {
+    			        Connection conn = Jsoup.connect(url);
+    			        
+    			        conn.validateTLSCertificates(false);
+    			        conn.followRedirects(true);
+    			        conn.userAgent(m_config.getUserAgent().getStringValue());
+    			        conn.header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+    			        conn.header("Accept-Language", "en-US,en;q=0.5");
+    			        conn.header("Accept-Encoding", "gzip, deflate");
+    			        
+    			        conn.execute();
+    			        Document doc = conn.get();
+    			        html = doc.html();
+    				} catch (Throwable e) {
+    					setWarningMessage("FAILED on URL \"" + url + "\": " + e.getMessage());
+    				}
+
+    			}
+    			
+    			if (html != null) {
+    				// clean html
+    				TagNode node = cleaner.clean(html);
+    				result = new PrettyXmlSerializer(props).getAsString(node);
+    			} else {
+    				result = "";
+    			}
+            	
+                if (m_config.getXml().getBooleanValue()) {
+                	try {
+        				return XMLCellFactory.create(result);
+        			} catch (Exception e) {
+        				setWarningMessage("FAILED on URL \"" + url + "\": " + e.getMessage());
+        				return new MissingCell(e.getMessage());
+        			}
+                } else {
+                	return new StringCell(result);
+                }
+
+            }
+        };
+        c.append(factory);
+        return c;
+    }
     /**
      * {@inheritDoc}
      */
