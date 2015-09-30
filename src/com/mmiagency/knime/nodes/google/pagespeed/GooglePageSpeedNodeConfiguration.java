@@ -23,6 +23,7 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
+import org.knime.core.node.defaultnodesettings.SettingsModelLong;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 public class GooglePageSpeedNodeConfiguration {
@@ -35,17 +36,20 @@ public class GooglePageSpeedNodeConfiguration {
 	static final String FIELD_LABEL_FILTER_THIRD_PARTY_RESOURCES = "Filter Third Party Resources";
 	static final String FIELD_LABEL_LOCALE = "Locale";
 	static final String FIELD_LABEL_STRATEGY = "Strategy";
+	static final String FIELD_LABEL_WAIT_TIME = "Wait time (in milliseconds) between requests";
 	
 	static final String FIELD_KEY_URL_COLUMN = "urlColumn";
 	static final String FIELD_KEY_API_KEY = "apiKey";
 	static final String FIELD_KEY_FILTER_THIRD_PARTY_RESOURCES = "filterThirdPartyResources";
 	static final String FIELD_KEY_LOCALE = "locale";
 	static final String FIELD_KEY_STRATEGY = "strategy";
+	static final String FIELD_KEY_WAIT_TIME = "waitTime";
 	
 	static final String FIELD_DEFAULT_URL_COLUMN = "url";
 	static final String FIELD_DEFAULT_LOCALE = "en_US";
 	static final String FIELD_DEFAULT_STRATEGY = "desktop";
 	static final String[] FIELD_OPTIONS_STRATEGY = new String[]{"desktop", "mobile"};
+	static final long FIELD_DEFAULT_WAIT_TIME = 1000;
 
 	// settings for storing and values evaluation
 	private final SettingsModelString m_url = getUrlColumnSettingsModel();	
@@ -53,6 +57,7 @@ public class GooglePageSpeedNodeConfiguration {
 	private final SettingsModelBoolean m_filterThirdPartyResources = getFilterThirdPartyResourcesSettingsModel();
 	private final SettingsModelString m_locale = getLocaleSettingsModel();
 	private final SettingsModelString m_strategy = getStrategySettingsModel();
+	private final SettingsModelLong m_waitTime = getWaitTimeSettingsModel();
 	
 	public GooglePageSpeedNodeConfiguration() {
 		
@@ -79,6 +84,10 @@ public class GooglePageSpeedNodeConfiguration {
     	return new SettingsModelString(FIELD_KEY_STRATEGY, FIELD_DEFAULT_STRATEGY);
     }
 
+    public static SettingsModelLong getWaitTimeSettingsModel() {
+    	return new SettingsModelLong(FIELD_KEY_WAIT_TIME, FIELD_DEFAULT_WAIT_TIME);
+    }
+
     public SettingsModelString getUrl() {
     	return m_url;	
     }
@@ -94,6 +103,9 @@ public class GooglePageSpeedNodeConfiguration {
 	public SettingsModelString getStrategy() {
 		return m_strategy;
 	}
+	public SettingsModelLong getWaitTime() {
+		return m_waitTime;
+	}
     
     
     public void saveSettingsTo(final NodeSettingsWO settings) {
@@ -104,6 +116,7 @@ public class GooglePageSpeedNodeConfiguration {
         m_filterThirdPartyResources.saveSettingsTo(settings);
         m_locale.saveSettingsTo(settings);
         m_strategy.saveSettingsTo(settings);
+        m_waitTime.saveSettingsTo(settings);
     }
 
     public void loadValidatedSettingsFrom(final NodeSettingsRO settings)
@@ -117,6 +130,7 @@ public class GooglePageSpeedNodeConfiguration {
         m_filterThirdPartyResources.loadSettingsFrom(settings);
         m_locale.loadSettingsFrom(settings);
         m_strategy.loadSettingsFrom(settings);
+        m_waitTime.loadSettingsFrom(settings);
     }
 
     public void validateSettings(final NodeSettingsRO settings)
@@ -132,5 +146,6 @@ public class GooglePageSpeedNodeConfiguration {
         m_filterThirdPartyResources.validateSettings(settings);
         m_locale.validateSettings(settings);
         m_strategy.validateSettings(settings);
+        m_waitTime.validateSettings(settings);
     }
 }

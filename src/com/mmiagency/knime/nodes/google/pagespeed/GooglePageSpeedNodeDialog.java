@@ -31,6 +31,7 @@ import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentColumnNameSelection;
 import org.knime.core.node.defaultnodesettings.DialogComponentLabel;
+import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
@@ -117,7 +118,12 @@ public class GooglePageSpeedNodeDialog extends DefaultNodeSettingsPane {
         		GooglePageSpeedNodeConfiguration.getStrategySettingsModel(),
         		GooglePageSpeedNodeConfiguration.FIELD_LABEL_STRATEGY, 
         		GooglePageSpeedNodeConfiguration.FIELD_OPTIONS_STRATEGY));        
-                    
+        
+        addDialogComponent(new DialogComponentNumber(
+        		GooglePageSpeedNodeConfiguration.getWaitTimeSettingsModel(),
+        		GooglePageSpeedNodeConfiguration.FIELD_LABEL_WAIT_TIME, 
+        		GooglePageSpeedNodeConfiguration.FIELD_DEFAULT_WAIT_TIME));
+        
         addDialogComponent(m_warning);
         
     }

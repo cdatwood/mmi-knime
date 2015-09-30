@@ -137,6 +137,8 @@ public class GooglePageSpeedNodeModel extends NodeModel {
 			throw new InvalidSettingsException("You must link a table with URL column to this node.");
     	}
     	
+    	long waitTime = configuration.getWaitTime().getLongValue();
+    	
     	// prepare output data container
         BufferedDataContainer container = null;
         
@@ -254,7 +256,7 @@ public class GooglePageSpeedNodeModel extends NodeModel {
             
             // pause for 1 second to ensure we don't submit URL more frequent than 1 per second.
             try {
-            	Thread.sleep(1000);
+            	Thread.sleep(waitTime);
             } catch (InterruptedException e) {
             	throw new Exception("Processing interrupted", e);
             }

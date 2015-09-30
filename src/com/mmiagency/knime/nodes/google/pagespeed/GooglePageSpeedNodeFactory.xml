@@ -38,7 +38,7 @@
             <li>Specify a name for the key and click <strong>Create</strong></li>
             <li>An <strong>API key</strong> should be shown.</li>
         </ol>
-        Google imposes a quota limit on PageSpeed Insights API usage.  The current limit (as of September, 2015) is 25,000 requests / day and 1 requests / second.  This node has a hard-coded pause for 1 second between sending requests to Google to avoid exceeding quota.
+        Google imposes a quota limit on PageSpeed Insights API usage.  The current limit (as of September, 2015) is 25,000 requests / day and 1 requests / second.  The default pause is 1 second between sending requests to Google to avoid exceeding quota.
         </intro>
         
         <option name="Google API Key">Google API Key that's necessary to use the service.</option>
@@ -46,6 +46,7 @@
         <option name="Filter Third Party Resources">A PageSpeed option to filter out third party resources during evaluation, default is false.</option>
         <option name="Locale">A PageSpeed option for locale, default is en_US (format should be [language code]_[country code]).</option>
         <option name="Strategy">A PageSpeed option for choosing between mobile and desktop strategy, default is desktop.</option>
+        <option name="Wait time">Wait time (in milliseconds) between requests, default is 1000ms.</option>
 
     </fullDescription>
     
