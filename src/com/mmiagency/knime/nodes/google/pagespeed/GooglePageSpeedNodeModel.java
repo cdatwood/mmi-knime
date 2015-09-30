@@ -165,11 +165,7 @@ public class GooglePageSpeedNodeModel extends NodeModel {
     			if (cell.isMissing()) {
     				throw new Exception("URL value is missing");
     			}
-    			
-    			if (!(cell.getType().isCompatible(StringValue.class))) {
-    				throw new Exception("The specified URL column \"" + urlColumnName + "\" is not a string column.  Please specify a string column for URLs.");
-    			}
-    			
+    			    			
     			url = ((StringValue)cell).getStringValue();
 
     			pageSpeedResult = retrievePageSpeedResult(url);
@@ -662,7 +658,7 @@ public class GooglePageSpeedNodeModel extends NodeModel {
 			if (index >= 0) {
 				DataColumnSpec columnSpec = inSpecs[0].getColumnSpec(index);
 				// check if column is of string type
-				if (columnSpec.getType().equals(StringCell.TYPE)) {
+				if (columnSpec.getType().isCompatible(StringValue.class)) {
 					// found URL column
 					configuration.getUrl().setStringValue(GooglePageSpeedNodeConfiguration.FIELD_DEFAULT_URL_COLUMN);
 					setWarningMessage("Auto-guessing: Using column '"+GooglePageSpeedNodeConfiguration.FIELD_DEFAULT_URL_COLUMN+"' as URL column");
@@ -675,7 +671,7 @@ public class GooglePageSpeedNodeModel extends NodeModel {
 				// URL column doesn't exist, now check the first String column
 				for (Iterator<DataColumnSpec> it = inSpecs[0].iterator(); it.hasNext();) {
 					DataColumnSpec columnSpec = it.next();
-					if (columnSpec.getType().equals(StringCell.TYPE)) {
+					if (columnSpec.getType().isCompatible(StringValue.class)) {
 						configuration.getUrl().setStringValue(columnSpec.getName());
 						setWarningMessage("Auto-guessing: Using first string column '"+columnSpec.getName()+"' as URL column");
 						break;

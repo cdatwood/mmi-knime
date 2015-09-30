@@ -143,10 +143,6 @@ public class W3cHtmlValidatorNodeModel extends NodeModel {
     				throw new Exception("URL value is missing");
     			}
     			
-    			if (!(cell.getType().isCompatible(StringValue.class))) {
-    				throw new Exception("The specified URL column \"" + urlColumnName + "\" is not a string column.  Please specify a string column for URLs.");
-    			}
-    			
     			url = ((StringValue)cell).getStringValue();    	
 
         		// set URL in summary
@@ -312,7 +308,7 @@ public class W3cHtmlValidatorNodeModel extends NodeModel {
 			if (index >= 0) {
 				DataColumnSpec columnSpec = inSpecs[0].getColumnSpec(index);
 				// check if column is of string type
-				if (columnSpec.getType().equals(StringCell.TYPE)) {
+				if (columnSpec.getType().isCompatible(StringValue.class)) {
 					// found URL column
 					m_configuration.getUrl().setStringValue(W3cHtmlValidatorNodeConfiguration.FIELD_DEFAULT_URL_COLUMN);
 					setWarningMessage("Auto-guessing: Using column '"+W3cHtmlValidatorNodeConfiguration.FIELD_DEFAULT_URL_COLUMN+"' as URL column");
@@ -325,7 +321,7 @@ public class W3cHtmlValidatorNodeModel extends NodeModel {
 				// URL column doesn't exist, now check the first String column
 				for (Iterator<DataColumnSpec> it = inSpecs[0].iterator(); it.hasNext();) {
 					DataColumnSpec columnSpec = it.next();
-					if (columnSpec.getType().equals(StringCell.TYPE)) {
+					if (columnSpec.getType().isCompatible(StringValue.class)) {
 						m_configuration.getUrl().setStringValue(columnSpec.getName());
 						setWarningMessage("Auto-guessing: Using first string column '"+columnSpec.getName()+"' as URL column");
 						break;

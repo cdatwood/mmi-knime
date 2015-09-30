@@ -28,7 +28,7 @@
     <fullDescription>
         <intro>This node expects a sitemap URL input and produces sitemap entries in an output table. It also support sitemap index.</intro>
         
-        <option name="Sitemap URL">A sitemap URL</option>
+        <option name="Sitemap URL (Required)">A sitemap URL, this is a required field.</option>
 
     </fullDescription>
     

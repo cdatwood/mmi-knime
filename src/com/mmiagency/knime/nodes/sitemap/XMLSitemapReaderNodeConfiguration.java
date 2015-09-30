@@ -37,7 +37,7 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 public class XMLSitemapReaderNodeConfiguration {
-	static final String FIELD_LABEL_URL = "URL (Required)";
+	static final String FIELD_LABEL_URL = "Sitemap URL (Required)";
 
 	static final String FIELD_KEY_URL = "url";
 	

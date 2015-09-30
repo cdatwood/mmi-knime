@@ -26,7 +26,7 @@
     </shortDescription>
     
     <fullDescription>
-        <intro>This node takes URL from a column, retrieves its content (assuming to be in HTML form) for parsing.  If HTML content is available in another column, it can take HTML content directly instead of pulling from URL.  HTML content is then parsed and clean up using <a href="http://htmlcleaner.sourceforge.net/">HtmlCleaner</a> to output in XHTML form.  The result can be configured to output in either String for XML type.</intro>
+        <intro>This node takes URL from a column, retrieves its content (assuming to be in HTML form) for parsing.  If HTML content is available in another column, it can take HTML content directly instead of pulling from URL.  HTML content is then parsed and cleaned up using <a href="http://htmlcleaner.sourceforge.net/">HtmlCleaner</a> to output in XHTML form.  The result can be configured to output in either String for XML type.</intro>
         
         <option name="URL Column Name">URL column name</option>
         <option name="Content Column Name">Content column name.  If available, the node will use this content instead of pulling from URL.</option>
