@@ -21,6 +21,7 @@ package com.mmiagency.knime.nodes.html;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Iterator;
 
 import org.htmlcleaner.CleanerProperties;
@@ -116,30 +117,38 @@ public class CleanHtmlRetrieverNodeModel extends NodeModel {
 			}
 
 			String html = null;
+			String result = null;
 			
 			if (content == null) {
 
-		        Connection conn = Jsoup.connect(url);
-		        
-		        conn.validateTLSCertificates(false);
-		        conn.followRedirects(true);
-		        conn.userAgent(m_config.getUserAgent().getStringValue());
-		        conn.header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
-		        conn.header("Accept-Language", "en-US,en;q=0.5");
-		        conn.header("Accept-Encoding", "gzip, deflate");
-		        
-		        conn.execute();
-		        Document doc = conn.get();
-		        html = doc.html();
+				try {
+			        Connection conn = Jsoup.connect(url);
+			        
+			        conn.validateTLSCertificates(false);
+			        conn.followRedirects(true);
+			        conn.userAgent(m_config.getUserAgent().getStringValue());
+			        conn.header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+			        conn.header("Accept-Language", "en-US,en;q=0.5");
+			        conn.header("Accept-Encoding", "gzip, deflate");
+			        
+			        conn.execute();
+			        Document doc = conn.get();
+			        html = doc.html();
+				} catch (Throwable e) {
+					setWarningMessage("Error found on " + url + ": " + e.getMessage());
+				}
 
 			} else {
 				html = content;
 			}
-						 
-			// clean html
-			TagNode node = cleaner.clean(html);
-
-			String result = new PrettyXmlSerializer(props).getAsString(node);
+			
+			if (html != null) {
+				// clean html
+				TagNode node = cleaner.clean(html);
+				result = new PrettyXmlSerializer(props).getAsString(node);
+			} else {
+				result = "";
+			}
 			
 		    container.addRowToTable(m_config.createRow("" + index, url, result));
 			
