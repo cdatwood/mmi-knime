@@ -41,7 +41,6 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -65,9 +64,7 @@ import com.mmiagency.knime.nodes.util.Util;
  * @author Phuc Truong
  */
 public class MozUrlMetricsNodeModel extends NodeModel {
-    
-    private static final NodeLogger logger = NodeLogger.getLogger(MozUrlMetricsNodeModel.class);
-    
+        
     MozUrlMetricsNodeConfiguration m_config = new MozUrlMetricsNodeConfiguration();
 
 	/**
@@ -99,18 +96,22 @@ public class MozUrlMetricsNodeModel extends NodeModel {
     	// Look through the table for values and process
         BufferedDataContainer dc = exec.createDataContainer(createTableSpec());
         int rowIndex = 0;    	
+        int inDataIndex = -1;
     	for (Iterator<DataRow> it = inputTable.iterator(); it.hasNext();) {
+    		inDataIndex++;
     		DataRow row = it.next();
 			DataCell cell = row.getCell(urlColumnIndex);
 
 			// Validate the cell information
-			if (cell.isMissing()) throw new Exception("URL value is missing");
-			if (!(cell instanceof StringValue)) throw new Exception("The specified URL column \"" + urlColumnName + "\" is not a string column.  Please specify a string column for URLs.");
+			if (cell.isMissing()) {
+				setWarningMessage("URL is missing on row " + inDataIndex);
+				continue;
+			}
 			
 			// Skip blank URL's
 			String url = ((StringValue)cell).getStringValue();
 			if (Util.isBlankOrNull(url)) {
-				logger.error("Skipping blank url: " + url);
+				setWarningMessage("Skipping blank url: " + url);
 				continue;
 			}
 
@@ -123,7 +124,7 @@ public class MozUrlMetricsNodeModel extends NodeModel {
     		try {    			
     			rowIndex = processMozUrlMetrics(authenticator, dc, rowIndex, url, exec);		
     		} catch (Exception e) {
-    			logger.error("Unable to retrieve UrlMetrics results for url: " + url + ", error: " + e.getMessage());
+    			setWarningMessage("Unable to retrieve UrlMetrics results for url: " + url + ", error: " + e.getMessage());
     		}
     	}
         
@@ -228,9 +229,31 @@ public class MozUrlMetricsNodeModel extends NodeModel {
     @Override
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         
-        if (Util.isBlankOrNull(m_config.getUrl().getStringValue())) throw new InvalidSettingsException("Url is required");
-
-        return new PortObjectSpec[]{createTableSpec()};
+		if (inSpecs.length<2) {
+			throw new InvalidSettingsException("You must link a table with URL column to this node.");
+		}
+		
+		DataTableSpec tableSpec = (DataTableSpec) inSpecs[0];
+		
+		int index = tableSpec.findColumnIndex(m_config.getUrl().getStringValue()); 
+		if (index < 0) {
+			// URL column doesn't exist, now check the first String column
+			for (Iterator<DataColumnSpec> it = tableSpec.iterator(); it.hasNext();) {
+				DataColumnSpec columnSpec = it.next();
+				if (columnSpec.getType().isCompatible(StringValue.class)) {
+					m_config.getUrl().setStringValue(columnSpec.getName());
+					setWarningMessage("Auto-guessing: Using first string column '"+columnSpec.getName()+"' as URL column");
+					break;
+				}
+			}			
+		}	
+		
+		if (m_config.getUrl().getStringValue().isEmpty()) {
+			setWarningMessage("A string column for URLs in the data input table must exist and must be specified.  Please create a URL column or pick the right column in this node's configuration.");
+			throw new InvalidSettingsException("Url is required");
+		}   
+		
+		return new PortObjectSpec[]{createTableSpec()};
     }
 
     /**

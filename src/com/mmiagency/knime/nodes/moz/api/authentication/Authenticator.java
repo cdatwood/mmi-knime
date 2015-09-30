@@ -1,5 +1,25 @@
+/*
+ * ------------------------------------------------------------------------
+ * Copyright by MMI Agency, Houston, Texas, USA
+ * Website: http://www.mmiagency.com; Contact: 713-929-6900
+ *
+ * The MMI KNIME Node is Copyright (C) 2015, MMI Agency The KNIME Nodes 
+ * are free software: you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License as published by the Free 
+ * Software Foundation, either version 3 of the License, or (at your 
+ * option) any later version. 
+ * 
+ * The KNIME Nodes are distributed in the hope that it will be useful, 
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of 
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU 
+ * General Public License for more details. You should have received a 
+ * copy of the GNU General Public License along with the KNIME Nodes. If 
+ * not, see <http://www.gnu.org/licenses/>.
+ * ------------------------------------------------------------------------
+ */
 package com.mmiagency.knime.nodes.moz.api.authentication;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -109,7 +129,13 @@ public class Authenticator
 		byte[] rawHmac = mac.doFinal(stringToSign.getBytes());
 
 		// base64-encode the hmac
-		String urlSafeSignature = URLEncoder.encode(EncodeBase64(rawHmac));
+		String urlSafeSignature = null;
+		
+		try {
+			urlSafeSignature = URLEncoder.encode(EncodeBase64(rawHmac), "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			// do nothing as this should never happen
+		}
 		
 		String authenticationStr = "AccessID=" + accessID + "&Expires=" + expires + "&Signature=" + urlSafeSignature;
 

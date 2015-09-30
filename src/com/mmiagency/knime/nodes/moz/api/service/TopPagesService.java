@@ -1,9 +1,30 @@
+/*
+ * ------------------------------------------------------------------------
+ * Copyright by MMI Agency, Houston, Texas, USA
+ * Website: http://www.mmiagency.com; Contact: 713-929-6900
+ *
+ * The MMI KNIME Node is Copyright (C) 2015, MMI Agency The KNIME Nodes 
+ * are free software: you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License as published by the Free 
+ * Software Foundation, either version 3 of the License, or (at your 
+ * option) any later version. 
+ * 
+ * The KNIME Nodes are distributed in the hope that it will be useful, 
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of 
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU 
+ * General Public License for more details. You should have received a 
+ * copy of the GNU General Public License along with the KNIME Nodes. If 
+ * not, see <http://www.gnu.org/licenses/>.
+ * ------------------------------------------------------------------------
+ */
 package com.mmiagency.knime.nodes.moz.api.service;
 
 import java.net.URLEncoder;
 
 import com.mmiagency.knime.nodes.moz.api.authentication.Authenticator;
 import com.mmiagency.knime.nodes.moz.api.util.ConnectionUtil;
+
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 
 /**
@@ -44,7 +65,12 @@ private Authenticator authenticator;
 	 */
 	public String getTopPages(String objectURL, BigInteger col, int offset, int limit) throws Exception
 	{
-		String urlToFetch = "http://lsapi.seomoz.com/linkscape/top-pages/" + URLEncoder.encode(objectURL) + "?" + authenticator.getAuthenticationStr();
+		String urlToFetch = null;
+		try {
+			urlToFetch = "http://lsapi.seomoz.com/linkscape/top-pages/" + URLEncoder.encode(objectURL, "UTF-8") + "?" + authenticator.getAuthenticationStr();
+		} catch (UnsupportedEncodingException e) {
+			// do nothing as this should never happen
+		}		
 		if(offset >= 0 )
 		{
 			urlToFetch = urlToFetch + "&Offset=" + offset;

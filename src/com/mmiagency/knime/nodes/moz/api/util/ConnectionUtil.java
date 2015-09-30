@@ -1,13 +1,34 @@
+/*
+ * ------------------------------------------------------------------------
+ * Copyright by MMI Agency, Houston, Texas, USA
+ * Website: http://www.mmiagency.com; Contact: 713-929-6900
+ *
+ * The MMI KNIME Node is Copyright (C) 2015, MMI Agency The KNIME Nodes 
+ * are free software: you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License as published by the Free 
+ * Software Foundation, either version 3 of the License, or (at your 
+ * option) any later version. 
+ * 
+ * The KNIME Nodes are distributed in the hope that it will be useful, 
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of 
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU 
+ * General Public License for more details. You should have received a 
+ * copy of the GNU General Public License along with the KNIME Nodes. If 
+ * not, see <http://www.gnu.org/licenses/>.
+ * ------------------------------------------------------------------------
+ */
 package com.mmiagency.knime.nodes.moz.api.util;
 
-import java.io.IOException;
+import java.io.StringWriter;
 
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.BasicResponseHandler;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.commons.io.IOUtils;
+import com.google.api.client.http.GenericUrl;
+import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpRequestFactory;
+import com.google.api.client.http.HttpRequestInitializer;
+import com.google.api.client.http.HttpResponse;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.javanet.NetHttpTransport;
 
 /**
  * 
@@ -19,6 +40,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
  */
 public class ConnectionUtil 
 {
+	static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
 	
 	/**
 	 * 
@@ -29,28 +51,16 @@ public class ConnectionUtil
 	 * @return the http get response
 	 */
 	public static String makeRequest(String urlToFetch) throws Exception {
-        HttpClient httpclient = new DefaultHttpClient();
-
-        HttpGet httpget = new HttpGet(urlToFetch); 
-
-        // Create a response handler
-        ResponseHandler<String> responseHandler = new BasicResponseHandler();
-        String responseBody = "";
-		try 
-		{
-			responseBody = httpclient.execute(httpget, responseHandler);        
-		} 
-		catch (ClientProtocolException e) 
-		{
-			e.printStackTrace();
-			throw e;
-		} 
-		catch (IOException e) 
-		{
-			e.printStackTrace();
-			throw e;
-		}
-        httpclient.getConnectionManager().shutdown();        
-        return responseBody;
+		
+        HttpRequestFactory requestFactory =
+        		HTTP_TRANSPORT.createRequestFactory(new HttpRequestInitializer() {
+                    public void initialize(HttpRequest request) {
+                    }
+                });    	
+        HttpRequest request = requestFactory.buildGetRequest(new GenericUrl(urlToFetch.toString()));
+        HttpResponse response = request.execute();
+        StringWriter writer = new StringWriter();
+        IOUtils.copy(response.getContent(), writer, response.getContentEncoding());
+        return writer.toString();
 	}
 }

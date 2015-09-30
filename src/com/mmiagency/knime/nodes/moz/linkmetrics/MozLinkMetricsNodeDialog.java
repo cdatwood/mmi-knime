@@ -19,40 +19,12 @@
  */
 package com.mmiagency.knime.nodes.moz.linkmetrics;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-
 import org.knime.core.data.StringValue;
-import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeDialogPane;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
-import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentColumnNameSelection;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
-import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
-import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.util.DataValueColumnFilter;
-
-import com.mmiagency.knime.nodes.randomdata.RandomDataNodeModel;
-import com.mmiagency.knime.nodes.w3c.htmlvalidator.W3cHtmlValidatorNodeConfiguration;
 
 /**
  * 

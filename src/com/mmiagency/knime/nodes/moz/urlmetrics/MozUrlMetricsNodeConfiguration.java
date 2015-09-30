@@ -22,14 +22,8 @@ package com.mmiagency.knime.nodes.moz.urlmetrics;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
-import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
-import org.knime.core.node.util.StringHistory;
-
-import com.mmiagency.knime.nodes.moz.data.MozApiConnection;
-import com.mmiagency.knime.nodes.util.Util;
 
 public class MozUrlMetricsNodeConfiguration {
 
