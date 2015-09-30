@@ -59,16 +59,24 @@ public class XMLSitemapReaderNodeModel extends NodeModel {
 
     private int processSitemap(final BufferedDataContainer container, final ExecutionContext exec, final int id, final String url) throws IOException, CanceledExecutionException {
     	int index = id;
-        Connection conn = Jsoup.connect(url);
-        
-        conn.validateTLSCertificates(false);
-        conn.followRedirects(true);
-        conn.userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:40.0) Gecko/20100101 Firefox/40.0");
-        conn.header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
-        conn.header("Accept-Language", "en-US,en;q=0.5");
-        conn.header("Accept-Encoding", "gzip, deflate");
-        
-        conn.execute();
+    	Connection conn = null;
+    	
+    	try {
+	        conn = Jsoup.connect(url);
+	        
+	        conn.validateTLSCertificates(false);
+	        conn.followRedirects(true);
+	        conn.userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:40.0) Gecko/20100101 Firefox/40.0");
+	        conn.header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+	        conn.header("Accept-Language", "en-US,en;q=0.5");
+	        conn.header("Accept-Encoding", "gzip, deflate");
+	        
+	        conn.execute();
+    	} catch (Throwable e) {
+			setWarningMessage("FAILED on URL \"" + url + "\": " + e.getMessage());
+			container.addRowToTable(m_config.createRow(""+index++, url, "", "", "", 0));
+			return index;
+    	}
         Document doc = conn.get();
         
         // check if sitemap is an index page

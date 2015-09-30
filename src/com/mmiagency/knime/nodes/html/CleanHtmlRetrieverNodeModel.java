@@ -135,7 +135,7 @@ public class CleanHtmlRetrieverNodeModel extends NodeModel {
 			        Document doc = conn.get();
 			        html = doc.html();
 				} catch (Throwable e) {
-					setWarningMessage("Error found on " + url + ": " + e.getMessage());
+					setWarningMessage("FAILED on URL \"" + url + "\": " + e.getMessage());
 				}
 
 			} else {

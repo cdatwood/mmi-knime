@@ -136,7 +136,8 @@ public class KeywordDensityNodeModel extends NodeModel {
     		try {
     			helper.execute();
     		} catch (Exception e) {    			
-    			container.addRowToTable(factory.createRow("" + index++, url, "FAILED: " + e.getMessage()));
+    			setWarningMessage("FAILED on URL \"" + url + "\": " + e.getMessage());
+    			container.addRowToTable(factory.createRow("" + index++, url, ""));
     			continue;
     		}
     		
