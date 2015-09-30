@@ -22,6 +22,9 @@
     <node category-path="/community/mmi/" factory-class="com.mmiagency.knime.nodes.randomdata.RandomDataNodeFactory" id="com.mmiagency.knime.nodes.randomdata.RandomDataNodeFactory"/>
     <node category-path="/community/mmi/" factory-class="com.mmiagency.knime.nodes.html.CleanHtmlRetrieverNodeFactory" id="com.mmiagency.knime.nodes.html.CleanHtmlRetrieverNodeFactory"/>
     <node category-path="/community/mmi/" factory-class="com.mmiagency.knime.nodes.sitemap.XMLSitemapReaderNodeFactory" id="com.mmiagency.knime.nodes.sitemap.XMLSitemapReaderNodeFactory"/>
+    <node category-path="/community/mmi/" factory-class="com.mmiagency.knime.nodes.moz.connector.MozAPIConnectorFactory" id="com.mmiagency.knime.nodes.moz.connector.MozAPIConnectorNodeFactory"/>
+    <node category-path="/community/mmi/" factory-class="com.mmiagency.knime.nodes.moz.urlmetrics.MozUrlMetricsNodeFactory" id="com.mmiagency.knime.nodes.moz.urlmetrics.MozUrlMetricsNodeFactory"/>
+    <node category-path="/community/mmi/" factory-class="com.mmiagency.knime.nodes.moz.linkmetrics.MozLinkMetricsNodeFactory" id="com.mmiagency.knime.nodes.moz.linkmetrics.MozLinkMetricsNodeFactory"/>
   </extension>
    
 </plugin>

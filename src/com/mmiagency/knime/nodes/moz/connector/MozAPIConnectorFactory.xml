@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<knimeNode icon="./moz.png" type="Source"
+	xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://knime.org/node/v2.8 http://knime.org/node/v2.8.xsd">
+	<name>Moz API Connector</name>
+	<shortDescription>Create a connection to access Moz's API.</shortDescription>
+	<fullDescription>
+		<intro>
+	Creates a connection to access Moz's API. Documentation for the API can be found at <a href="https://moz.com/products/api">https://moz.com/products/api</a>
+		</intro>
+		<option name="Access ID">The API Access ID</option>
+		<option name="Secret Key">The API Secret Key</option>
+	</fullDescription>
+	<ports>
+		<outPort index="0" name="Moz API Connection">A connection that can be used to access Moz's API.</outPort>
+	</ports>
+</knimeNode>
