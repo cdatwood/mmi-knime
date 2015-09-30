@@ -80,11 +80,11 @@ public class RandomDataNodeModel extends NodeModel {
     		m_columnMax.add(createColumnMaxModel(i));
     		m_columnActive.add(createColumnActiveModel(i));
     	}
-    	System.out.println("NEW: " + m_noOfRows);
+    	//System.out.println("NEW: " + m_noOfRows);
         
     }
 
-    public static int MAX_COLUMNS = 100;
+    public static int MAX_COLUMNS = 5;
     public static String COLUMN_TYPE_STRING = "String";
     public static String COLUMN_TYPE_INTEGER = "Integer";
     public static String COLUMN_TYPE_DATE = "Date";
@@ -118,7 +118,7 @@ public class RandomDataNodeModel extends NodeModel {
         return new SettingsModelString("columnMax_" + index, null);
     }
     public static SettingsModelBoolean createColumnActiveModel(int index) {
-        return new SettingsModelBoolean("columnActive_" + index, true);
+        return new SettingsModelBoolean("columnActive_" + index, false);
     }
     
     
@@ -128,7 +128,7 @@ public class RandomDataNodeModel extends NodeModel {
      */
     @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
-    	System.out.println("CONFIGURE: " + m_noOfRows);
+    	//System.out.println("CONFIGURE: " + m_noOfRows);
         return new DataTableSpec[] {createSpec()};
     }
 
@@ -137,7 +137,7 @@ public class RandomDataNodeModel extends NodeModel {
      */
     @Override
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception {
-    	System.out.println("EXECUTE: " + m_noOfRows);
+    	//System.out.println("EXECUTE: " + m_noOfRows);
         final DataTableSpec newSpec = createSpec();
         final BufferedDataContainer dc = exec.createDataContainer(newSpec);
         final int totalNoOfRows = m_noOfRows.getIntValue();
@@ -175,7 +175,7 @@ public class RandomDataNodeModel extends NodeModel {
         			}
         			// Update the random integer
         			Integer randomInteger = generateRandomInteger(minTextLength, maxTextLength);
-        			System.out.println(columnMinTextLength + " - " + columnMaxTextLength + " -> " + randomInteger); 
+        			//System.out.println("Row " + rowIdx + " -> String -> " + columnMinTextLength + " - " + columnMaxTextLength + " -> " + randomInteger); 
                     cells.add(new StringCell(randomDataUtil.randomText(randomInteger)));
         		} else if (columnType.equals(COLUMN_TYPE_INTEGER)) {
         			// Set the default minimum and max integers
@@ -194,8 +194,8 @@ public class RandomDataNodeModel extends NodeModel {
         				maxInteger = columnMaxInteger;
         			}
         			// Update the random integer
+        			//System.out.println("Row " + rowIdx + " -> Integer -> " + columnMinInteger + " - " + columnMaxInteger); 
         			Integer randomInteger = generateRandomInteger(minInteger, maxInteger);
-        			System.out.println(columnMinInteger + " - " + columnMaxInteger + " -> " + randomInteger); 
         			cells.add(new IntCell(randomInteger));
         		} else if (columnType.equals(COLUMN_TYPE_DATE)) {
         			
@@ -215,8 +215,8 @@ public class RandomDataNodeModel extends NodeModel {
         				maxDate = columnMaxDate;
         			}
         			// Update the random Date
+        			//System.out.println("Row " + rowIdx + " -> Date -> " + columnMinDate + " - " + columnMaxDate); 
         			Date randomDate = generateRandomDate(minDate, maxDate);
-        			System.out.println(columnMinDate + " - " + columnMaxDate + " -> " + randomDate); 
                     cells.add(new StringCell(Util.formatDate(DATE_TYPE_FORMAT, randomDate, "")));
         		} 
         	}        
@@ -255,7 +255,7 @@ public class RandomDataNodeModel extends NodeModel {
 
     
     private DataTableSpec createSpec() {
-		System.out.println("CREATE SPEC: " + m_noOfRows);
+		//System.out.println("CREATE SPEC: " + m_noOfRows);
         final LinkedList<DataColumnSpec> specs = new LinkedList<DataColumnSpec>();
         
     	for (int i = 0;i < MAX_COLUMNS; i++) {
@@ -278,7 +278,7 @@ public class RandomDataNodeModel extends NodeModel {
      */
     @Override
     protected void loadInternals(final File nodeInternDir, final ExecutionMonitor exec) throws IOException, CanceledExecutionException {
-    	System.out.println("LOAD INTERNALS: " + m_noOfRows);
+    	//System.out.println("LOAD INTERNALS: " + m_noOfRows);
     	// nothing to do
     }
 
@@ -287,7 +287,7 @@ public class RandomDataNodeModel extends NodeModel {
      */
     @Override
     protected void saveInternals(final File nodeInternDir, final ExecutionMonitor exec) throws IOException, CanceledExecutionException {
-    	System.out.println("SAVE INTERNALS: " + m_noOfRows);
+    	//System.out.println("SAVE INTERNALS: " + m_noOfRows);
         // nothing to do
     }
 
@@ -304,7 +304,7 @@ public class RandomDataNodeModel extends NodeModel {
      */
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
-    	System.out.println("LOAD SETTINGS: " + m_noOfRows);
+    	//System.out.println("LOAD SETTINGS: " + m_noOfRows);
         m_noOfRows.loadSettingsFrom(settings);
     	for (int i = 0;i < MAX_COLUMNS; i++) {
     		m_columnNames.get(i).loadSettingsFrom(settings);
@@ -321,7 +321,7 @@ public class RandomDataNodeModel extends NodeModel {
      */
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
-    	System.out.println("SAVE SETTINGS: " + m_noOfRows);
+    	//System.out.println("SAVE SETTINGS: " + m_noOfRows);
         m_noOfRows.saveSettingsTo(settings);
     	for (int i = 0;i < MAX_COLUMNS; i++) {
     		m_columnNames.get(i).saveSettingsTo(settings);
@@ -337,7 +337,7 @@ public class RandomDataNodeModel extends NodeModel {
      */
     @Override
     protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-    	System.out.println("VALIDATE SETTINGS: " + m_noOfRows);
+    	//System.out.println("VALIDATE SETTINGS: " + m_noOfRows);
         m_noOfRows.validateSettings(settings);
         
         //final int totalNoOfRows = ((SettingsModelInteger) m_noOfRows.createCloneWithValidatedValue(settings)).getIntValue();
@@ -365,7 +365,7 @@ public class RandomDataNodeModel extends NodeModel {
     		String min = columnMin.get(i).getStringValue();
     		String max = columnMax.get(i).getStringValue();
     		//Boolean active = columnActive.get(i).getBooleanValue();
-    		System.out.println("Validating: " + columnNumber + " -> " + type + " -> " + min + " -> " + max);
+    		//System.out.println("Validating: " + columnNumber + " -> " + type + " -> " + min + " -> " + max);
     		
     		// For "String", "Integer" types, validate max/min as numbers
     		if (type.equals(COLUMN_TYPE_STRING) || type.equals(COLUMN_TYPE_INTEGER)) {
