@@ -30,6 +30,8 @@ import org.htmlcleaner.TagNode;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
@@ -193,6 +195,24 @@ public class CleanHtmlRetrieverNodeModel extends NodeModel {
     			        
     			        conn.execute();
     			        Document doc = conn.get();
+    			        
+    			        // check if absolute URLs conversion is needed
+    			        if (m_config.getAbsoluteUrls().getBooleanValue()) {
+    			        	// traverse through the Document, convert all paths
+    			        	// a, link href, script src, img src
+    			        	String[] attrs = new String[]{"href", "src"};
+    			        	Elements elements = doc.getAllElements();		        	
+    			        	for (Iterator<Element> i = elements.iterator(); i.hasNext();) {
+    			        		Element e = i.next();
+    			        		for (String attr : attrs) {
+    			        			String path = e.attr("abs:"+attr);
+    			        			if (path != null && !path.isEmpty()) {
+    			        				e.attr(attr, path);
+    			        			}
+    			        		}
+    			        	}
+    			        }
+    			        
     			        html = doc.html();
     				} catch (Throwable e) {
     					setWarningMessage("FAILED on URL \"" + url + "\": " + e.getMessage());

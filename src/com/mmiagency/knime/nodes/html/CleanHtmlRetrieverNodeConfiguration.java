@@ -40,6 +40,7 @@ public class CleanHtmlRetrieverNodeConfiguration {
 	static final String FIELD_LABEL_XML = "Output result as XML (Will output as String if unchecked)";
 	static final String FIELD_LABEL_USER_AGENT = "User Agent";
 	static final String FIELD_LABEL_RETRIES = "Number of retries (per URL)";
+	static final String FIELD_LABEL_ABSOLUTE_URLS = "Make absolute URLs";
 
 	static final String FIELD_KEY_URL_COLUMN = "url";
 	static final String FIELD_KEY_CONTENT_COLUMN = "content";
@@ -47,6 +48,7 @@ public class CleanHtmlRetrieverNodeConfiguration {
 	static final String FIELD_KEY_XML = "xml";
 	static final String FIELD_KEY_USER_AGENT = "userAgent";
 	static final String FIELD_KEY_RETRIES = "retries";
+	static final String FIELD_KEY_ABSOLUTE_URLS = "absoluteUrls";
 
 	static final String FIELD_DEFAULT_URL_COLUMN = "url";
 	static final String FIELD_DEFAULT_CONTENT_COLUMN = "";
@@ -54,6 +56,7 @@ public class CleanHtmlRetrieverNodeConfiguration {
 	static final boolean FIELD_DEFAULT_XML = true;
 	static final String FIELD_DEFAULT_USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:40.0) Gecko/20100101 Firefox/40.0";
 	static final String FIELD_DEFAULT_RETRIES = "3";
+	static final boolean FIELD_DEFAULT_ABSOLUTE_URLS = false;
 
 	private static final StringHistory USER_AGENT_HISTORY = StringHistory.getInstance(CleanHtmlRetrieverNodeConfiguration.class.getCanonicalName());
 
@@ -65,6 +68,7 @@ public class CleanHtmlRetrieverNodeConfiguration {
 	private final SettingsModelBoolean m_xml = getXmlSettingsModel();
 	private final SettingsModelString m_userAgent = getUserAgentSettingsModel();
 	private final SettingsModelString m_retries = getRetriesSettingsModel();
+	private final SettingsModelBoolean m_absoluteUrls = getAbsoluteUrlsSettingsModel();
 
 	public CleanHtmlRetrieverNodeConfiguration() {
 		// initialize list of available encoding
@@ -103,6 +107,10 @@ public class CleanHtmlRetrieverNodeConfiguration {
     	return new SettingsModelString(FIELD_KEY_RETRIES, FIELD_DEFAULT_RETRIES);   
     }
     
+    public static SettingsModelBoolean getAbsoluteUrlsSettingsModel() {
+    	return new SettingsModelBoolean(FIELD_KEY_ABSOLUTE_URLS, FIELD_DEFAULT_ABSOLUTE_URLS);
+    }
+
     public static List<String> getRetriesOptions() {
     	return Arrays.asList(new String[]{"1","2","3","4","5","6","7","8","9","10"});
     }
@@ -139,6 +147,10 @@ public class CleanHtmlRetrieverNodeConfiguration {
     	return m_retries;
     }
     
+    public SettingsModelBoolean getAbsoluteUrls() {
+    	return m_absoluteUrls;
+    }
+    
     public void saveSettingsTo(final NodeSettingsWO settings) {
         m_url.saveSettingsTo(settings);
         m_content.saveSettingsTo(settings);
@@ -146,6 +158,7 @@ public class CleanHtmlRetrieverNodeConfiguration {
         m_xml.saveSettingsTo(settings);
         m_userAgent.saveSettingsTo(settings);
         m_retries.saveSettingsTo(settings);
+        m_absoluteUrls.saveSettingsTo(settings);
         
         if (!m_userAgent.getStringValue().isEmpty()) {
         	USER_AGENT_HISTORY.add(m_userAgent.getStringValue());
@@ -160,6 +173,7 @@ public class CleanHtmlRetrieverNodeConfiguration {
         m_xml.loadSettingsFrom(settings);
         m_userAgent.loadSettingsFrom(settings);
         m_retries.loadSettingsFrom(settings);
+        m_absoluteUrls.loadSettingsFrom(settings);
         
         if (!m_userAgent.getStringValue().isEmpty()) {
         	USER_AGENT_HISTORY.add(m_userAgent.getStringValue());
@@ -174,6 +188,7 @@ public class CleanHtmlRetrieverNodeConfiguration {
         m_xml.validateSettings(settings);
         m_userAgent.validateSettings(settings);
         m_retries.validateSettings(settings);
+        m_absoluteUrls.validateSettings(settings);
         
         if (!m_userAgent.getStringValue().isEmpty()) {
         	USER_AGENT_HISTORY.add(m_userAgent.getStringValue());
