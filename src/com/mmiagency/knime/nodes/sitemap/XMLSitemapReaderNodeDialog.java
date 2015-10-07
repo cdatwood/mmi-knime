@@ -21,6 +21,7 @@ package com.mmiagency.knime.nodes.sitemap;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
+import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 /**
  * <code>NodeDialog</code> for the "XMLSitemapReader" Node.
@@ -43,11 +44,12 @@ public class XMLSitemapReaderNodeDialog extends DefaultNodeSettingsPane {
     protected XMLSitemapReaderNodeDialog() {
         super();
         
-        //FlowVariableModel flowVar = new FlowVariableModel(this, new String[]{XMLSitemapReaderNodeConfiguration.FIELD_KEY_URL}, FlowVariable.Type.STRING);
+        SettingsModelString urlSettingsModel = XMLSitemapReaderNodeConfiguration.getUrlSettingsModel();
         
         addDialogComponent(new DialogComponentString(
-        		XMLSitemapReaderNodeConfiguration.getUrlSettingsModel(),
-        		XMLSitemapReaderNodeConfiguration.FIELD_LABEL_URL, true, 20));        
+        		urlSettingsModel,
+        		XMLSitemapReaderNodeConfiguration.FIELD_LABEL_URL, true, 20, createFlowVariableModel(urlSettingsModel))
+        );        
     }
 }
 
