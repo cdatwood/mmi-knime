@@ -50,9 +50,9 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.streamable.simple.SimpleStreamableFunctionNodeModel;
 
 /**
  * This is the model implementation of TidyHtmlRetriever.
@@ -60,7 +60,7 @@ import org.knime.core.node.NodeSettingsWO;
  *
  * @author MMI Agency
  */
-public class CleanHtmlRetrieverNodeModel extends NodeModel {
+public class CleanHtmlRetrieverNodeModel extends SimpleStreamableFunctionNodeModel {
     
 	private CleanHtmlRetrieverNodeConfiguration m_config = new CleanHtmlRetrieverNodeConfiguration();
 	
@@ -68,9 +68,7 @@ public class CleanHtmlRetrieverNodeModel extends NodeModel {
      * Constructor for the node model.
      */
     protected CleanHtmlRetrieverNodeModel() {
-    
-        // TODO: Specify the amount of input and output ports needed.
-        super(1, 1);
+    	super();
     }
 
     /**
@@ -135,7 +133,7 @@ public class CleanHtmlRetrieverNodeModel extends NodeModel {
 	    return new DataTableSpec[]{result};
     }
     
-    private ColumnRearranger createColumnRearranger(DataTableSpec in) {
+    protected ColumnRearranger createColumnRearranger(DataTableSpec in) {
         ColumnRearranger c = new ColumnRearranger(in);
         // column spec of the appended column
         DataColumnSpec newColSpec = null;
