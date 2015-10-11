@@ -173,6 +173,8 @@ public class CleanHtmlRetrieverNodeModel extends SimpleStreamableFunctionNodeMod
     				DataCell contentCell = row.getCell(contentColumnIndex);
     				if (contentCell.isMissing()) {
     					// do nothing, we will pull content from URL
+    				} else {
+    					content = ((StringValue)contentCell).getStringValue();
     				}
     			}
 
