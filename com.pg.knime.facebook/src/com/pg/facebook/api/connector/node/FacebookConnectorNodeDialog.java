@@ -91,7 +91,6 @@ public class FacebookConnectorNodeDialog extends StandardTrackedNodeDialogPane {
     
     class TokenChangeAction implements ActionListener {
 
-		@Override
 		public void actionPerformed(ActionEvent arg0) {
 			
 			String selectedItem = (String)cbmApiSelection.getSelectedItem();

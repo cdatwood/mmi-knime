@@ -12,7 +12,6 @@ public class AsyncHttpTracker implements ITracker {
 
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(AsyncHttpTracker.class);
 	
-	@Override
 	public void track(String name, String classification) {
 		
 		// Create non-blocking thread request
@@ -33,7 +32,6 @@ public class AsyncHttpTracker implements ITracker {
 			this.url = url;
 		}
 		
-		@Override
 		public void run() {
 			try {
 				URL url = new URL (this.url);

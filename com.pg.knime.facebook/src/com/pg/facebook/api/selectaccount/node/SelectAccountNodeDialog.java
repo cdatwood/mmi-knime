@@ -67,7 +67,6 @@ public class SelectAccountNodeDialog extends StandardNodeDialogPane {
     	
     	// Action Handler
     	cbxAccounts.addActionListener(new ActionListener() {
-			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				if (accounts == null ) return;
 				String accountName = (String)accounts.getSelectedItem();
@@ -137,7 +136,6 @@ public class SelectAccountNodeDialog extends StandardNodeDialogPane {
 			this.client = client;
 		}
     	
-		@Override
 		public void actionPerformed(ActionEvent e) {
 			accounts.removeAllElements();
 			try {

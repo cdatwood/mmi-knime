@@ -165,7 +165,6 @@ public class InsightsNodeDialog extends StandardNodeDialogPane {
 	
 	private class MetricGroupActionListener implements ActionListener {
 
-		@Override
 		public void actionPerformed(ActionEvent event) {
 			String group = (String)cbmMetricGroups.getSelectedItem();
 			List<String[]> metrics = FacebookInsightsConfiguration.METRIC_HELP_LIST().get(group);
@@ -181,7 +180,6 @@ public class InsightsNodeDialog extends StandardNodeDialogPane {
 	
 	private class MetricActionListener implements ActionListener {
 
-		@Override
 		public void actionPerformed(ActionEvent event) {
 			String group = (String)cbmMetricGroups.getSelectedItem();
 			String metric = (String)cbmMetrics.getSelectedItem();
@@ -199,7 +197,6 @@ public class InsightsNodeDialog extends StandardNodeDialogPane {
 	
 	private class AddButtonListener implements ActionListener {
 
-		@Override
 		public void actionPerformed(ActionEvent event) {
 			
 			String metric = (String)cbmMetrics.getSelectedItem();
@@ -223,7 +220,6 @@ public class InsightsNodeDialog extends StandardNodeDialogPane {
 			this.component = component;
 		}
 
-		@Override
 		public void actionPerformed(ActionEvent event) {
 			if ( component == null ) return;
 			
