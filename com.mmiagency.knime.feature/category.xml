@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/com.mmiagency.knime.feature_1.0.0.qualifier.jar" id="com.mmiagency.knime.feature" version="1.0.0.qualifier">
+      <category name="MMI Labs"/>
+   </feature>
+   <category-def name="MMI Labs" label="MMI Labs">
+      <description>
+         This feature contains MMI KNIME nodes for various data analysis
+tasks within KNIME.
+      </description>
+   </category-def>
+</site>
