@@ -1,3 +1,3 @@
 .DS_Store
-com.mmiagency.knime.nodes/bin/*
-com.pg.knime.facebook/bin/*
+*/.DS_Store
+*/bin/*
