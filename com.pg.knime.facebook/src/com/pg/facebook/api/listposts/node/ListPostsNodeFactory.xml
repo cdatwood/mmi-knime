@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode icon="./default.png" type="Source" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.8 http://knime.org/node/v2.8.xsd">
+    <name>Facebook List Posts (P&amp;G)</name>
+    
+    <shortDescription>
+        Retrieves page posts from Facebook account.
+    </shortDescription>
+    
+    <fullDescription>
+        <intro>Retrieves an accounts Posts.  Available post fields are here: https://developers.facebook.com/docs/graph-api/reference/v2.2/post</intro>
+        <option name="Max Posts">Maximum number of posts to retrieve (defaults to 1000).</option>
+        
+    </fullDescription>
+    
+    <ports>
+        <inPort index="0" name="Facebook Connection">Facebook Connection</inPort>
+        <!-- possibly more input ports here-->
+        <outPort index="0" name="Post Table">Table with associated Post details</outPort>
+        <!-- possibly more output ports here-->
+    </ports>    
+    
+</knimeNode>

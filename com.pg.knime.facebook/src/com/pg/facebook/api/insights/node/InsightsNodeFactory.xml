@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode icon="./default.png" type="Source" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.8 http://knime.org/node/v2.8.xsd">
+    <name>Facebook Insights Query (P&amp;G)</name>
+    
+    <shortDescription>
+        Retrieves insight metrics from Facebook Graph API.
+    </shortDescription>
+    
+    <fullDescription>
+        <intro>
+        	Retrieves insight metrics from Facebook Graph API.  Available metrics are listed at:
+        	<a href="https://developers.facebook.com/docs/graph-api/reference/v2.2/insights/">https://developers.facebook.com/docs/graph-api/reference/v2.2/insights/</a>.
+        	
+        </intro>
+        
+        <option name="Metrics">Comma-separated list of Facebook metrics.  See above reference link for options.</option>
+        <option name="Period">Time span for metrics to cover when aggregated.  Some metrics are not available for all time periods (e.g. page_fans is only available for Lifetime).  Review insights reference link above for valid periods.  When in doubt choose "All".</option>
+        <option name="Since">Starting date (PST) for metric collection.  Remove this constraint with the associated checkbox.</option>
+        <option name="Until">Ending date (PST) for metric collection.  Remove this constraint with the associated checkbox.</option>
+        
+    </fullDescription>
+    
+    <ports>
+        <inPort index="0" name="Facebook Connection">Authenticated connection to Facebook API with selected Object ID</inPort>
+        <!-- possibly more input ports here-->
+        <outPort index="0" name="Query Results">Table containing first group of metrics</outPort>
+        
+        <!-- possibly more output ports here-->
+    </ports>    
+    
+</knimeNode>

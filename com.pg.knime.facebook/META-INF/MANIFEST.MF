@@ -1,0 +1,25 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: P&G Facebook Nodes for KNIME Workbench
+Bundle-SymbolicName: com.pg.facebook;singleton:=true
+Bundle-Version: 1.0.6
+Bundle-ClassPath: facebookconnector.jar,
+ lib/restfb-1.6.16.jar,
+ lib/opencsv-1.8.jar
+Bundle-Vendor: Procter & Gamble, eBusiness Analytics
+Require-Bundle: org.eclipse.core.runtime,
+ org.knime.workbench.core,
+ org.knime.workbench.repository,
+ org.knime.base,
+ org.apache.commons.lang;bundle-version="2.6.0",
+ com.pg.knime.foundation;bundle-version="1.0.7",
+ com.pg.knime.vault;bundle-version="1.0.2"
+Export-Package: com.pg.facebook.api.connector.node,
+ com.pg.facebook.api.insights.node,
+ com.pg.facebook.api.listaccounts.node,
+ com.pg.facebook.api.listcomments.node,
+ com.pg.facebook.api.listposts.node,
+ com.pg.facebook.api.selectaccount.node,
+ com.pg.facebook.api.selectpost.node
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+

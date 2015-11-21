@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: PG Knime Node Foundations for KNIME Workbench
+Bundle-SymbolicName: com.pg.knime.foundation;singleton:=true
+Bundle-Version: 1.1.2
+Bundle-ClassPath: pg-knime-foundation.jar
+Bundle-Vendor: Procter & Gamble
+Require-Bundle: org.eclipse.core.runtime,
+ org.knime.workbench.core,
+ org.knime.workbench.repository,
+ org.knime.base,
+ org.apache.commons.lang;bundle-version="2.6.0"
+Export-Package: com.pg.knime.node,
+ com.pg.knime.node.configuration,
+ com.pg.knime.secure
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+

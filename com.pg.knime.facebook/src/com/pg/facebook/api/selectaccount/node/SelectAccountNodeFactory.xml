@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode icon="./default.png" type="Source" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.8 http://knime.org/node/v2.8.xsd">
+    <name>Facebook Account Connector (P&amp;G)</name>
+    
+    <shortDescription>
+        Selects a specific Facebook Account for use in Insight and API queries.
+    </shortDescription>
+    
+    <fullDescription>
+        <intro>Provides additional configuration to a Facebook API Connection by specifying an Account that will be used in down-stream processes (metric acquisition, etc).  Drop-down select chooser can be used to facilitate ID and Token discovery.</intro>
+        
+        
+        <option name="Account ID">Facebook ID of selected account.</option>
+        <option name="Account Token">Impersonation token associated with account.</option>
+        
+    </fullDescription>
+    
+    <ports>
+        <inPort index="0" name="Facebook Connection">Connection to Facebook API</inPort>
+        <!-- possibly more input ports here-->
+        <outPort index="0" name="Facebook Connection">Connection to Facebook API with Selected Account</outPort>
+       
+    </ports>    
+    
+</knimeNode>
