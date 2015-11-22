@@ -58,8 +58,8 @@ public class SelectAccountNodeDialog extends StandardNodeDialogPane {
     		buildStandardPanel(
     			new PanelBuilder()
     				.add("Accounts", cbxAccounts, btnListAccounts )
-    				//.add("Account Id", txtAccountId )
-    				//.add("Account Token", txtAccountAccessToken )
+    				.add("Account Id", txtAccountId )
+    				.add("Account Token", txtAccountAccessToken )
     				.build()
     		)
     	);
