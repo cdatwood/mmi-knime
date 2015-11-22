@@ -10,10 +10,10 @@ use Facebook\Exceptions\FacebookSDKException;
 
 
 $fb = new Facebook([
-  //'app_id' => '959814390733501',
-  //'app_secret' => '46ace08cce9c040eca0dbd080d83c252',
-  'app_id' => '128490190584651',
-  'app_secret' => 'ebcf28fe6505902c967f60ba40fbd7d0',
+  'app_id' => '959814390733501',
+  'app_secret' => '46ace08cce9c040eca0dbd080d83c252',
+  //'app_id' => '128490190584651',
+  //'app_secret' => 'ebcf28fe6505902c967f60ba40fbd7d0',
   'default_graph_version' => 'v2.5',
   //'default_access_token' => '{access-token}', // optional
 ]);
