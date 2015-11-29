@@ -32,6 +32,7 @@ import org.knime.core.node.ModelContentWO;
 import org.knime.core.node.port.AbstractSimplePortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
+import org.knime.core.node.port.PortTypeRegistry;
 import org.knime.core.node.util.ViewUtils;
 
 /**
@@ -46,12 +47,12 @@ public final class MozApiConnectionPortObject extends AbstractSimplePortObject {
     /**
      * The type of this port.
      */
-    public static final PortType TYPE = new PortType(MozApiConnectionPortObject.class);
+    public static final PortType TYPE = PortTypeRegistry.getInstance().getPortType(MozApiConnectionPortObject.class);
 
     /**
      * Database type for optional ports.
      */
-    public static final PortType TYPE_OPTIONAL = new PortType(MozApiConnectionPortObject.class, true);
+    public static final PortType TYPE_OPTIONAL = PortTypeRegistry.getInstance().getPortType(MozApiConnectionPortObject.class);
     
     /**
      * Constructor for framework.

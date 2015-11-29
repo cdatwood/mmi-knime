@@ -38,7 +38,7 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Field.TermVector;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriter.MaxFieldLength;
+import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.TermFreqVector;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
@@ -122,9 +122,10 @@ public class KeywordDensityHelper {
         text.write(jdoc.select("body").text());
 
         // analyze content with Lucene
-        StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_CURRENT);
+        StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_35);
         Directory directory = new RAMDirectory();
-        IndexWriter indexWriter = new IndexWriter(directory, analyzer, MaxFieldLength.LIMITED);    	
+        IndexWriterConfig indexConfig = new IndexWriterConfig(Version.LUCENE_35, analyzer);
+        IndexWriter indexWriter = new IndexWriter(directory, indexConfig);    	
 
         Document doc = new Document();
         Field textField = new Field("content", text.toString(), Field.Store.YES, Field.Index.ANALYZED, TermVector.WITH_POSITIONS_OFFSETS);

@@ -93,8 +93,8 @@ public class MozLinkMetricsNodeModel extends NodeModel {
 
     	// Look through the table for values and process
         BufferedDataContainer dc = exec.createDataContainer(createTableSpec());
-        int rowIndex = 0;
-        int inDataIndex = -1;
+        long rowIndex = 0;
+        long inDataIndex = -1;
     	for (Iterator<DataRow> it = inputTable.iterator(); it.hasNext();) {
     		inDataIndex++;
     		DataRow row = it.next();
@@ -114,8 +114,8 @@ public class MozLinkMetricsNodeModel extends NodeModel {
 			}
 			
 			// Update the progress
-			BigDecimal progressPercentage = new BigDecimal(rowIndex).divide(new BigDecimal(inputTable.getRowCount()), 2, BigDecimal.ROUND_HALF_UP);
-			exec.setProgress(progressPercentage.doubleValue(), "Processing " + (rowIndex + 1) + " of " + inputTable.getRowCount() + ": "+ url);
+			BigDecimal progressPercentage = new BigDecimal(rowIndex).divide(new BigDecimal(inputTable.size()), 2, BigDecimal.ROUND_HALF_UP);
+			exec.setProgress(progressPercentage.doubleValue(), "Processing " + (rowIndex + 1) + " of " + inputTable.size() + ": "+ url);
 			
 			// Process the URL using MOZ
     		try {    			
@@ -145,7 +145,7 @@ public class MozLinkMetricsNodeModel extends NodeModel {
    
     private Long m_lastApiCallMillis = null;
     
-    private int processMozLinkMetrics(Authenticator authenticator, BufferedDataContainer dc, int rowIndex, String url, final ExecutionContext exec) throws Exception {
+    private long processMozLinkMetrics(Authenticator authenticator, BufferedDataContainer dc, long rowIndex, String url, final ExecutionContext exec) throws Exception {
     	
     	// Grab the parameters set by the user
     	String scope = m_config.getScope().getStringValue();

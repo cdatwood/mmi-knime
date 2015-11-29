@@ -95,8 +95,8 @@ public class MozUrlMetricsNodeModel extends NodeModel {
 
     	// Look through the table for values and process
         BufferedDataContainer dc = exec.createDataContainer(createTableSpec());
-        int rowIndex = 0;    	
-        int inDataIndex = -1;
+        long rowIndex = 0;    	
+        long inDataIndex = -1;
     	for (Iterator<DataRow> it = inputTable.iterator(); it.hasNext();) {
     		inDataIndex++;
     		DataRow row = it.next();
@@ -116,8 +116,8 @@ public class MozUrlMetricsNodeModel extends NodeModel {
 			}
 
 			// Update the progress
-			BigDecimal progressPercentage = new BigDecimal(rowIndex).divide(new BigDecimal(inputTable.getRowCount()), 2, BigDecimal.ROUND_HALF_UP);
-			exec.setProgress(progressPercentage.doubleValue(), "Processing " + (rowIndex + 1) + " of " + inputTable.getRowCount() + ": "+ url);
+			BigDecimal progressPercentage = new BigDecimal(rowIndex).divide(new BigDecimal(inputTable.size()), 2, BigDecimal.ROUND_HALF_UP);
+			exec.setProgress(progressPercentage.doubleValue(), "Processing " + (rowIndex + 1) + " of " + inputTable.size() + ": "+ url);
 			
 			
 			// Process the URL using MOZ
@@ -148,7 +148,7 @@ public class MozUrlMetricsNodeModel extends NodeModel {
     
     private Long m_lastApiCallMillis = null;
     
-    private int processMozUrlMetrics(Authenticator authenticator, BufferedDataContainer dc, int rowIndex, String url, final ExecutionContext exec) throws Exception {
+    private long processMozUrlMetrics(Authenticator authenticator, BufferedDataContainer dc, long rowIndex, String url, final ExecutionContext exec) throws Exception {
    	
     	
 		// Sleep 5 seconds between calls

@@ -357,7 +357,7 @@ public class W3cCssValidatorNodeModel extends NodeModel {
     		
             // check if the execution monitor was canceled
             exec.checkCanceled();
-            exec.setProgress(summaryRowCount / (double)inData.getRowCount(), 
+            exec.setProgress(summaryRowCount / (double)inData.size(), 
                 "Adding row " + summaryRowCount);
             
             // pause for 1 second to ensure we don't submit URL more frequent than 1 per second.

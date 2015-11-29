@@ -223,7 +223,7 @@ public class GooglePageSpeedNodeModel extends NodeModel {
         		
                 // check if the execution monitor was canceled
                 exec.checkCanceled();
-                exec.setProgress(i / (double)inData[0].getRowCount(), 
+                exec.setProgress(i / (double)inData[0].size(), 
                     "Adding row " + i);
                 
                 i++;
@@ -247,7 +247,7 @@ public class GooglePageSpeedNodeModel extends NodeModel {
     		
             // check if the execution monitor was canceled
             exec.checkCanceled();
-            exec.setProgress(i / (double)inData[0].getRowCount(), 
+            exec.setProgress(i / (double)inData[0].size(), 
                 "Adding row " + i);
             
             // pause for 1 second to ensure we don't submit URL more frequent than 1 per second.
@@ -280,7 +280,7 @@ public class GooglePageSpeedNodeModel extends NodeModel {
     		
             // check if the execution monitor was canceled
             exec.checkCanceled();
-            exec.setProgress(i / (double)inData[0].getRowCount(), 
+            exec.setProgress(i / (double)inData[0].size(), 
                 "Adding row " + i);
             
             i++;

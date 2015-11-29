@@ -144,7 +144,7 @@ public class RandomDataNodeModel extends NodeModel {
         
         RandomDataUtil randomDataUtil = new RandomDataUtil();
         
-        for (int rowIdx = 0; rowIdx < totalNoOfRows; rowIdx++) {
+        for (long rowIdx = 0; rowIdx < totalNoOfRows; rowIdx++) {
             exec.checkCanceled();
             final LinkedList<DataCell> cells = new LinkedList<DataCell>();
 
@@ -221,7 +221,6 @@ public class RandomDataNodeModel extends NodeModel {
         		} 
         	}        
             
-
             final DefaultRow row = new DefaultRow(RowKey.createRowKey(rowIdx), cells);
             dc.addRowToTable(row);
         }
