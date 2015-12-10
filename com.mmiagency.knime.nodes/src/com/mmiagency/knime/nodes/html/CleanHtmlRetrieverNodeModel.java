@@ -173,6 +173,10 @@ public class CleanHtmlRetrieverNodeModel extends NodeModel {
     				DataCell contentCell = row.getCell(contentColumnIndex);
     				if (contentCell.isMissing()) {
     					// do nothing, we will pull content from URL
+    				} else if (contentCell.getType().isCompatible(StringValue.class)) {
+    					content = ((StringValue)contentCell).getStringValue();
+    				} else {
+    					setWarningMessage("Content column is not a string for URL: " + url);
     				}
     			}
 
