@@ -2,7 +2,7 @@
 <feature
       id="com.mmiagency.knime.feature"
       label="MMI Data Analytics Nodes"
-      version="1.0.0.qualifier"
+      version="1.0.100.qualifier"
       provider-name="MMI Agency">
 
    <description>
