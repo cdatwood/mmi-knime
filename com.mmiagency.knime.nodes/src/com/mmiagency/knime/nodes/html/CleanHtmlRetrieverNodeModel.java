@@ -30,6 +30,8 @@ import org.htmlcleaner.TagNode;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
@@ -48,9 +50,9 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.streamable.simple.SimpleStreamableFunctionNodeModel;
 
 /**
  * This is the model implementation of TidyHtmlRetriever.
@@ -58,7 +60,7 @@ import org.knime.core.node.NodeSettingsWO;
  *
  * @author MMI Agency
  */
-public class CleanHtmlRetrieverNodeModel extends NodeModel {
+public class CleanHtmlRetrieverNodeModel extends SimpleStreamableFunctionNodeModel {
     
 	private CleanHtmlRetrieverNodeConfiguration m_config = new CleanHtmlRetrieverNodeConfiguration();
 	
@@ -66,9 +68,7 @@ public class CleanHtmlRetrieverNodeModel extends NodeModel {
      * Constructor for the node model.
      */
     protected CleanHtmlRetrieverNodeModel() {
-    
-        // TODO: Specify the amount of input and output ports needed.
-        super(1, 1);
+    	super();
     }
 
     /**
@@ -133,7 +133,7 @@ public class CleanHtmlRetrieverNodeModel extends NodeModel {
 	    return new DataTableSpec[]{result};
     }
     
-    private ColumnRearranger createColumnRearranger(DataTableSpec in) {
+    protected ColumnRearranger createColumnRearranger(DataTableSpec in) {
         ColumnRearranger c = new ColumnRearranger(in);
         // column spec of the appended column
         DataColumnSpec newColSpec = null;
@@ -173,10 +173,8 @@ public class CleanHtmlRetrieverNodeModel extends NodeModel {
     				DataCell contentCell = row.getCell(contentColumnIndex);
     				if (contentCell.isMissing()) {
     					// do nothing, we will pull content from URL
-    				} else if (contentCell.getType().isCompatible(StringValue.class)) {
-    					content = ((StringValue)contentCell).getStringValue();
     				} else {
-    					setWarningMessage("Content column is not a string for URL: " + url);
+    					content = ((StringValue)contentCell).getStringValue();
     				}
     			}
 
@@ -197,6 +195,24 @@ public class CleanHtmlRetrieverNodeModel extends NodeModel {
     			        
     			        conn.execute();
     			        Document doc = conn.get();
+    			        
+    			        // check if absolute URLs conversion is needed
+    			        if (m_config.getAbsoluteUrls().getBooleanValue()) {
+    			        	// traverse through the Document, convert all paths
+    			        	// a, link href, script src, img src
+    			        	String[] attrs = new String[]{"href", "src"};
+    			        	Elements elements = doc.getAllElements();		        	
+    			        	for (Iterator<Element> i = elements.iterator(); i.hasNext();) {
+    			        		Element e = i.next();
+    			        		for (String attr : attrs) {
+    			        			String path = e.attr("abs:"+attr);
+    			        			if (path != null && !path.isEmpty()) {
+    			        				e.attr(attr, path);
+    			        			}
+    			        		}
+    			        	}
+    			        }
+    			        
     			        html = doc.html();
     				} catch (Throwable e) {
     					setWarningMessage("FAILED on URL \"" + url + "\": " + e.getMessage());

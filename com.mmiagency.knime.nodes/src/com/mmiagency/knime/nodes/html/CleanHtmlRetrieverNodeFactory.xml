@@ -34,6 +34,7 @@
         <option name="Output result as XML">Output result as String or XML type.  XML type is useful when this node is part of XML analysis workflow.</option>
         <option name="User agent">User agent to be used in header for HTTP request.</option>
         <option name="Number of retries">Number of retries after a failure per URL requests.</option>
+        <option name="Make absolute URLs">Convert all relative URLs in the documents into absolute URLs.</option>
 
     </fullDescription>
     

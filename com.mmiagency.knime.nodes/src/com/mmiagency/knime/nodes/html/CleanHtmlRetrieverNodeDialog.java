@@ -79,6 +79,11 @@ public class CleanHtmlRetrieverNodeDialog extends DefaultNodeSettingsPane {
         		CleanHtmlRetrieverNodeConfiguration.FIELD_LABEL_RETRIES, 
         		CleanHtmlRetrieverNodeConfiguration.getRetriesOptions(),
         		true));
+        
+        addDialogComponent(new DialogComponentBoolean(
+        		CleanHtmlRetrieverNodeConfiguration.getAbsoluteUrlsSettingsModel(), 
+        		CleanHtmlRetrieverNodeConfiguration.FIELD_LABEL_ABSOLUTE_URLS));
+
     }
 }
 
