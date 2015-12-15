@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://www.knime.org/2008/09/XMLConfig" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.knime.org/2008/09/XMLConfig http://www.knime.org/XMLConfig_2008_09.xsd" key="settings.xml">
+<entry key="node_file" type="xstring" value="settings.xml"/>
+<config key="flow_stack"/>
+<config key="internal_node_subsettings">
+<entry key="memory_policy" type="xstring" value="CacheSmallInMemory"/>
+</config>
+<config key="model">
+<config key="column-filter">
+<entry key="filter-type" type="xstring" value="STANDARD"/>
+<config key="included_names">
+<entry key="array-size" type="xint" value="1"/>
+<entry key="0" type="xstring" value="status"/>
+</config>
+<config key="excluded_names">
+<entry key="array-size" type="xint" value="45"/>
+<entry key="0" type="xstring" value="url"/>
+<entry key="1" type="xstring" value="strategy"/>
+<entry key="2" type="xstring" value="responseCode"/>
+<entry key="3" type="xstring" value="title"/>
+<entry key="4" type="xstring" value="speed score"/>
+<entry key="5" type="xstring" value="pageStats - numberResources"/>
+<entry key="6" type="xstring" value="pageStats - numberHosts"/>
+<entry key="7" type="xstring" value="pageStats - totalRequestBytes"/>
+<entry key="8" type="xstring" value="pageStats - numberStaticResources"/>
+<entry key="9" type="xstring" value="pageStats - htmlResponseBytes"/>
+<entry key="10" type="xstring" value="pageStats - cssResponseBytes"/>
+<entry key="11" type="xstring" value="pageStats - imageResponseBytes"/>
+<entry key="12" type="xstring" value="pageStats - javascriptResponseBytes"/>
+<entry key="13" type="xstring" value="pageStats - otherResponseBytes"/>
+<entry key="14" type="xstring" value="pageStats - numberJsResources"/>
+<entry key="15" type="xstring" value="pageStats - numberCssResources"/>
+<entry key="16" type="xstring" value="locale"/>
+<entry key="17" type="xstring" value="AvoidLandingPageRedirects - ruleImpact"/>
+<entry key="18" type="xstring" value="AvoidLandingPageRedirects - summary"/>
+<entry key="19" type="xstring" value="EnableGzipCompression - ruleImpact"/>
+<entry key="20" type="xstring" value="EnableGzipCompression - summary"/>
+<entry key="21" type="xstring" value="EnableGzipCompression - urlBlocks"/>
+<entry key="22" type="xstring" value="LeverageBrowserCaching - ruleImpact"/>
+<entry key="23" type="xstring" value="LeverageBrowserCaching - summary"/>
+<entry key="24" type="xstring" value="LeverageBrowserCaching - urlBlocks"/>
+<entry key="25" type="xstring" value="MainResourceServerResponseTime - ruleImpact"/>
+<entry key="26" type="xstring" value="MainResourceServerResponseTime - summary"/>
+<entry key="27" type="xstring" value="MainResourceServerResponseTime - urlBlocks"/>
+<entry key="28" type="xstring" value="MinifyCss - ruleImpact"/>
+<entry key="29" type="xstring" value="MinifyCss - summary"/>
+<entry key="30" type="xstring" value="MinifyCss - urlBlocks"/>
+<entry key="31" type="xstring" value="MinifyHTML - ruleImpact"/>
+<entry key="32" type="xstring" value="MinifyHTML - summary"/>
+<entry key="33" type="xstring" value="MinifyHTML - urlBlocks"/>
+<entry key="34" type="xstring" value="MinifyJavaScript - ruleImpact"/>
+<entry key="35" type="xstring" value="MinifyJavaScript - summary"/>
+<entry key="36" type="xstring" value="MinifyJavaScript - urlBlocks"/>
+<entry key="37" type="xstring" value="MinimizeRenderBlockingResources - ruleImpact"/>
+<entry key="38" type="xstring" value="MinimizeRenderBlockingResources - summary"/>
+<entry key="39" type="xstring" value="MinimizeRenderBlockingResources - urlBlocks"/>
+<entry key="40" type="xstring" value="OptimizeImages - ruleImpact"/>
+<entry key="41" type="xstring" value="OptimizeImages - summary"/>
+<entry key="42" type="xstring" value="OptimizeImages - urlBlocks"/>
+<entry key="43" type="xstring" value="PrioritizeVisibleContent - ruleImpact"/>
+<entry key="44" type="xstring" value="PrioritizeVisibleContent - summary"/>
+</config>
+<entry key="enforce_option" type="xstring" value="EnforceExclusion"/>
+<config key="name_pattern">
+<entry key="pattern" type="xstring" value=""/>
+<entry key="type" type="xstring" value="Wildcard"/>
+<entry key="caseSensitive" type="xboolean" value="true"/>
+</config>
+<config key="datatype">
+<config key="typelist">
+<entry key="org.knime.core.data.BooleanValue" type="xboolean" value="false"/>
+<entry key="org.knime.core.data.date.DateAndTimeValue" type="xboolean" value="false"/>
+<entry key="org.knime.core.data.DoubleValue" type="xboolean" value="false"/>
+<entry key="org.knime.core.data.IntValue" type="xboolean" value="false"/>
+<entry key="org.knime.core.data.LongValue" type="xboolean" value="false"/>
+<entry key="org.knime.core.data.StringValue" type="xboolean" value="false"/>
+</config>
+</config>
+</config>
+</config>
+<entry key="customDescription" type="xstring" isnull="true" value=""/>
+<entry key="state" type="xstring" value="IDLE"/>
+<entry key="factory" type="xstring" value="org.knime.base.node.preproc.filter.column.DataColumnSpecFilterNodeFactory"/>
+<entry key="node-name" type="xstring" value="Column Filter"/>
+<entry key="node-bundle-name" type="xstring" value="KNIME Base Nodes"/>
+<entry key="node-bundle-symbolic-name" type="xstring" value="org.knime.base"/>
+<entry key="node-bundle-vendor" type="xstring" value="KNIME GmbH, Konstanz, Germany"/>
+<entry key="node-bundle-version" type="xstring" value="3.1.0.v201512020906"/>
+<entry key="node-feature-name" type="xstring" value="KNIME Core"/>
+<entry key="node-feature-symbolic-name" type="xstring" value="org.knime.features.base.feature.group"/>
+<entry key="node-feature-vendor" type="xstring" value="KNIME GmbH, Konstanz, Germany"/>
+<entry key="node-feature-version" type="xstring" value="3.1.0.v201512031304"/>
+<config key="factory_settings"/>
+<entry key="name" type="xstring" value="Column Filter"/>
+<entry key="hasContent" type="xboolean" value="false"/>
+<entry key="isInactive" type="xboolean" value="false"/>
+<config key="ports">
+<config key="port_1">
+<entry key="index" type="xint" value="1"/>
+<entry key="port_dir_location" type="xstring" isnull="true" value=""/>
+</config>
+</config>
+<config key="filestores">
+<entry key="file_store_location" type="xstring" isnull="true" value=""/>
+<entry key="file_store_id" type="xstring" isnull="true" value=""/>
+</config>
+</config>

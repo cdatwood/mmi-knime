@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://www.knime.org/2008/09/XMLConfig" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.knime.org/2008/09/XMLConfig http://www.knime.org/XMLConfig_2008_09.xsd" key="settings.xml">
+<entry key="node_file" type="xstring" value="settings.xml"/>
+<config key="flow_stack"/>
+<config key="internal_node_subsettings">
+<entry key="memory_policy" type="xstring" value="CacheSmallInMemory"/>
+</config>
+<config key="model">
+<config key="apiKey_Internals">
+<entry key="SettingsModelID" type="xstring" value="SMID_string"/>
+<entry key="EnabledStatus" type="xboolean" value="true"/>
+</config>
+<entry key="apiKey" type="xstring" value="AIzaSyB9wl_C-2lBgTPLvewm6v7JJx74ACkPOes"/>
+<config key="urlColumn_Internals">
+<entry key="SettingsModelID" type="xstring" value="SMID_string"/>
+<entry key="EnabledStatus" type="xboolean" value="true"/>
+</config>
+<entry key="urlColumn" type="xstring" value="url"/>
+<config key="filterThirdPartyResources_Internals">
+<entry key="SettingsModelID" type="xstring" value="SMID_boolean"/>
+<entry key="EnabledStatus" type="xboolean" value="true"/>
+</config>
+<entry key="filterThirdPartyResources" type="xboolean" value="false"/>
+<config key="locale_Internals">
+<entry key="SettingsModelID" type="xstring" value="SMID_string"/>
+<entry key="EnabledStatus" type="xboolean" value="true"/>
+</config>
+<entry key="locale" type="xstring" value="en_US"/>
+<config key="strategy_Internals">
+<entry key="SettingsModelID" type="xstring" value="SMID_string"/>
+<entry key="EnabledStatus" type="xboolean" value="true"/>
+</config>
+<entry key="strategy" type="xstring" value="desktop"/>
+<config key="waitTime_Internals">
+<entry key="SettingsModelID" type="xstring" value="SMN_long"/>
+<entry key="EnabledStatus" type="xboolean" value="true"/>
+</config>
+<entry key="waitTime" type="xlong" value="1000"/>
+</config>
+<entry key="customDescription" type="xstring" isnull="true" value=""/>
+<entry key="state" type="xstring" value="CONFIGURED"/>
+<entry key="factory" type="xstring" value="com.mmiagency.knime.nodes.google.pagespeed.GooglePageSpeedNodeFactory"/>
+<entry key="node-name" type="xstring" value="Google PageSpeed Insight"/>
+<entry key="node-bundle-name" type="xstring" value="MMI Data Analytics Node extensions for KNIME Workbench"/>
+<entry key="node-bundle-symbolic-name" type="xstring" value="com.mmiagency.knime.nodes"/>
+<entry key="node-bundle-vendor" type="xstring" value="MMI Agency"/>
+<entry key="node-bundle-version" type="xstring" value="0.0.14.6"/>
+<entry key="node-feature-name" type="xstring" value="MMI Data Analytics Nodes"/>
+<entry key="node-feature-symbolic-name" type="xstring" value="com.mmiagency.knime.feature.feature.group"/>
+<entry key="node-feature-vendor" type="xstring" value="MMI Agency"/>
+<entry key="node-feature-version" type="xstring" value="1.0.100.201512132225"/>
+<config key="factory_settings"/>
+<entry key="name" type="xstring" value="Google PageSpeed Insight"/>
+<entry key="hasContent" type="xboolean" value="false"/>
+<entry key="isInactive" type="xboolean" value="false"/>
+<config key="ports">
+<config key="port_1">
+<entry key="index" type="xint" value="1"/>
+<entry key="port_dir_location" type="xstring" isnull="true" value=""/>
+</config>
+</config>
+<config key="filestores">
+<entry key="file_store_location" type="xstring" isnull="true" value=""/>
+<entry key="file_store_id" type="xstring" isnull="true" value=""/>
+</config>
+</config>
