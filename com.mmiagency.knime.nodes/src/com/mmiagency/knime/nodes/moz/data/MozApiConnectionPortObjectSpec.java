@@ -19,14 +19,20 @@
  */
 package com.mmiagency.knime.nodes.moz.data;
 
+import java.io.IOException;
+import java.util.zip.ZipEntry;
+
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.ModelContent;
 import org.knime.core.node.ModelContentRO;
 import org.knime.core.node.ModelContentWO;
 import org.knime.core.node.port.AbstractSimplePortObjectSpec;
+import org.knime.core.node.port.PortObjectSpecZipInputStream;
+import org.knime.core.node.port.PortObjectSpecZipOutputStream;
 import org.knime.core.node.util.ViewUtils;
 
 /**
@@ -112,6 +118,42 @@ public final class MozApiConnectionPortObjectSpec extends AbstractSimplePortObje
         JPanel f = ViewUtils.getInFlowLayout(new JLabel(text));
         f.setName("Connection");
         return new JComponent[]{f};
+    }
+    
+    static public class Serializer extends PortObjectSpecSerializer<MozApiConnectionPortObjectSpec> {
+
+		@Override
+		public void savePortObjectSpec(MozApiConnectionPortObjectSpec portObjectSpec, PortObjectSpecZipOutputStream out)
+				throws IOException {
+	        ModelContent model = new ModelContent("content.xml");
+	        ModelContentWO wo = model.addModelContent("MozApiConnection");
+	        portObjectSpec.getMozApiConnection().save(wo);
+	        out.putNextEntry(new ZipEntry("content.xml"));
+	        model.saveToXML(out);			
+		}
+
+		@Override
+		public MozApiConnectionPortObjectSpec loadPortObjectSpec(PortObjectSpecZipInputStream in) throws IOException {
+	        ZipEntry entry = in.getNextEntry();
+	        if(!"content.xml".equals(entry.getName())) {
+	            throw new IOException("Expected zip entry content.xml, got " + entry.getName());
+	        } else {
+	            ModelContentRO model = ModelContent.loadFromXML(in);
+	            MozApiConnectionPortObjectSpec result = new MozApiConnectionPortObjectSpec();
+
+	            try {
+	            	if (!model.containsKey("MozApiConnection")) {
+	            		return result;
+	            	}
+	                ModelContentRO ro = model.getModelContent("MozApiConnection");
+	                result.load(ro);
+	                return result;
+	            } catch (InvalidSettingsException e) {
+	                throw new IOException("Unable to load content into \"MozApiConnectionPortObjectSpec\": " + e.getMessage(), e);
+	            }
+	        }
+		}
+    	
     }
 
 }

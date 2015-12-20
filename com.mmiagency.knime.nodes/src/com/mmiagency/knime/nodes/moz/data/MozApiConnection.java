@@ -57,7 +57,7 @@ public final class MozApiConnection {
      * @throws InvalidSettingsException If the model was invalid
      */
     public MozApiConnection(final ModelContentRO model) throws InvalidSettingsException {
-        this(model.getString(API_ACCESS_ID), model.getString(API_SECRET_KEY));
+        this(model.getString(API_ACCESS_ID, ""), model.getString(API_SECRET_KEY, ""));
     }
 
     /**

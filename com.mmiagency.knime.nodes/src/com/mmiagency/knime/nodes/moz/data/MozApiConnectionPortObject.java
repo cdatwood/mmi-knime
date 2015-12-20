@@ -19,6 +19,8 @@
  */
 package com.mmiagency.knime.nodes.moz.data;
 
+import java.io.IOException;
+import java.util.zip.ZipEntry;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -27,10 +29,13 @@ import javax.swing.JScrollPane;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.ModelContent;
 import org.knime.core.node.ModelContentRO;
 import org.knime.core.node.ModelContentWO;
 import org.knime.core.node.port.AbstractSimplePortObject;
 import org.knime.core.node.port.PortObjectSpec;
+import org.knime.core.node.port.PortObjectZipInputStream;
+import org.knime.core.node.port.PortObjectZipOutputStream;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.PortTypeRegistry;
 import org.knime.core.node.util.ViewUtils;
@@ -104,6 +109,7 @@ public final class MozApiConnectionPortObject extends AbstractSimplePortObject {
     protected void load(final ModelContentRO model, final PortObjectSpec spec, final ExecutionMonitor exec)
             throws InvalidSettingsException, CanceledExecutionException {
         m_spec = (MozApiConnectionPortObjectSpec)spec;
+        m_spec.load(model);
     }
 
     /**
@@ -120,6 +126,42 @@ public final class MozApiConnectionPortObject extends AbstractSimplePortObject {
         JPanel f = ViewUtils.getInFlowLayout(new JLabel(text));
         f.setName("Connection");
         return new JComponent[]{new JScrollPane(f)};
+    }
+    
+    static public class Serializer extends PortObjectSerializer<MozApiConnectionPortObject> {
+
+		@Override
+		public void savePortObject(MozApiConnectionPortObject portObject, PortObjectZipOutputStream out,
+				ExecutionMonitor exec) throws IOException, CanceledExecutionException {
+	        ModelContent model = new ModelContent("content.xml");
+	        ModelContentWO wo = model.addModelContent("MozApiConnection");
+	        portObject.getMozApiConnection().save(wo);
+	        out.putNextEntry(new ZipEntry("content.xml"));
+	        model.saveToXML(out);
+		}
+
+		@Override
+		public MozApiConnectionPortObject loadPortObject(PortObjectZipInputStream in, PortObjectSpec spec,
+				ExecutionMonitor exec) throws IOException, CanceledExecutionException {
+	        ZipEntry entry = in.getNextEntry();
+	        if(!"content.xml".equals(entry.getName())) {
+	            throw new IOException("Expected zip entry content.xml, got " + entry.getName());
+	        } else {
+	            ModelContentRO model = ModelContent.loadFromXML(in);
+	            MozApiConnectionPortObject result = new MozApiConnectionPortObject();
+
+	            try {
+	            	if (!model.containsKey("MozApiConnection")) {
+	            		return result;
+	            	}
+	                ModelContentRO ro = model.getModelContent("MozApiConnection");
+	                result.load(ro, spec, exec);
+	                return result;
+	            } catch (InvalidSettingsException e) {
+	                throw new IOException("Unable to load content into \"MozApiConnectionPortObject\": " + e.getMessage(), e);
+	            }
+	        }
+		}
     }
 
 }
