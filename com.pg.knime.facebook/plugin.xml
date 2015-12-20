@@ -3,13 +3,13 @@
 <plugin>
    
 	<extension point="org.knime.workbench.repository.nodes">
-		<node category-path="/pg/facebook" factory-class="com.pg.facebook.api.connector.node.FacebookConnectorNodeFactory" id="com.pg.facebook.api.connector.node.FacebookConnectorNodeFactory"/>
-		<node category-path="/pg/facebook" factory-class="com.pg.facebook.api.listaccounts.node.ListAccountsNodeFactory" id="com.pg.facebook.api.listaccounts.node.ListAccountsNodeFactory"/>
-		<node category-path="/pg/facebook" factory-class="com.pg.facebook.api.selectaccount.node.SelectAccountNodeFactory" id="com.pg.facebook.api.selectaccount.node.SelectAccountNodeFactory"/>
-		<node category-path="/pg/facebook" factory-class="com.pg.facebook.api.insights.node.InsightsNodeFactory" id="com.pg.facebook.api.insights.node.InsightsNodeFactory"/>
-		<node category-path="/pg/facebook" factory-class="com.pg.facebook.api.listposts.node.ListPostsNodeFactory" id="com.pg.facebook.api.listposts.node.ListPostsNodeFactory"/>
-		<node category-path="/pg/facebook" factory-class="com.pg.facebook.api.selectpost.node.SelectPostNodeFactory" id="com.pg.facebook.api.selectpost.node.SelectPostNodeFactory"/>
-		<node category-path="/pg/facebook" factory-class="com.pg.facebook.api.listcomments.node.ListCommentsNodeFactory" id="com.pg.facebook.api.listcomments.node.ListCommentsNodeFactory"/>
+		<node category-path="/community/mmi/facebook" factory-class="com.pg.facebook.api.connector.node.FacebookConnectorNodeFactory" id="com.pg.facebook.api.connector.node.FacebookConnectorNodeFactory"/>
+		<node category-path="/community/mmi/facebook" factory-class="com.pg.facebook.api.listaccounts.node.ListAccountsNodeFactory" id="com.pg.facebook.api.listaccounts.node.ListAccountsNodeFactory"/>
+		<node category-path="/community/mmi/facebook" factory-class="com.pg.facebook.api.selectaccount.node.SelectAccountNodeFactory" id="com.pg.facebook.api.selectaccount.node.SelectAccountNodeFactory"/>
+		<node category-path="/community/mmi/facebook" factory-class="com.pg.facebook.api.insights.node.InsightsNodeFactory" id="com.pg.facebook.api.insights.node.InsightsNodeFactory"/>
+		<node category-path="/community/mmi/facebook" factory-class="com.pg.facebook.api.listposts.node.ListPostsNodeFactory" id="com.pg.facebook.api.listposts.node.ListPostsNodeFactory"/>
+		<node category-path="/community/mmi/facebook" factory-class="com.pg.facebook.api.selectpost.node.SelectPostNodeFactory" id="com.pg.facebook.api.selectpost.node.SelectPostNodeFactory"/>
+		<node category-path="/community/mmi/facebook" factory-class="com.pg.facebook.api.listcomments.node.ListCommentsNodeFactory" id="com.pg.facebook.api.listcomments.node.ListCommentsNodeFactory"/>
 	</extension>
    
 	 <extension point="org.knime.workbench.repository.categories">
@@ -20,7 +20,7 @@
 	    	level-id="facebook"
 	    	locked="false"
 	    	name="Facebook"
-	    	path="/pg/">
+	    	path="/community/mmi/">
 	  	</category>
 	  
 	</extension>	

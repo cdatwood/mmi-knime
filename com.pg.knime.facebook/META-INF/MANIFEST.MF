@@ -1,12 +1,12 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: P&G Facebook Nodes for KNIME Workbench
+Bundle-Name: MMI Facebook Nodes
 Bundle-SymbolicName: com.pg.facebook;singleton:=true
 Bundle-Version: 1.0.6
 Bundle-ClassPath: facebookconnector.jar,
  lib/restfb-1.6.16.jar,
  lib/opencsv-1.8.jar
-Bundle-Vendor: Procter & Gamble, eBusiness Analytics
+Bundle-Vendor: MMI Agency
 Require-Bundle: org.eclipse.core.runtime,
  org.knime.workbench.core,
  org.knime.workbench.repository,

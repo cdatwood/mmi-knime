@@ -5,31 +5,41 @@
 	 <extension point="org.knime.workbench.repository.categories">
 	 	
 	 	<!-- PG Custom Category -->
+     <!--
 	 	<category icon="icons/pg-knime-icon.png" level-id="pg" locked="false" name="PG" path="/">
 	 	</category>
+	 -->
 	 	
 	 	<!-- PG Custom Category (Dev) -->
+     <!--
 	 	<category icon="icons/pg-knime-icon.png" level-id="pgdev" locked="false" name="PG-Dev" path="/">
 	 	</category>
+	 -->
 	 	
 	 	<!-- Database Category -->
+     <!--
 	 	<category icon="icons/database-icon.png" level-id="db" locked="false" name="Databases" path="/pg/">
 	 	</category>
+	 -->
 
 	 	<!-- Utils Category -->
+     <!--
 	 	<category icon="icons/utils-icon.png" level-id="util" locked="false" name="Utilities" path="/pg/">
 	 	</category>
+	 -->
 	 	
 	 	<!-- Meta Node Category -->
+     <!--
 	 	<category icon="icons/metanode-icon.png" level-id="meta" locked="false" name="Custom MetaNodes" path="/pg/">
 	 	</category>
+	 -->
 	 	
 	 </extension> 
 	 
-	 
+	<!-- 
 	<extension point="org.knime.product.splashExtension">
 		<splashExtension icon="icons/pg-splash.png" id="Procter &amp; Gamble" tooltip="P&amp;G">
       </splashExtension>
 	</extension>
-	   
+	-->
 </plugin>
