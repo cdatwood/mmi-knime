@@ -11,7 +11,7 @@
         id="MMI"
         tooltip="MMI Agency">
      </splashExtension>
-  </extension>  
+  </extension>
   
   <extension point="org.knime.workbench.repository.nodes">
     <node category-path="/community/mmi/" factory-class="com.mmiagency.knime.nodes.google.pagespeed.GooglePageSpeedNodeFactory" id="com.mmiagency.knime.nodes.google.pagespeed.GooglePageSpeedNodeFactory"/>
@@ -26,5 +26,10 @@
     <node category-path="/community/mmi/" factory-class="com.mmiagency.knime.nodes.moz.urlmetrics.MozUrlMetricsNodeFactory" id="com.mmiagency.knime.nodes.moz.urlmetrics.MozUrlMetricsNodeFactory"/>
     <node category-path="/community/mmi/" factory-class="com.mmiagency.knime.nodes.moz.linkmetrics.MozLinkMetricsNodeFactory" id="com.mmiagency.knime.nodes.moz.linkmetrics.MozLinkMetricsNodeFactory"/>
   </extension>
-   
+
+  <extension point="org.knime.core.PortType">
+    <portType name="Moz API Connection" objectClass="com.mmiagency.knime.nodes.moz.data.MozApiConnectionPortObject" objectSerializer="com.mmiagency.knime.nodes.moz.data.MozApiConnectionPortObject$Serializer" specClass="com.mmiagency.knime.nodes.moz.data.MozApiConnectionPortObjectSpec" specSerializer="com.mmiagency.knime.nodes.moz.data.MozApiConnectionPortObjectSpec$Serializer">
+    </portType>
+  </extension>
+
 </plugin>
