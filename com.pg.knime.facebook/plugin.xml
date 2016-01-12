@@ -12,6 +12,11 @@
 		<node category-path="/community/mmi/facebook" factory-class="com.pg.facebook.api.listcomments.node.ListCommentsNodeFactory" id="com.pg.facebook.api.listcomments.node.ListCommentsNodeFactory"/>
 	</extension>
    
+    <extension point="org.knime.core.PortType">
+      <portType name="Moz API Connection" objectClass="com.pg.facebook.api.connector.data.FacebookApiConnectorPortObject" objectSerializer="com.pg.facebook.api.connector.data.FacebookApiConnectorPortObject$Serializer" specClass="com.pg.facebook.api.connector.data.FacebookApiConnectionPortObjectSpec" specSerializer="com.pg.facebook.api.connector.data.FacebookApiConnectionPortObjectSpec$Serializer">
+      </portType>
+    </extension>
+    
 	 <extension point="org.knime.workbench.repository.categories">
 	
 	  	<!-- Facebook -->

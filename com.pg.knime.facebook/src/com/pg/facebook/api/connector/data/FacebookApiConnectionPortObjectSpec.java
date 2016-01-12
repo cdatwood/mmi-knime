@@ -1,10 +1,15 @@
 package com.pg.facebook.api.connector.data;
 
+import java.io.IOException;
+import java.util.zip.ZipEntry;
+
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.ModelContent;
 import org.knime.core.node.ModelContentRO;
 import org.knime.core.node.ModelContentWO;
 import org.knime.core.node.port.AbstractSimplePortObjectSpec;
-
+import org.knime.core.node.port.PortObjectSpecZipInputStream;
+import org.knime.core.node.port.PortObjectSpecZipOutputStream;
 import com.pg.facebook.api.FacebookApiClient;
 import com.pg.facebook.api.connector.node.FacebookConnectorConfiguration;
 import com.pg.facebook.api.selectaccount.node.FacebookSelectAccountConfiguration;
@@ -69,4 +74,40 @@ public class FacebookApiConnectionPortObjectSpec extends AbstractSimplePortObjec
 		return client;
 	}
 
+
+    static public class Serializer extends PortObjectSpecSerializer<FacebookApiConnectionPortObjectSpec> {
+
+		@Override
+		public void savePortObjectSpec(FacebookApiConnectionPortObjectSpec portObjectSpec, PortObjectSpecZipOutputStream out)
+				throws IOException {
+	        ModelContent model = new ModelContent("content.xml");
+	        ModelContentWO wo = model.addModelContent("FacebookApiConnection");
+	        portObjectSpec.save(wo);
+	        out.putNextEntry(new ZipEntry("content.xml"));
+	        model.saveToXML(out);			
+		}
+
+		@Override
+		public FacebookApiConnectionPortObjectSpec loadPortObjectSpec(PortObjectSpecZipInputStream in) throws IOException {
+	        ZipEntry entry = in.getNextEntry();
+	        if(!"content.xml".equals(entry.getName())) {
+	            throw new IOException("Expected zip entry content.xml, got " + entry.getName());
+	        } else {
+	            ModelContentRO model = ModelContent.loadFromXML(in);
+	            FacebookApiConnectionPortObjectSpec result = new FacebookApiConnectionPortObjectSpec();
+
+	            try {
+	            	if (!model.containsKey("FacebookApiConnection")) {
+	            		return result;
+	            	}
+	                ModelContentRO ro = model.getModelContent("FacebookApiConnection");
+	                result.load(ro);
+	                return result;
+	            } catch (InvalidSettingsException e) {
+	                throw new IOException("Unable to load content into \"FacebookApiConnectionPortObjectSpec\": " + e.getMessage(), e);
+	            }
+	        }
+		}
+    	
+    }
 }
