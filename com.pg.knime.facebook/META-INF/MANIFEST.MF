@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: MMI Facebook Nodes
 Bundle-SymbolicName: com.pg.facebook;singleton:=true
-Bundle-Version: 1.0.6
+Bundle-Version: 1.0.6.qualifier
 Bundle-ClassPath: facebookconnector.jar,
  lib/restfb-1.6.16.jar,
  lib/opencsv-1.8.jar
