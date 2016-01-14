@@ -22,6 +22,7 @@ import com.pg.facebook.api.connector.data.FacebookApiConnectionPortObjectSpec;
 import com.pg.knime.node.SortedComboBoxModel;
 import com.pg.knime.node.StandardNodeDialogPane;
 import com.restfb.types.Account;
+import com.restfb.types.User;
 
 /**
  * <code>NodeDialog</code> for the "SelectAccount" Node.
@@ -124,6 +125,12 @@ public class SelectAccountNodeDialog extends StandardNodeDialogPane {
 		// Create Button Action Handler:
 		if ( specs[0] instanceof FacebookApiConnectionPortObjectSpec && btnListAccounts.getActionListeners().length == 0 ) {
 			btnListAccounts.addActionListener(new GetAccountList(((FacebookApiConnectionPortObjectSpec)specs[0]).getFacebookClient()));
+		}
+		
+		if (txtAccountId.getText() == null || txtAccountId.getText().isEmpty()) {
+			User me = client.getMe();
+			txtAccountId.setText(me.getId());
+			txtAccountAccessToken.setText(((FacebookApiConnectionPortObjectSpec)specs[0]).getAccessToken());
 		}
 	}
 	

@@ -7,6 +7,7 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.ModelContent;
 import org.knime.core.node.ModelContentRO;
 import org.knime.core.node.ModelContentWO;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.port.AbstractSimplePortObjectSpec;
 import org.knime.core.node.port.PortObjectSpecZipInputStream;
 import org.knime.core.node.port.PortObjectSpecZipOutputStream;
@@ -20,6 +21,8 @@ public class FacebookApiConnectionPortObjectSpec extends AbstractSimplePortObjec
 	
 	private FacebookConnectorConfiguration connectionConfig;
 	private FacebookSelectAccountConfiguration accountConfig; 
+	
+	private static NodeLogger LOGGER = NodeLogger.getLogger(FacebookApiConnectionPortObjectSpec.class);
 	
 	public FacebookApiConnectionPortObjectSpec() {
 		
@@ -71,7 +74,17 @@ public class FacebookApiConnectionPortObjectSpec extends AbstractSimplePortObjec
 	}
 	
 	public FacebookApiClient getFacebookClient() {
+		/*
+		if (connectionConfig == null) 
+			LOGGER.info("ACCESS TOKEN: []");
+		else
+			LOGGER.info("ACCESS TOKEN: " + connectionConfig.getAccessToken());
+			*/
 		return client;
+	}
+	
+	public String getAccessToken() {
+		return connectionConfig.getAccessToken();
 	}
 
 

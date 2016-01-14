@@ -16,6 +16,7 @@ import com.restfb.types.Account;
 import com.restfb.types.Comment;
 import com.restfb.types.Insight;
 import com.restfb.types.Post;
+import com.restfb.types.User;
 
 public class FacebookApiClient {
 
@@ -28,13 +29,18 @@ public class FacebookApiClient {
 	private static int MAX_ATTEMPTS = 3;
 	private static NodeLogger LOGGER = NodeLogger.getLogger(FacebookApiClient.class);
 	
+	private String accessToken;
+	
 	public FacebookApiClient() {
+		LOGGER.info(" Instantiating blank FacebookClient");
 		client = new DefaultFacebookClient();
 	}
 	
 	public FacebookApiClient(String accessToken, String appSecret) {
+		LOGGER.info(" Instantiating FacebookClient("+accessToken+","+appSecret+")");
 		client = new DefaultFacebookClient(accessToken, appSecret, Version.VERSION_2_1);
 		tokenConfigured = true;
+		this.accessToken = accessToken;
 	}
 	
 	public boolean isConfigured() {
@@ -108,8 +114,16 @@ public class FacebookApiClient {
 		
 	}
 	
+	public User getMe() {
+		return client.fetchObject("me", User.class);
+	}
 	
 	private <T> Connection<T> getConnection(FacebookClient client, String connection, Class<T> clz, Parameter... parameters ) {
+		/*
+		LOGGER.info(" Access token: " + accessToken);
+		LOGGER.info(" Impersonation account ID: " + this.getImpersonationAccountId());
+		LOGGER.info(" Impersonation token: " + this.getImpersonationAccessToken());
+		*/
 		
 		// Guard Statement:
 		if ( client == null ) return null;
@@ -119,7 +133,7 @@ public class FacebookApiClient {
 		
 		do {
 			LOGGER.debug( "Get connection: " + connection + " (attempt: " + attempts + ")" );
-			try { cnxn = client.fetchConnection( connection, clz, parameters ); }
+			try { cnxn = client.fetchConnection( connection, clz, parameters );}
 			catch ( FacebookException fexc ) { 
 				LOGGER.error( "Facebook Error: " + fexc.getMessage() );
 				try { Thread.sleep(attempts++ * 1000); } 
