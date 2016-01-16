@@ -184,7 +184,12 @@ public class MozLinkMetricsNodeModel extends NodeModel {
     		subExec.setProgress(progressPercentage.doubleValue(), "Calling API for URL: " + url + " -> Index: " + (index + 1) + " - " + (index + batchSize));
 
 			// Make the API Call
-            String response = linksService.getLinks(url, scope, null, sort, LinksConstants.LINKS_COL_ALL, index, batchSize);
+    		// piggyback LinkCols and TargetCols params to sort param
+    		String linkTargetCols = "";
+    		if (m_config.getLinkTargetCols().getBooleanValue()) {
+    			linkTargetCols = "&LinkCols=30&TargetCols=30";
+    		}
+            String response = linksService.getLinks(url, scope, null, sort + linkTargetCols, LinksConstants.LINKS_COL_ALL, index, batchSize);
             m_lastApiCallMillis = System.currentTimeMillis();
             
             Gson gson = new Gson();
@@ -195,31 +200,37 @@ public class MozLinkMetricsNodeModel extends NodeModel {
             	// Add the data to row
             	final LinkedList<DataCell> cells = new LinkedList<DataCell>();
             	cells.add(new StringCell(url));
-            	cells.add(new StringCell(result.fmrp));
-            	cells.add(new StringCell(result.fmrr));
-            	cells.add(new StringCell(result.lrid));
-            	cells.add(new StringCell(result.lsrc));
-            	cells.add(new StringCell(result.ltgt));
-            	cells.add(new StringCell(result.lufmrp));
-            	cells.add(new StringCell(result.lufmrr));
-            	cells.add(new StringCell(result.lupda));
-            	cells.add(new StringCell(result.luueid));
-            	cells.add(new StringCell(result.luuid));
-            	cells.add(new StringCell(result.luulc));
-            	cells.add(new StringCell(result.luumrp));
-            	cells.add(new StringCell(result.luumrr));
-            	cells.add(new StringCell(result.luupa));
-            	cells.add(new StringCell(result.luus));
-            	cells.add(new StringCell(result.luut));
-            	cells.add(new StringCell(result.pda));
-            	cells.add(new StringCell(result.ueid));
-            	cells.add(new StringCell(result.uid));
-            	cells.add(new StringCell(result.ulc));
-            	cells.add(new StringCell(result.umrp));
-            	cells.add(new StringCell(result.umrr));
-            	cells.add(new StringCell(result.upa));
-            	cells.add(new StringCell(result.us));
-            	cells.add(new StringCell(result.ut));
+            	cells.add(new StringCell(result.fmrp == null ? "" : result.fmrp));
+            	cells.add(new StringCell(result.fmrr == null ? "" : result.fmrr));
+            	cells.add(new StringCell(result.lrid == null ? "" : result.lrid));
+            	cells.add(new StringCell(result.lsrc == null ? "" : result.lsrc));
+            	cells.add(new StringCell(result.ltgt == null ? "" : result.ltgt));
+            	cells.add(new StringCell(result.lufmrp == null ? "" : result.lufmrp));
+            	cells.add(new StringCell(result.lufmrr == null ? "" : result.lufmrr));
+            	cells.add(new StringCell(result.lupda == null ? "" : result.lupda));
+            	cells.add(new StringCell(result.luueid == null ? "" : result.luueid));
+            	cells.add(new StringCell(result.luuid == null ? "" : result.luuid));
+            	cells.add(new StringCell(result.luulc == null ? "" : result.luulc));
+            	cells.add(new StringCell(result.luumrp == null ? "" : result.luumrp));
+            	cells.add(new StringCell(result.luumrr == null ? "" : result.luumrr));
+            	cells.add(new StringCell(result.luupa == null ? "" : result.luupa));
+            	cells.add(new StringCell(result.luus == null ? "" : result.luus));
+            	cells.add(new StringCell(result.luut == null ? "" : result.luut));
+            	cells.add(new StringCell(result.pda == null ? "" : result.pda));
+            	cells.add(new StringCell(result.ueid == null ? "" : result.ueid));
+            	cells.add(new StringCell(result.uid == null ? "" : result.uid));
+            	cells.add(new StringCell(result.ulc == null ? "" : result.ulc));
+            	cells.add(new StringCell(result.umrp == null ? "" : result.umrp));
+            	cells.add(new StringCell(result.umrr == null ? "" : result.umrr));
+            	cells.add(new StringCell(result.upa == null ? "" : result.upa));
+            	cells.add(new StringCell(result.us == null ? "" : result.us));
+            	cells.add(new StringCell(result.ut == null ? "" : result.ut));
+                // for LinkCols & TargetCols
+            	cells.add(new StringCell(result.lf == null ? "" : result.lf));
+            	cells.add(new StringCell(result.lt == null ? "" : result.lt));
+            	cells.add(new StringCell(result.lnt == null ? "" : result.lnt));
+            	cells.add(new StringCell(result.lmrp == null ? "" : result.lmrp));
+            	cells.add(new StringCell(result.lmrr == null ? "" : result.lmrr));
             	final DefaultRow row = new DefaultRow(RowKey.createRowKey(rowIndex), cells);
             	dc.addRowToTable(row);
             	rowIndex++;
@@ -262,6 +273,12 @@ public class MozLinkMetricsNodeModel extends NodeModel {
         specs.add(new DataColumnSpecCreator("upa", StringCell.TYPE).createSpec());
         specs.add(new DataColumnSpecCreator("us", StringCell.TYPE).createSpec());
         specs.add(new DataColumnSpecCreator("ut", StringCell.TYPE).createSpec());
+        // for LinkCols & TargetCols
+        specs.add(new DataColumnSpecCreator("lf", StringCell.TYPE).createSpec());
+        specs.add(new DataColumnSpecCreator("lt", StringCell.TYPE).createSpec());
+        specs.add(new DataColumnSpecCreator("lnt", StringCell.TYPE).createSpec());
+        specs.add(new DataColumnSpecCreator("lmrp", StringCell.TYPE).createSpec());
+        specs.add(new DataColumnSpecCreator("lmrr", StringCell.TYPE).createSpec());
     	return new DataTableSpec(specs.toArray(new DataColumnSpec[0]));
     }
 

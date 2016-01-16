@@ -52,6 +52,11 @@ public class LinksResponse {
     public String upa;
     public String us;
     public String ut;
+    public String lf;
+    public String lt;
+    public String lnt;
+    public String lmrp;
+    public String lmrr;
 
 
 }

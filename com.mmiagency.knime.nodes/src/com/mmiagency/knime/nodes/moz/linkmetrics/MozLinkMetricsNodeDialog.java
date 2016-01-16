@@ -21,6 +21,7 @@ package com.mmiagency.knime.nodes.moz.linkmetrics;
 
 import org.knime.core.data.StringValue;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
+import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentColumnNameSelection;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
@@ -61,6 +62,7 @@ public class MozLinkMetricsNodeDialog extends DefaultNodeSettingsPane {
         		};
         
         addDialogComponent(new DialogComponentColumnNameSelection(MozLinkMetricsNodeConfiguration.getUrlColumnSettingsModel(), "URL Column Name", 0, true, new DataValueColumnFilter(StringValue.class)));
+        addDialogComponent(new DialogComponentBoolean(MozLinkMetricsNodeConfiguration.getLinkTargetColsSettingsModel(), "Include LinkCols & TargetCols"));
     	addDialogComponent(new DialogComponentStringSelection(MozLinkMetricsNodeConfiguration.getScopeSettingsModel(), "Scope", scopes));
     	addDialogComponent(new DialogComponentStringSelection(MozLinkMetricsNodeConfiguration.getSortSettingsModel(), "Sort", sort));
         addDialogComponent(new DialogComponentNumber(MozLinkMetricsNodeConfiguration.getMaxResultsSettingsModel(), "Max Results: ", Integer.valueOf(100)));

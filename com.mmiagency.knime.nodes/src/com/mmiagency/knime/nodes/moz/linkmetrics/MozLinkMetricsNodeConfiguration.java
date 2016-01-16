@@ -22,6 +22,7 @@ package com.mmiagency.knime.nodes.moz.linkmetrics;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
@@ -58,6 +59,11 @@ public class MozLinkMetricsNodeConfiguration {
     public static SettingsModelDoubleBounded getDelayBetweenCallsSettingsModel() {return new SettingsModelDoubleBounded("delayBetweenCalls", 10, 0, 60);}
 	public SettingsModelDoubleBounded getDelayBetweenCalls() {return m_delayBetweenCalls;}
 	
+	// Enable LinkCols & TargetCols
+	private final SettingsModelBoolean m_linkTargetCols = getLinkTargetColsSettingsModel();
+	public static SettingsModelBoolean getLinkTargetColsSettingsModel() {return new SettingsModelBoolean("linkTargetCols", false);}
+	public SettingsModelBoolean getLinkTargetCols() {return m_linkTargetCols;}
+	
 	
     public void saveSettingsTo(final NodeSettingsWO settings) {
         m_url.saveSettingsTo(settings);
@@ -65,22 +71,25 @@ public class MozLinkMetricsNodeConfiguration {
         m_sort.saveSettingsTo(settings);
         m_maxResults.saveSettingsTo(settings);
         m_delayBetweenCalls.saveSettingsTo(settings);
+        m_linkTargetCols.saveSettingsTo(settings);
     }
 
     public void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_url.loadSettingsFrom(settings);
-        m_scope.loadSettingsFrom(settings);
-        m_sort.loadSettingsFrom(settings);
-        m_maxResults.loadSettingsFrom(settings);
-        m_delayBetweenCalls.loadSettingsFrom(settings);
+    	if (settings.containsKey(m_url.getKey())) m_url.loadSettingsFrom(settings);
+    	if (settings.containsKey(m_scope.getKey())) m_scope.loadSettingsFrom(settings);
+    	if (settings.containsKey(m_sort.getKey())) m_sort.loadSettingsFrom(settings);
+    	if (settings.containsKey(m_maxResults.getKey())) m_maxResults.loadSettingsFrom(settings);
+    	if (settings.containsKey(m_delayBetweenCalls.getKey())) m_delayBetweenCalls.loadSettingsFrom(settings);
+        if (settings.containsKey(m_linkTargetCols.getConfigName())) m_linkTargetCols.loadSettingsFrom(settings);
     }
 
     public void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-    	m_url.validateSettings(settings);
-    	m_scope.validateSettings(settings);
-    	m_sort.validateSettings(settings);
-    	m_maxResults.validateSettings(settings);
-    	m_delayBetweenCalls.validateSettings(settings);
+    	if (settings.containsKey(m_url.getKey())) m_url.validateSettings(settings);
+    	if (settings.containsKey(m_scope.getKey())) m_scope.validateSettings(settings);
+    	if (settings.containsKey(m_sort.getKey())) m_sort.validateSettings(settings);
+    	if (settings.containsKey(m_maxResults.getKey())) m_maxResults.validateSettings(settings);
+    	if (settings.containsKey(m_delayBetweenCalls.getKey())) m_delayBetweenCalls.validateSettings(settings);
+    	if (settings.containsKey(m_linkTargetCols.getConfigName())) m_linkTargetCols.loadSettingsFrom(settings);
     }
   
 }
