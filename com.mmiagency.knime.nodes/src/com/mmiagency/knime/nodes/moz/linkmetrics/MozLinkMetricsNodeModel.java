@@ -187,7 +187,7 @@ public class MozLinkMetricsNodeModel extends NodeModel {
     		// piggyback LinkCols and TargetCols params to sort param
     		String linkTargetCols = "";
     		if (m_config.getLinkTargetCols().getBooleanValue()) {
-    			linkTargetCols = "&LinkCols=30&TargetCols=30";
+    			linkTargetCols = "&LinkCols=30&TargetCols=144115291691993380";
     		}
             String response = linksService.getLinks(url, scope, null, sort + linkTargetCols, LinksConstants.LINKS_COL_ALL, index, batchSize);
             m_lastApiCallMillis = System.currentTimeMillis();
@@ -225,6 +225,7 @@ public class MozLinkMetricsNodeModel extends NodeModel {
             	cells.add(new StringCell(result.upa == null ? "" : result.upa));
             	cells.add(new StringCell(result.us == null ? "" : result.us));
             	cells.add(new StringCell(result.ut == null ? "" : result.ut));
+            	cells.add(new StringCell(result.uu == null ? "" : result.uu));
                 // for LinkCols & TargetCols
             	cells.add(new StringCell(result.lf == null ? "" : result.lf));
             	cells.add(new StringCell(result.lt == null ? "" : result.lt));
@@ -273,6 +274,7 @@ public class MozLinkMetricsNodeModel extends NodeModel {
         specs.add(new DataColumnSpecCreator("upa", StringCell.TYPE).createSpec());
         specs.add(new DataColumnSpecCreator("us", StringCell.TYPE).createSpec());
         specs.add(new DataColumnSpecCreator("ut", StringCell.TYPE).createSpec());
+        specs.add(new DataColumnSpecCreator("uu", StringCell.TYPE).createSpec());
         // for LinkCols & TargetCols
         specs.add(new DataColumnSpecCreator("lf", StringCell.TYPE).createSpec());
         specs.add(new DataColumnSpecCreator("lt", StringCell.TYPE).createSpec());

@@ -57,6 +57,5 @@ public class LinksResponse {
     public String lnt;
     public String lmrp;
     public String lmrr;
-
-
+    public String uu;
 }
