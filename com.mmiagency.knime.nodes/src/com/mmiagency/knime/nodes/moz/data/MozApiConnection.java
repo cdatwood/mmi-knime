@@ -81,7 +81,7 @@ public final class MozApiConnection {
     @Override
     public boolean equals(final Object obj) {
         if (this == obj) return true;
-        if (!(obj instanceof Authenticator)) return false;
+        if (getClass() != obj.getClass()) return false;
         
         Authenticator mozAuthenticator = (Authenticator)obj;
         if (!mozAuthenticator.getAccessID().equals(mozAuthenticator.getAccessID())) return false;

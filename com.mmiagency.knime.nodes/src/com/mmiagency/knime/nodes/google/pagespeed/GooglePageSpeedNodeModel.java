@@ -189,11 +189,11 @@ public class GooglePageSpeedNodeModel extends NodeModel {
     			pageSpeedResult.status = "URL value is missing";
     			pageSpeedErrors.add(pageSpeedResult);
     			hasError = true;
-    		} catch (Throwable t) {
-    			logger.error("Unable to retrieve PageSpeed results for url: " + url + ", error: " + t.getMessage());
+    		} catch (Exception e) {
+    			logger.error("Unable to retrieve PageSpeed results for url: " + url + ", error: " + e.getMessage());
     			pageSpeedResult = new PageSpeedResult();
     			pageSpeedResult.id = url;
-    			pageSpeedResult.status = t.getMessage();
+    			pageSpeedResult.status = e.getMessage();
     			pageSpeedErrors.add(pageSpeedResult);
     			hasError = true;
     		}

@@ -44,7 +44,7 @@ public class Util {
                     continue;
                 }
 
-                iResult = new Integer(results.toString());
+                iResult = Integer.valueOf(results.toString());
             } catch (Exception E) {
             }
         } while (false);

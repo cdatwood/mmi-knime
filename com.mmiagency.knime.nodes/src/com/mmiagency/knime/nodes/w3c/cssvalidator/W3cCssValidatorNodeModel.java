@@ -177,9 +177,9 @@ public class W3cCssValidatorNodeModel extends NodeModel {
     	    	goodRespond = false;
     	    	errorMessage = hse.getMessage();
         		summaryCells[7] = new StringCell(errorMessage);
-    	    } catch (Throwable t) {
+    	    } catch (Exception e) {
     	    	goodRespond = false;
-    	    	errorMessage = t.getMessage();
+    	    	errorMessage = e.getMessage();
         		summaryCells[7] = new StringCell(errorMessage);
     	    }
     	    
@@ -196,7 +196,7 @@ public class W3cCssValidatorNodeModel extends NodeModel {
 	    			Matcher m = h3Pattern.matcher(e.text());
 	    			if (m.matches()) {
 	    				try {
-	    					summaryCells[5] = new IntCell(new Integer(m.group(1)));	    				
+	    					summaryCells[5] = new IntCell(Integer.valueOf(m.group(1)));	    				
 	    				} catch (NumberFormatException nfe) {
 	    					// leave it empty
 	    				}

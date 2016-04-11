@@ -214,7 +214,7 @@ public class CleanHtmlRetrieverNodeModel extends SimpleStreamableFunctionNodeMod
     			        }
     			        
     			        html = doc.html();
-    				} catch (Throwable e) {
+    				} catch (Exception e) {
     					setWarningMessage("FAILED on URL \"" + url + "\": " + e.getMessage());
     				}
 

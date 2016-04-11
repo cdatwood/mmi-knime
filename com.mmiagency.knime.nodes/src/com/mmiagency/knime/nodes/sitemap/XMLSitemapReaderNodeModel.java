@@ -72,7 +72,7 @@ public class XMLSitemapReaderNodeModel extends NodeModel {
 	        conn.header("Accept-Encoding", "gzip, deflate");
 	        
 	        conn.execute();
-    	} catch (Throwable e) {
+    	} catch (Exception e) {
 			setWarningMessage("FAILED on URL \"" + url + "\": " + e.getMessage());
 			container.addRowToTable(m_config.createRow(""+index++, url, "", "", "", 0));
 			return index;

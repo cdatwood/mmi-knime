@@ -162,9 +162,9 @@ public class W3cHtmlValidatorNodeModel extends NodeModel {
     	    	goodRespond = false;
     	    	errorMessage = hse.getMessage();
         		summaryCells[4] = new StringCell(errorMessage);
-    	    } catch (Throwable t) {
+    	    } catch (Exception e) {
     	    	goodRespond = false;
-    	    	errorMessage = t.getMessage();
+    	    	errorMessage = e.getMessage();
         		summaryCells[4] = new StringCell(errorMessage);
     	    }
     	    
