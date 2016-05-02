@@ -61,7 +61,7 @@ public class MozLinkMetricsNodeConfiguration {
 	
 	// Enable LinkCols & TargetCols
 	private final SettingsModelBoolean m_linkTargetCols = getLinkTargetColsSettingsModel();
-	public static SettingsModelBoolean getLinkTargetColsSettingsModel() {return new SettingsModelBoolean("linkTargetCols", false);}
+	public static SettingsModelBoolean getLinkTargetColsSettingsModel() {return new SettingsModelBoolean("linkTargetCols", true);}
 	public SettingsModelBoolean getLinkTargetCols() {return m_linkTargetCols;}
 	
 	

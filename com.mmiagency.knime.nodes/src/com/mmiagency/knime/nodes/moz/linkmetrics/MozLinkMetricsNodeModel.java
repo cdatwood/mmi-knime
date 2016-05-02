@@ -186,9 +186,10 @@ public class MozLinkMetricsNodeModel extends NodeModel {
 			// Make the API Call
     		// piggyback LinkCols and TargetCols params to sort param
     		String linkTargetCols = "";
-    		if (m_config.getLinkTargetCols().getBooleanValue()) {
+    		// [2016-05-01] Ed: always include LinkCols and TargetCols now because Moz changed its API where both params are required
+    		//if (m_config.getLinkTargetCols().getBooleanValue()) {
     			linkTargetCols = "&LinkCols=30&TargetCols=144115291691993380";
-    		}
+    		//}
             String response = linksService.getLinks(url, scope, null, sort + linkTargetCols, LinksConstants.LINKS_COL_ALL, index, batchSize);
             m_lastApiCallMillis = System.currentTimeMillis();
             
