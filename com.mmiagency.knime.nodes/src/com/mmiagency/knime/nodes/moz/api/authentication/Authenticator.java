@@ -70,7 +70,8 @@ public class Authenticator
 	{
 		this.accessID = accessID;
 		this.secretKey = secretKey;
-		this.expiresInterval = 5 * 60 * 1000; // 5 minutes
+		//this.expiresInterval = 5 * 60 * 1000; // 5 minutes
+		this.expiresInterval = 300;
 	}
 
 	/**
