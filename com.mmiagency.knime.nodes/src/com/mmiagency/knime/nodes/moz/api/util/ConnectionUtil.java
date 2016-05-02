@@ -60,7 +60,7 @@ public class ConnectionUtil
         HttpRequest request = requestFactory.buildGetRequest(new GenericUrl(urlToFetch.toString()));
         HttpResponse response = request.execute();
         StringWriter writer = new StringWriter();
-        IOUtils.copy(response.getContent(), writer, response.getContentEncoding());
+        IOUtils.copy(response.getContent(), writer, response.getMediaType().getCharsetParameter().name());
         return writer.toString();
 	}
 }
